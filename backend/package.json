@@ -1,0 +1,47 @@
+{
+  "name": "pharmapulse-backend",
+  "version": "1.0.0",
+  "description": "PharmaPulse Pharmacy Management System - Backend API",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "node prisma/seed.js",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.0",
+    "argon2": "^0.41.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "prisma": "^6.4.0",
+    "supertest": "^7.0.0",
+    "vitest": "^3.0.7"
+  },
+  "keywords": [
+    "pharmacy-management",
+    "fefo-inventory",
+    "pos",
+    "express",
+    "prisma",
+    "postgresql"
+  ],
+  "author": "ALGIONS AI LABS",
+  "license": "UNLICENSED"
+}

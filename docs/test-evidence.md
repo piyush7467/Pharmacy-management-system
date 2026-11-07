@@ -82,10 +82,11 @@
 
 ```text
 [Day 1 Foundation Check]
-- Prisma Schema Validation: Pending
-- Database Migrations Check: Pending
-- Seed Script Repeatability: Pending
-- Healthcheck Endpoint Test: Pending
+- Prisma Schema Validation: PASSED (Prisma v6.19.3)
+- Database Migrations / Sync: PASSED (15 tables created in Neon PostgreSQL)
+- Seed Script Repeatability: PASSED (Users, Categories, Medicines, Batches, Movements seeded)
+- Healthcheck Endpoint Test: PASSED (Vitest + Supertest 2/2 passed)
+- Git Secrets Protection: PASSED (.env files ignored in root and backend)
 
 [Day 2 Catalogue & Inventory Check]
 - Auth Token Flow & Refresh Rotation: Pending
