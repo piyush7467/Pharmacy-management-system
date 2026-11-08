@@ -91,10 +91,15 @@
 - UI Library Integration & Chunking: PASSED (Radix UI, TanStack Table, Recharts, Sonner, Motion optimized in 7.05s)
 - Redux Preferences & Theme Persistence: PASSED (Safe storage under app-preferences)
 
-[Day 2 Catalogue & Inventory Check]
-- Auth Token Flow & Refresh Rotation: Pending
-- Purchase Draft -> Receive Atomic Transition: Pending
-- Category & Medicine CRUD Tests: Pending
+[Day 2 Authentication & Staff Management Check]
+- Admin Initialization from .env: PASSED (piyushshakya112@gmail.com seeded with Argon2id)
+- Login & JWT Access Token Issuance: PASSED (15m in-memory token + HttpOnly cookie)
+- Refresh Token Family Rotation & Reuse Detection: PASSED (Cryptographic SHA-256 hash storage)
+- Staff Account Provisioning: PASSED (Admin creates PHARMACIST and CASHIER; secondary ADMIN creation blocked)
+- Staff Lifecycle Controls: PASSED (Suspend, reactivate, and soft-delete verified with session revocation)
+- Password Recovery via Brevo API: PASSED (Secure hashed single-use tokens; zero email enumeration leakage)
+- Automated Test Suite: PASSED (13/13 Vitest + Supertest integration tests passed)
+- Frontend Auth Bundle: PASSED (LoginView, ResetPasswordView, StaffManagementView built in 8.80s)
 
 [Day 3 POS & Business Logic Check]
 - TEST-ACCEPT-001 (FEFO Deduction): Pending

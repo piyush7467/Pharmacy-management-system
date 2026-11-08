@@ -1,12 +1,14 @@
 import { PrismaClient, Role, BatchStatus } from '@prisma/client';
 import argon2 from 'argon2';
+import { env } from '../src/config/env.js';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting deterministic seed for PharmaPulse demo data...');
+  console.log('🌱 Starting deterministic seed for PharmaPulse...');
 
-  // 1. Clean existing records (in reverse dependency order)
+  // 1. Clean existing records in reverse dependency order
+  await prisma.passwordResetToken.deleteMany({});
   await prisma.auditLog.deleteMany({});
   await prisma.stockMovement.deleteMany({});
   await prisma.returnItem.deleteMany({});
@@ -23,9 +25,11 @@ async function main() {
   await prisma.refreshToken.deleteMany({});
   await prisma.user.deleteMany({});
 
-  // 2. Seed Users
-  const defaultPassword = 'Password@123';
-  const passwordHash = await argon2.hash(defaultPassword, {
+  // 2. Seed Initial Admin only (from backend .env variables)
+  const adminEmail = env.ADMIN_EMAIL || 'admin@pharmapulse.demo';
+  const adminPassword = env.ADMIN_PASSWORD || 'Admin@SecurePassword123';
+
+  const passwordHash = await argon2.hash(adminPassword, {
     type: argon2.argon2id,
     memoryCost: 65536,
     timeCost: 3,
@@ -34,35 +38,14 @@ async function main() {
 
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@pharmapulse.demo',
+      email: adminEmail,
       passwordHash,
-      fullName: 'Aarav Patel (Admin)',
+      fullName: 'System Administrator',
       role: Role.ADMIN
     }
   });
 
-  const pharmacist = await prisma.user.create({
-    data: {
-      email: 'pharmacist@pharmapulse.demo',
-      passwordHash,
-      fullName: 'Diya Sharma (Lead Pharmacist)',
-      role: Role.PHARMACIST
-    }
-  });
-
-  const cashier = await prisma.user.create({
-    data: {
-      email: 'cashier@pharmapulse.demo',
-      passwordHash,
-      fullName: 'Rohan Verma (Cashier)',
-      role: Role.CASHIER
-    }
-  });
-
-  console.log('✅ Demo users seeded:');
-  console.log(`   - Admin:      admin@pharmapulse.demo / Password@123`);
-  console.log(`   - Pharmacist: pharmacist@pharmapulse.demo / Password@123`);
-  console.log(`   - Cashier:    cashier@pharmapulse.demo / Password@123`);
+  console.log(`✅ Initial Admin seeded from environment: ${admin.email}`);
 
   // 3. Seed Categories
   const analgesics = await prisma.category.create({
@@ -235,7 +218,7 @@ async function main() {
       movementType: 'SALE_DEDUCTION',
       quantityDelta: -20,
       balanceAfter: 80,
-      performedByUserId: cashier.id,
+      performedByUserId: admin.id,
       reason: 'Opening sample sale test deduction'
     }
   });

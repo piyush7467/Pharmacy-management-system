@@ -1,7 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { AppLayout } from '../components/layout/AppLayout.jsx';
+import { ProtectedRoute } from '../components/auth/ProtectedRoute.jsx';
+import { LoginView } from '../features/auth/LoginView.jsx';
+import { ResetPasswordView } from '../features/auth/ResetPasswordView.jsx';
 import { DashboardView } from '../features/dashboard/DashboardView.jsx';
+import { StaffManagementView } from '../features/staff/StaffManagementView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -14,9 +18,9 @@ function PlaceholderView({ title, description, moduleName }) {
         <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-brand-primary/10 text-brand-primary">
           Module: {moduleName}
         </span>
-        <h2 className="text-lg font-semibold text-text-primary">Ready for Day 2 Implementation</h2>
+        <h2 className="text-lg font-semibold text-text-primary">Ready for Implementation</h2>
         <p className="text-sm text-text-muted max-w-md mx-auto">
-          This feature module is scaffolded with feature-based directory structure and backend PostgreSQL schema models.
+          This feature module is backed by validated PostgreSQL database schemas and server-side RBAC guards.
         </p>
       </div>
     </div>
@@ -26,8 +30,21 @@ function PlaceholderView({ title, description, moduleName }) {
 export function AppRoutes() {
   return (
     <Routes>
-      <Route element={<AppLayout />}>
+      {/* Public Authentication Routes */}
+      <Route path="/login" element={<LoginView />} />
+      <Route path="/reset-password" element={<ResetPasswordView />} />
+
+      {/* Protected Operations Application */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<DashboardView />} />
+        
+        {/* POS & Catalogue */}
         <Route
           path="pos"
           element={
@@ -118,14 +135,27 @@ export function AppRoutes() {
             />
           }
         />
+
+        {/* Admin-Only Staff Management */}
+        <Route
+          path="staff"
+          element={
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <StaffManagementView />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="audit"
           element={
-            <PlaceholderView
-              title="System Audit Trail"
-              description="Immutable audit logging of sensitive stock adjustments and administrative actions."
-              moduleName="Audit"
-            />
+            <ProtectedRoute allowedRoles={['ADMIN']}>
+              <PlaceholderView
+                title="System Audit Trail"
+                description="Immutable audit logging of sensitive stock adjustments and administrative actions."
+                moduleName="Audit"
+              />
+            </ProtectedRoute>
           }
         />
         <Route
@@ -139,6 +169,9 @@ export function AppRoutes() {
           }
         />
       </Route>
+
+      {/* Fallback to root */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

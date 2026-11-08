@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar.jsx';
 import { Navbar } from './Navbar.jsx';
-import { Toaster } from '../ui/sonner.jsx';
 import { useThemeEffect } from '../../hooks/useThemeEffect.js';
 
 export function AppLayout() {
@@ -24,9 +23,6 @@ export function AppLayout() {
           <Outlet />
         </main>
       </div>
-
-      {/* Global Notification Toaster */}
-      <Toaster position="top-right" closeButton richColors />
     </div>
   );
 }

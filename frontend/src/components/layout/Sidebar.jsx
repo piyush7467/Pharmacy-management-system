@@ -14,6 +14,7 @@ import {
   BarChart3,
   ShieldAlert,
   Settings,
+  Users,
   ChevronLeft,
   ChevronRight,
   Cross
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { to: '/sales', label: 'Sales & Invoices', icon: Receipt },
   { to: '/returns', label: 'Customer Returns', icon: RotateCcw },
   { to: '/reports', label: 'Reports & Audit', icon: BarChart3 },
+  { to: '/staff', label: 'Staff Management', icon: Users, adminOnly: true },
   { to: '/audit', label: 'System Audit Trail', icon: ShieldAlert },
   { to: '/settings', label: 'Settings & Legal', icon: Settings }
 ];
@@ -39,6 +41,12 @@ const NAV_ITEMS = [
 export function Sidebar({ mobileOpen, setMobileOpen }) {
   const dispatch = useDispatch();
   const collapsed = useSelector((state) => state.preferences.sidebarCollapsed);
+  const user = useSelector((state) => state.auth?.user);
+
+  const filteredNavItems = NAV_ITEMS.filter((item) => {
+    if (item.adminOnly && user?.role !== 'ADMIN') return false;
+    return true;
+  });
 
   return (
     <>
@@ -84,7 +92,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
 
         {/* Navigation Items */}
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-          {NAV_ITEMS.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink

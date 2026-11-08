@@ -6,6 +6,8 @@ import morgan from 'morgan';
 import { env } from './config/env.js';
 import { requestIdMiddleware } from './middleware/requestId.js';
 import { errorHandler, AppError } from './middleware/errorHandler.js';
+import { authRouter } from './modules/auth/auth.routes.js';
+import { usersRouter } from './modules/users/users.routes.js';
 
 export const app = express();
 
@@ -54,6 +56,12 @@ app.get('/api/v1/health', (req, res) => {
     }
   });
 });
+
+// -------------------------------------------------------------
+// MODULE ROUTERS
+// -------------------------------------------------------------
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/users', usersRouter);
 
 // -------------------------------------------------------------
 // 404 CATCH-ALL

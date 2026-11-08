@@ -80,18 +80,34 @@ model User {
   fullName     String         @db.VarChar(100)
   role         Role           @default(CASHIER)
   isActive     Boolean        @default(true)
+  deletedAt    DateTime?      @db.Timestamptz(6)
   createdAt    DateTime       @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime       @updatedAt @db.Timestamptz(6)
 
-  refreshTokens    RefreshToken[]
-  purchasesReceived Purchase[]     @relation("PurchasesReceivedByUser")
-  sales            Sale[]         @relation("SalesByCashier")
-  returnsProcessed CustomerReturn[] @relation("ReturnsProcessedByUser")
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  purchasesReceived   Purchase[]     @relation("PurchasesReceivedByUser")
+  sales               Sale[]         @relation("SalesByCashier")
+  returnsProcessed    CustomerReturn[] @relation("ReturnsProcessedByUser")
   adjustmentsApproved StockAdjustment[] @relation("AdjustmentsApprovedByUser")
-  stockMovements   StockMovement[] @relation("StockMovementsByUser")
-  auditLogs        AuditLog[]     @relation("AuditLogsByUser")
+  stockMovements      StockMovement[] @relation("StockMovementsByUser")
+  auditLogs           AuditLog[]     @relation("AuditLogsByUser")
 
   @@index([email])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @db.VarChar(255)
+  expiresAt DateTime  @db.Timestamptz(6)
+  usedAt    DateTime? @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([userId])
 }
 
 model RefreshToken {
