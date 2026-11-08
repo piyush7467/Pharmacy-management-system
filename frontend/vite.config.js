@@ -13,5 +13,18 @@ export default defineConfig({
         changeOrigin: true
       }
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@reduxjs/toolkit', 'react-redux', 'redux-persist', 'sonner', 'lucide-react', 'clsx', 'tailwind-merge'],
+          analytics: ['recharts'],
+          table: ['@tanstack/react-table', '@tanstack/react-query'],
+          motion: ['motion']
+        }
+      }
+    }
   }
 });
