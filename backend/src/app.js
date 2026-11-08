@@ -12,6 +12,9 @@ import { categoriesRouter } from './modules/categories/categories.routes.js';
 import { suppliersRouter } from './modules/suppliers/suppliers.routes.js';
 import { medicinesRouter } from './modules/medicines/medicines.routes.js';
 import { purchasesRouter } from './modules/purchases/purchases.routes.js';
+import { salesRouter } from './modules/sales/sales.routes.js';
+import { returnsRouter } from './modules/returns/returns.routes.js';
+import { inventoryRouter } from './modules/inventory/inventory.routes.js';
 
 export const app = express();
 
@@ -70,6 +73,9 @@ app.use('/api/v1/categories', categoriesRouter);
 app.use('/api/v1/suppliers', suppliersRouter);
 app.use('/api/v1/medicines', medicinesRouter);
 app.use('/api/v1/purchases', purchasesRouter);
+app.use('/api/v1/sales', salesRouter);
+app.use('/api/v1/returns', returnsRouter);
+app.use('/api/v1/inventory', inventoryRouter);
 
 // -------------------------------------------------------------
 // 404 CATCH-ALL

@@ -10,6 +10,10 @@ import { CategoriesView } from '../features/categories/CategoriesView.jsx';
 import { SuppliersView } from '../features/suppliers/SuppliersView.jsx';
 import { MedicinesView } from '../features/medicines/MedicinesView.jsx';
 import { PurchasesView } from '../features/purchases/PurchasesView.jsx';
+import { PosView } from '../features/pos/PosView.jsx';
+import { InventoryView } from '../features/inventory/InventoryView.jsx';
+import { SalesView } from '../features/sales/SalesView.jsx';
+import { ReturnsView } from '../features/returns/ReturnsView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -48,51 +52,15 @@ export function AppRoutes() {
       >
         <Route index element={<DashboardView />} />
         
-        {/* POS & Catalogue */}
-        <Route
-          path="pos"
-          element={
-            <PlaceholderView
-              title="Point of Sale (POS)"
-              description="High-speed barcode checkout with automatic FEFO batch allocation."
-              moduleName="Sales / POS"
-            />
-          }
-        />
+        {/* POS & Operations */}
+        <Route path="pos" element={<PosView />} />
         <Route path="medicines" element={<MedicinesView />} />
         <Route path="categories" element={<CategoriesView />} />
         <Route path="suppliers" element={<SuppliersView />} />
         <Route path="purchases" element={<PurchasesView />} />
-        <Route
-          path="inventory"
-          element={
-            <PlaceholderView
-              title="Batch-Wise Inventory & Adjustments"
-              description="Granular batch tracking with expiry dates, purchase costs, and stock reconciliation."
-              moduleName="Inventory"
-            />
-          }
-        />
-        <Route
-          path="sales"
-          element={
-            <PlaceholderView
-              title="Sales Ledger & Historical Invoices"
-              description="Search completed transactions and reprint fiscal invoices."
-              moduleName="Sales"
-            />
-          }
-        />
-        <Route
-          path="returns"
-          element={
-            <PlaceholderView
-              title="Customer Returns & Restocking"
-              description="Process returns against prior invoices with condition disposition and auditable reasons."
-              moduleName="Returns"
-            />
-          }
-        />
+        <Route path="inventory" element={<InventoryView />} />
+        <Route path="sales" element={<SalesView />} />
+        <Route path="returns" element={<ReturnsView />} />
         <Route
           path="reports"
           element={
