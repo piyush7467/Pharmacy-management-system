@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-page: #F7F8F5;
+    --bg-surface: #FFFFFF;
+    --bg-surface-secondary: #EDF1EB;
+    --border-color: #E3E8E1;
+    --text-primary: #272E29;
+    --text-muted: #737D75;
+    
+    --brand-primary: #355B48;
+    --brand-hover: #294B39;
+    --brand-accent: #D6A96B;
+    
+    --status-success: #2E7D32;
+    --status-warning: #ED6C02;
+    --status-danger: #D32F2F;
+    --status-info: #0288D1;
+  }
+
+  .dark {
+    --bg-page: #171C19;
+    --bg-surface: #222A25;
+    --bg-surface-secondary: #303B33;
+    --border-color: #37433B;
+    --text-primary: #EDF2ED;
+    --text-muted: #A2AEA5;
+    
+    --brand-primary: #91B49B;
+    --brand-hover: #7A9F84;
+    --brand-accent: #D6A96B;
+    
+    --status-success: #66BB6A;
+    --status-warning: #FFA726;
+    --status-danger: #EF5350;
+    --status-info: #29B6F6;
+  }
+
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom Semantic Utility Classes */
+.bg-surface-page { background-color: var(--bg-page); }
+.bg-surface-card { background-color: var(--bg-surface); }
+.bg-surface-muted { background-color: var(--bg-surface-secondary); }
+.border-surface { border-color: var(--border-color); }
+.text-text-primary { color: var(--text-primary); }
+.text-text-muted { color: var(--text-muted); }
+.bg-brand-primary { background-color: var(--brand-primary); }
+.text-brand-primary { color: var(--brand-primary); }
+.border-brand-primary { border-color: var(--brand-primary); }
+.bg-brand-accent { background-color: var(--brand-accent); }
+.text-brand-accent { color: var(--brand-accent); }
