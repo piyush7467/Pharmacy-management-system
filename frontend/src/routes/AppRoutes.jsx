@@ -6,6 +6,10 @@ import { LoginView } from '../features/auth/LoginView.jsx';
 import { ResetPasswordView } from '../features/auth/ResetPasswordView.jsx';
 import { DashboardView } from '../features/dashboard/DashboardView.jsx';
 import { StaffManagementView } from '../features/staff/StaffManagementView.jsx';
+import { CategoriesView } from '../features/categories/CategoriesView.jsx';
+import { SuppliersView } from '../features/suppliers/SuppliersView.jsx';
+import { MedicinesView } from '../features/medicines/MedicinesView.jsx';
+import { PurchasesView } from '../features/purchases/PurchasesView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -55,46 +59,10 @@ export function AppRoutes() {
             />
           }
         />
-        <Route
-          path="medicines"
-          element={
-            <PlaceholderView
-              title="Medicine Catalogue"
-              description="Pharmaceutical inventory directory with dosage, strength, and reorder levels."
-              moduleName="Medicines"
-            />
-          }
-        />
-        <Route
-          path="categories"
-          element={
-            <PlaceholderView
-              title="Therapeutic Categories"
-              description="Classification of medications (e.g. Analgesics, Antibiotics, Vitamins)."
-              moduleName="Categories"
-            />
-          }
-        />
-        <Route
-          path="suppliers"
-          element={
-            <PlaceholderView
-              title="Supplier Directory"
-              description="Approved pharmaceutical distributors and contact records."
-              moduleName="Suppliers"
-            />
-          }
-        />
-        <Route
-          path="purchases"
-          element={
-            <PlaceholderView
-              title="Purchases & Goods Receiving"
-              description="Purchase order drafting and physical shipment intake into active batches."
-              moduleName="Purchases"
-            />
-          }
-        />
+        <Route path="medicines" element={<MedicinesView />} />
+        <Route path="categories" element={<CategoriesView />} />
+        <Route path="suppliers" element={<SuppliersView />} />
+        <Route path="purchases" element={<PurchasesView />} />
         <Route
           path="inventory"
           element={

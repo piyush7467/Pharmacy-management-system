@@ -8,6 +8,10 @@ import { requestIdMiddleware } from './middleware/requestId.js';
 import { errorHandler, AppError } from './middleware/errorHandler.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
+import { categoriesRouter } from './modules/categories/categories.routes.js';
+import { suppliersRouter } from './modules/suppliers/suppliers.routes.js';
+import { medicinesRouter } from './modules/medicines/medicines.routes.js';
+import { purchasesRouter } from './modules/purchases/purchases.routes.js';
 
 export const app = express();
 
@@ -62,6 +66,10 @@ app.get('/api/v1/health', (req, res) => {
 // -------------------------------------------------------------
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', usersRouter);
+app.use('/api/v1/categories', categoriesRouter);
+app.use('/api/v1/suppliers', suppliersRouter);
+app.use('/api/v1/medicines', medicinesRouter);
+app.use('/api/v1/purchases', purchasesRouter);
 
 // -------------------------------------------------------------
 // 404 CATCH-ALL
