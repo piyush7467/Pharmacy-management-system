@@ -15,6 +15,8 @@ import { purchasesRouter } from './modules/purchases/purchases.routes.js';
 import { salesRouter } from './modules/sales/sales.routes.js';
 import { returnsRouter } from './modules/returns/returns.routes.js';
 import { inventoryRouter } from './modules/inventory/inventory.routes.js';
+import { reportsRouter } from './modules/reports/reports.routes.js';
+import { auditRouter } from './modules/audit/audit.routes.js';
 
 export const app = express();
 
@@ -76,6 +78,8 @@ app.use('/api/v1/purchases', purchasesRouter);
 app.use('/api/v1/sales', salesRouter);
 app.use('/api/v1/returns', returnsRouter);
 app.use('/api/v1/inventory', inventoryRouter);
+app.use('/api/v1/reports', reportsRouter);
+app.use('/api/v1/audit-logs', auditRouter);
 
 // -------------------------------------------------------------
 // 404 CATCH-ALL

@@ -14,6 +14,9 @@ import { PosView } from '../features/pos/PosView.jsx';
 import { InventoryView } from '../features/inventory/InventoryView.jsx';
 import { SalesView } from '../features/sales/SalesView.jsx';
 import { ReturnsView } from '../features/returns/ReturnsView.jsx';
+import { ReportsView } from '../features/reports/ReportsView.jsx';
+import { AuditView } from '../features/audit/AuditView.jsx';
+import { SettingsView } from '../features/settings/SettingsView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -61,18 +64,9 @@ export function AppRoutes() {
         <Route path="inventory" element={<InventoryView />} />
         <Route path="sales" element={<SalesView />} />
         <Route path="returns" element={<ReturnsView />} />
-        <Route
-          path="reports"
-          element={
-            <PlaceholderView
-              title="Financial Reports & Ledger Reconciliation"
-              description="Sales totals, tax reports, cost valuation, and mathematical ledger audits."
-              moduleName="Reports"
-            />
-          }
-        />
+        <Route path="reports" element={<ReportsView />} />
 
-        {/* Admin-Only Staff Management */}
+        {/* Admin-Only Staff Management & Audit */}
         <Route
           path="staff"
           element={
@@ -86,24 +80,11 @@ export function AppRoutes() {
           path="audit"
           element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
-              <PlaceholderView
-                title="System Audit Trail"
-                description="Immutable audit logging of sensitive stock adjustments and administrative actions."
-                moduleName="Audit"
-              />
+              <AuditView />
             </ProtectedRoute>
           }
         />
-        <Route
-          path="settings"
-          element={
-            <PlaceholderView
-              title="Settings & Privacy Disclaimers"
-              description="Pharmacy identity, tax configurations, and demo privacy policies."
-              moduleName="Settings"
-            />
-          }
-        />
+        <Route path="settings" element={<SettingsView />} />
       </Route>
 
       {/* Fallback to root */}

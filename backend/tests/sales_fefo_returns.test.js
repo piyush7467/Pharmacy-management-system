@@ -26,6 +26,7 @@ describe('POS, FEFO Engine, Invoicing & Returns Module', { timeout: 40000 }, () 
       });
 
     adminAccessToken = loginRes.body.data.accessToken;
+    const adminUserId = loginRes.body.data.user.id;
 
     // 2. Setup a dedicated test medicine and specific test batches to guarantee 100% test isolation
     const category = await prisma.category.findFirst();
@@ -65,6 +66,17 @@ describe('POS, FEFO Engine, Invoicing & Returns Module', { timeout: 40000 }, () 
     });
     batchEarlyId = bEarly.id;
 
+    await prisma.stockMovement.create({
+      data: {
+        batchId: bEarly.id,
+        movementType: 'PURCHASE_RECEIPT',
+        quantityDelta: 50,
+        balanceAfter: 50,
+        performedByUserId: adminUserId,
+        reason: 'Initial intake for test lot'
+      }
+    });
+
     // Batch 2 (Late expiry): 50 units, expires in 12 months
     const lateExpiry = new Date();
     lateExpiry.setMonth(lateExpiry.getMonth() + 12);
@@ -83,6 +95,17 @@ describe('POS, FEFO Engine, Invoicing & Returns Module', { timeout: 40000 }, () 
     });
     batchLateId = bLate.id;
 
+    await prisma.stockMovement.create({
+      data: {
+        batchId: bLate.id,
+        movementType: 'PURCHASE_RECEIPT',
+        quantityDelta: 50,
+        balanceAfter: 50,
+        performedByUserId: adminUserId,
+        reason: 'Initial intake for test lot'
+      }
+    });
+
     // Batch 3 (Expired): 30 units, expired 10 days ago
     const pastExpiry = new Date();
     pastExpiry.setDate(pastExpiry.getDate() - 10);
@@ -100,6 +123,17 @@ describe('POS, FEFO Engine, Invoicing & Returns Module', { timeout: 40000 }, () 
       }
     });
     batchExpiredId = bExpired.id;
+
+    await prisma.stockMovement.create({
+      data: {
+        batchId: bExpired.id,
+        movementType: 'PURCHASE_RECEIPT',
+        quantityDelta: 30,
+        balanceAfter: 30,
+        performedByUserId: adminUserId,
+        reason: 'Initial intake for test expired lot'
+      }
+    });
   }, 40000);
 
   // Acceptance Test #1: FEFO Batch Deduction
