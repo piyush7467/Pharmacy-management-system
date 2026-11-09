@@ -307,6 +307,15 @@ export async function receivePurchase(id, receiveData = {}, actorId, context = {
         continue;
       }
 
+      // Security & Regulatory Compliance: Reject receiving already-expired batches into active inventory
+      if (new Date(item.expiryDate) <= now) {
+        throw new AppError(
+          `Cannot receive batch ${item.batchNumber} as it has already expired (${new Date(item.expiryDate).toISOString().slice(0, 10)})`,
+          400,
+          'EXPIRED_BATCH_BLOCKED'
+        );
+      }
+
       // Check if batch already exists for medicine + batchNumber
       let batch = await tx.batch.findUnique({
         where: {
