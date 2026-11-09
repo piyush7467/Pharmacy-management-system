@@ -72,22 +72,33 @@ export function PosView() {
   const checkoutMutation = useMutation({
     mutationFn: async (payload) => {
       const res = await apiClient.post('/sales', payload);
-      return res.data;
+      return res?.data || res;
     },
-    onSuccess: (data) => {
-      const sale = data.data;
-      toast.success(`Invoice ${sale.invoiceNumber} processed successfully!`);
-      setCompletedSale(sale);
-      setInvoiceModalOpen(true);
+    onSuccess: (resData) => {
+      const sale = resData?.invoiceNumber ? resData : resData?.data || resData;
+      if (sale && sale.invoiceNumber) {
+        toast.success(`Invoice ${sale.invoiceNumber} processed successfully!`);
+        setCompletedSale(sale);
+        setInvoiceModalOpen(true);
+      } else {
+        toast.success('Sale processed successfully!');
+      }
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
       queryClient.invalidateQueries({ queryKey: ['medicines'] });
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-sales-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-inventory-overview'] });
       clearCart();
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Checkout failed. Please check stock levels.');
+      const message =
+        err?.message ||
+        err?.response?.data?.message ||
+        err?.response?.data?.error?.message ||
+        'Checkout failed. Please check stock levels.';
+      toast.error(message);
     }
   });
 

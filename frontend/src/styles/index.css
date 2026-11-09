@@ -2,83 +2,83 @@
 
 @layer base {
   :root {
-    --background: #F7F8F5;
-    --foreground: #272E29;
+    --background: #F8FAF8;
+    --foreground: #131F17;
 
     --card: #FFFFFF;
-    --card-foreground: #272E29;
+    --card-foreground: #131F17;
 
     --popover: #FFFFFF;
-    --popover-foreground: #272E29;
+    --popover-foreground: #131F17;
 
-    /* Forest Green Primary */
-    --primary: #355B48;
-    --primary-hover: #294B39;
+    /* Authoritative Forest Emerald Primary */
+    --primary: #1C673D;
+    --primary-hover: #144D2D;
     --primary-foreground: #FFFFFF;
 
     /* Secondary Soft Sage */
-    --secondary: #EDF1EB;
-    --secondary-foreground: #272E29;
+    --secondary: #EDF3EE;
+    --secondary-foreground: #131F17;
 
-    /* Muted Editorial Neutrals */
-    --muted: #EDF1EB;
-    --muted-foreground: #737D75;
+    /* Muted High-Legibility Neutrals */
+    --muted: #EDF3EE;
+    --muted-foreground: #526357;
 
-    /* Warm Neutral Accent */
-    --accent: #D6A96B;
-    --accent-foreground: #171C19;
+    /* Warm Amber Accent */
+    --accent: #C89249;
+    --accent-foreground: #131F17;
 
     --destructive: #D32F2F;
     --destructive-foreground: #FFFFFF;
 
-    --border: #E3E8E1;
-    --input: #E3E8E1;
-    --ring: #355B48;
+    --border: #DFE6E0;
+    --input: #DFE6E0;
+    --ring: #1C673D;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
 
     /* Operational Statuses */
-    --status-success: #2E7D32;
-    --status-warning: #ED6C02;
-    --status-danger: #D32F2F;
+    --status-success: #1E7E34;
+    --status-warning: #D97706;
+    --status-danger: #DC2626;
   }
 
   .dark {
-    --background: #171C19;
-    --foreground: #EDF2ED;
+    --background: #0E1410;
+    --foreground: #F1F5F2;
 
-    --card: #222A25;
-    --card-foreground: #EDF2ED;
+    --card: #151D18;
+    --card-foreground: #F1F5F2;
 
-    --popover: #222A25;
-    --popover-foreground: #EDF2ED;
+    --popover: #151D18;
+    --popover-foreground: #F1F5F2;
 
-    /* Sage Green Primary in Dark Mode */
-    --primary: #91B49B;
-    --primary-hover: #7A9F84;
-    --primary-foreground: #171C19;
+    /* Luminous Emerald Mint in Dark Mode */
+    --primary: #2EB872;
+    --primary-hover: #269B5F;
+    --primary-foreground: #08150C;
 
     /* Secondary Dark Sage/Charcoal */
-    --secondary: #303B33;
-    --secondary-foreground: #EDF2ED;
+    --secondary: #1E2822;
+    --secondary-foreground: #F1F5F2;
 
-    --muted: #303B33;
-    --muted-foreground: #A2AEA5;
+    --muted: #1E2822;
+    --muted-foreground: #98A99C;
 
     /* Warm Neutral Accent */
-    --accent: #D6A96B;
-    --accent-foreground: #171C19;
+    --accent: #E5B26E;
+    --accent-foreground: #0E1410;
 
-    --destructive: #EF5350;
-    --destructive-foreground: #171C19;
+    --destructive: #EF4444;
+    --destructive-foreground: #FFFFFF;
 
-    --border: #37433B;
-    --input: #37433B;
-    --ring: #91B49B;
+    --border: #25332A;
+    --input: #25332A;
+    --ring: #2EB872;
 
-    --status-success: #66BB6A;
-    --status-warning: #FFA726;
-    --status-danger: #EF5350;
+    --status-success: #34D399;
+    --status-warning: #FBBF24;
+    --status-danger: #F87171;
   }
 
   * {
@@ -88,6 +88,10 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
