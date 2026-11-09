@@ -213,3 +213,59 @@ export async function resetPassword({ token, newPassword }) {
 
   return { message: 'Password has been successfully reset. Please log in with your new password.' };
 }
+
+export async function updateProfile(userId, { fullName }) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId }
+  });
+
+  if (!user || user.deletedAt) {
+    throw new AppError('User account not found', 404, 'USER_NOT_FOUND');
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: {
+      fullName: fullName.trim()
+    },
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      role: true,
+      isActive: true,
+      createdAt: true
+    }
+  });
+
+  return { user: updated };
+}
+
+export async function changePassword(userId, { currentPassword, newPassword }) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId }
+  });
+
+  if (!user || user.deletedAt) {
+    throw new AppError('User account not found', 404, 'USER_NOT_FOUND');
+  }
+
+  const isValid = await argon2.verify(user.passwordHash, currentPassword);
+  if (!isValid) {
+    throw new AppError('Current password does not match records', 400, 'INVALID_CURRENT_PASSWORD');
+  }
+
+  const passwordHash = await argon2.hash(newPassword, {
+    type: argon2.argon2id,
+    memoryCost: 65536,
+    timeCost: 3,
+    parallelism: 4
+  });
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash }
+  });
+
+  return { message: 'Account password changed successfully' };
+}

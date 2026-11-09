@@ -16,15 +16,15 @@ export function LegalHeader({ activeTab, setActiveTab }) {
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 flex items-center gap-1.5">
               <BookOpen className="w-3.5 h-3.5" />
-              ALGIONS Assessment Specification
+              Official Dispensary Governance
             </span>
-            <span className="text-xs text-text-muted">Last Updated: November 2026</span>
+            <span className="text-xs text-text-muted">Standard Operational Terms</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
-            Privacy, Terms & Legal Disclaimer
+            Privacy, Terms &amp; Regulatory Policies
           </h1>
           <p className="text-sm text-text-muted mt-1 max-w-2xl">
-            Legal boundaries, regulatory compliance standards, privacy disclosures, and security architecture governing the PharmaPulse Pharmacy Management platform.
+            Statutory drug dispensing standards, data privacy commitments, security controls, and operational terms governing the pharmacy management platform.
           </p>
         </div>
       </div>

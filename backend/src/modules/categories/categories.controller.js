@@ -10,9 +10,9 @@ export async function listCategories(req, res, next) {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 50;
-    const { search } = req.query;
+    const { search, status } = req.query;
 
-    const result = await categoriesService.listCategories({ search, page, limit });
+    const result = await categoriesService.listCategories({ search, status, page, limit });
 
     return res.status(200).json({
       success: true,

@@ -18,6 +18,7 @@ import { ReportsView } from '../features/reports/ReportsView.jsx';
 import { AuditView } from '../features/audit/AuditView.jsx';
 import { SettingsView } from '../features/settings/SettingsView.jsx';
 import { PrivacyTermsView } from '../features/legal/PrivacyTermsView.jsx';
+import { PharmacyProfileView } from '../features/profile/PharmacyProfileView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -92,6 +93,7 @@ export function AppRoutes() {
           }
         />
         <Route path="settings" element={<SettingsView />} />
+        <Route path="profile" element={<PharmacyProfileView />} />
       </Route>
 
       {/* Fallback to root */}

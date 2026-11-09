@@ -105,9 +105,28 @@ export function MedicinesTable({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-bold text-xs border-surface bg-surface-page text-text-primary">
-                        {med.category?.name || 'General'}
-                      </Badge>
+                      <div className="space-y-1">
+                        <Badge variant="outline" className="font-bold text-xs border-surface bg-surface-page text-text-primary">
+                          {med.category?.name || 'General'}
+                        </Badge>
+                        {Array.isArray(med.therapeuticClasses) && med.therapeuticClasses.length > 0 && (
+                          <div className="flex flex-wrap gap-1 max-w-[220px]">
+                            {med.therapeuticClasses.slice(0, 2).map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-[10px] px-1.5 py-0.5 rounded-md bg-surface-muted text-text-secondary border border-surface font-medium truncate"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {med.therapeuticClasses.length > 2 && (
+                              <span className="text-[10px] text-text-muted font-mono" title={med.therapeuticClasses.join(', ')}>
+                                +{med.therapeuticClasses.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {med.earliestBatch ? (

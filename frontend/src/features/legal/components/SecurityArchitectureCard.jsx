@@ -1,27 +1,27 @@
 import React from 'react';
-import { ShieldCheck, Key, Lock, RefreshCw, Zap, Server, Code } from 'lucide-react';
+import { ShieldCheck, RefreshCw, Zap, Server, FileCode, CheckCircle2 } from 'lucide-react';
 
 export function SecurityArchitectureCard() {
   const securityFeatures = [
     {
       title: 'Idempotency Protection',
-      detail: 'Client-supplied UUID idempotency keys on checkout prevent duplicate debits during network retries or double clicks.',
+      detail: 'Unique transaction keys on point-of-sale checkout prevent duplicate billing during network timeouts or double-clicks.',
       icon: Zap
     },
     {
-      title: 'Atomic Database Transactions',
-      detail: 'Multi-table operations (Sale + SaleItems + Batches + StockMovements + Audit) execute inside Prisma $transaction rollback boundaries.',
+      title: 'Atomic Transaction Boundaries',
+      detail: 'Multi-table operations (Sale + Batch Deductions + Movements + Invoicing) execute within rollback boundaries to prevent partial data states.',
       icon: RefreshCw
     },
     {
-      title: 'Double-Entry Reconciliation Formula',
-      detail: 'Mathematical proof audit verifies that physical batch stock matches cumulative movements: Opening + Purchases - Sales + Returns ± Adjustments.',
+      title: 'Reconciled Audit Ledger',
+      detail: 'Automated verification guarantees that current physical stock strictly equals: Inward Receipts - Sales + Returns ± Adjustments with zero discrepancy.',
       icon: Server
     },
     {
-      title: 'OpenAPI 3.0 Contract Verification',
-      detail: 'All endpoints are documented and validated via OpenAPI 3.0 schema specs mounted at /api/v1/api-docs with zero mock data dependencies.',
-      icon: Code
+      title: 'Standardized API Architecture',
+      detail: 'All system endpoints follow structured contracts with complete schema validation, secure error envelopes, and automated request tracing.',
+      icon: FileCode
     }
   ];
 
@@ -33,8 +33,8 @@ export function SecurityArchitectureCard() {
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-text-primary">Security Architecture & Audit Integrity</h2>
-            <p className="text-xs text-text-muted">Enterprise-grade defensive controls and cryptographic guarantees</p>
+            <h2 className="text-lg font-bold text-text-primary">System Security &amp; Audit Architecture</h2>
+            <p className="text-xs text-text-muted">Enterprise-grade defensive controls, encryption, and operational integrity</p>
           </div>
         </div>
 
@@ -56,28 +56,31 @@ export function SecurityArchitectureCard() {
           })}
         </div>
 
-        {/* Technical Specification Summary */}
+        {/* Technical Standards Summary */}
         <div className="p-4 rounded-xl bg-surface-muted/80 border border-surface space-y-3">
           <div className="flex items-center justify-between text-xs text-text-muted">
-            <span className="font-semibold text-text-primary">Defensive Implementation Standards</span>
-            <span className="font-mono text-emerald-500">45 Passing Automated Test Suites</span>
+            <span className="font-semibold text-text-primary">Security Implementation Standards</span>
+            <span className="inline-flex items-center gap-1 text-emerald-500 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Continuous System Verification
+            </span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
             <div className="p-2.5 rounded-lg bg-surface-card border border-surface">
-              <div className="font-bold text-text-primary">Argon2id</div>
-              <div className="text-[11px] text-text-muted">Password KDF</div>
+              <div className="font-bold text-text-primary">Encrypted Auth</div>
+              <div className="text-[11px] text-text-muted">Multi-layer KDF</div>
             </div>
             <div className="p-2.5 rounded-lg bg-surface-card border border-surface">
-              <div className="font-bold text-text-primary">AES-256 / TLS 1.3</div>
-              <div className="text-[11px] text-text-muted">In-Transit & Rest</div>
+              <div className="font-bold text-text-primary">TLS 1.3 / AES-256</div>
+              <div className="text-[11px] text-text-muted">In-Transit &amp; At Rest</div>
             </div>
             <div className="p-2.5 rounded-lg bg-surface-card border border-surface">
-              <div className="font-bold text-text-primary">RBAC Guard</div>
-              <div className="text-[11px] text-text-muted">Server-Side Gate</div>
+              <div className="font-bold text-text-primary">Role Guards</div>
+              <div className="text-[11px] text-text-muted">Server-Side RBAC</div>
             </div>
             <div className="p-2.5 rounded-lg bg-surface-card border border-surface">
-              <div className="font-bold text-text-primary">UUID v4</div>
-              <div className="text-[11px] text-text-muted">Trace & Request ID</div>
+              <div className="font-bold text-text-primary">Audit Correlation</div>
+              <div className="text-[11px] text-text-muted">Request Trace IDs</div>
             </div>
           </div>
         </div>

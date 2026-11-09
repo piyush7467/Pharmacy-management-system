@@ -23,17 +23,17 @@ export function PrivacyPolicyCard() {
               Zero Third-Party Telemetry
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              PharmaPulse operates with zero third-party advertising scripts, external tracking pixels, or cross-site fingerprinting. All operational metrics remain strictly within your sovereign PostgreSQL instance.
+              PharmaPulse operates with zero third-party advertising trackers or external data brokers. All operational metrics remain strictly within your dedicated dispensary database.
             </p>
           </div>
 
           <div className="p-4 rounded-xl bg-surface-muted/60 border border-surface space-y-2">
             <div className="flex items-center gap-2 text-brand-primary font-semibold text-sm">
               <Shield className="w-4 h-4" />
-              Argon2id Password Storage
+              Cryptographic Password Protection
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              User credentials are salted and hashed using state-of-the-art Argon2id algorithm, resistant to GPU-accelerated brute-force attacks and rainbow table compromises. Plaintext passwords are never logged or stored.
+              Staff credentials are salted and hashed using modern memory-hard cryptographic algorithms resistant to brute-force compromises. Plaintext passwords are never stored.
             </p>
           </div>
 
@@ -50,10 +50,10 @@ export function PrivacyPolicyCard() {
           <div className="p-4 rounded-xl bg-surface-muted/60 border border-surface space-y-2">
             <div className="flex items-center gap-2 text-brand-primary font-semibold text-sm">
               <Database className="w-4 h-4" />
-              Session Token Ephemerality
+              Ephemeral Staff Sessions
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
-              JWT access tokens have short lifespans (15 minutes) and refresh tokens are stored in signed, httpOnly, sameSite cookies to protect against Cross-Site Scripting (XSS) and token theft.
+              Staff authentication utilizes short-lived tokens stored in signed, httpOnly cookies to prevent session interception and unauthorized replay attacks.
             </p>
           </div>
         </div>
@@ -70,9 +70,9 @@ export function PrivacyPolicyCard() {
             Under the Digital Personal Data Protection Act (DPDPA 2023) and general data protection standards, data principals may request the erasure or anonymization of non-statutory records. Statutory dispensing logs and tax invoices must be retained for the minimum period mandated by drug control regulations (3 to 5 years depending on jurisdiction).
           </p>
 
-          <h3 className="font-semibold text-sm text-text-primary">3. Database Backups & Encryption</h3>
+          <h3 className="font-semibold text-sm text-text-primary">3. Data Backups &amp; Encryption</h3>
           <p>
-            All persistent storage volumes utilize AES-256 at-rest encryption via serverless PostgreSQL providers. In-transit traffic is strictly forced over TLS 1.3 with automated HSTS header enforcement.
+            All persistent storage volumes utilize AES-256 at-rest encryption. In-transit traffic is strictly forced over TLS 1.3 with automated HSTS header enforcement.
           </p>
         </div>
       </div>

@@ -127,6 +127,59 @@ export const openapiSpec = {
         }
       }
     },
+    '/auth/profile': {
+      patch: {
+        tags: ['Authentication'],
+        summary: 'Update Staff Account Details',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['fullName'],
+                properties: {
+                  fullName: { type: 'string', example: 'Piyush Shakya' }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Profile updated successfully.' },
+          '400': { description: 'Validation failed.' },
+          '401': { description: 'Authentication required.' }
+        }
+      }
+    },
+    '/auth/change-password': {
+      post: {
+        tags: ['Authentication'],
+        summary: 'Change Personal Account Password',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['currentPassword', 'newPassword'],
+                properties: {
+                  currentPassword: { type: 'string', format: 'password' },
+                  newPassword: { type: 'string', format: 'password', minLength: 8 }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          '200': { description: 'Password changed successfully.' },
+          '400': { description: 'Current password incorrect or validation failed.' },
+          '401': { description: 'Authentication required.' }
+        }
+      }
+    },
     '/auth/refresh': {
       post: {
         tags: ['Authentication'],

@@ -185,7 +185,7 @@ async function main() {
   });
 
   // Batch 4 (Low stock drug)
-  await prisma.batch.create({
+  const batchAmx = await prisma.batch.create({
     data: {
       medicineId: amoxicillin.id,
       batchNumber: 'BATCH-AMX-2026-01',
@@ -231,6 +231,38 @@ async function main() {
       balanceAfter: 150,
       performedByUserId: admin.id,
       reason: 'Initial opening stock intake'
+    }
+  });
+
+  await prisma.stockMovement.create({
+    data: {
+      batchId: batchExpired.id,
+      movementType: 'PURCHASE_RECEIPT',
+      quantityDelta: 20,
+      balanceAfter: 20,
+      performedByUserId: admin.id,
+      reason: 'Opening expired stock verification lot'
+    }
+  });
+
+  await prisma.stockMovement.create({
+    data: {
+      batchId: batchAmx.id,
+      movementType: 'PURCHASE_RECEIPT',
+      quantityDelta: 12,
+      balanceAfter: 12,
+      performedByUserId: admin.id,
+      reason: 'Opening low stock intake'
+    }
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: admin.id,
+      action: 'SEED_INITIALIZATION',
+      entityName: 'SYSTEM',
+      entityId: admin.id,
+      diff: { note: 'Initial seed baseline generated' }
     }
   });
 

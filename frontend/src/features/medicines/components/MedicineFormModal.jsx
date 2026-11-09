@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pill, Loader2, Plus, Edit2 } from 'lucide-react';
+import { Pill, Loader2, Plus, Edit2, X, Tag } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -43,8 +43,31 @@ export function MedicineFormModal({
     packageUnit: 'Strip of 10',
     minReorderLevel: 20,
     defaultTaxRate: 12.0,
+    manufacturer: '',
+    therapeuticClasses: [],
     isActive: true
   });
+
+  const [tagInput, setTagInput] = useState('');
+
+  const handleAddTag = (e) => {
+    e?.preventDefault();
+    const tag = tagInput.trim();
+    if (tag && !formData.therapeuticClasses.includes(tag)) {
+      setFormData({
+        ...formData,
+        therapeuticClasses: [...formData.therapeuticClasses, tag]
+      });
+      setTagInput('');
+    }
+  };
+
+  const handleRemoveTag = (tagToRemove) => {
+    setFormData({
+      ...formData,
+      therapeuticClasses: formData.therapeuticClasses.filter((t) => t !== tagToRemove)
+    });
+  };
 
   useEffect(() => {
     if (editingMedicine) {
@@ -58,6 +81,8 @@ export function MedicineFormModal({
         packageUnit: editingMedicine.packageUnit || 'Strip of 10',
         minReorderLevel: editingMedicine.minReorderLevel || 20,
         defaultTaxRate: editingMedicine.defaultTaxRate !== undefined ? editingMedicine.defaultTaxRate : 12.0,
+        manufacturer: editingMedicine.manufacturer || '',
+        therapeuticClasses: Array.isArray(editingMedicine.therapeuticClasses) ? editingMedicine.therapeuticClasses : [],
         isActive: editingMedicine.isActive !== undefined ? editingMedicine.isActive : true
       });
     } else {
@@ -71,6 +96,8 @@ export function MedicineFormModal({
         packageUnit: 'Strip of 10',
         minReorderLevel: 20,
         defaultTaxRate: 12.0,
+        manufacturer: '',
+        therapeuticClasses: [],
         isActive: true
       });
     }
@@ -228,6 +255,19 @@ export function MedicineFormModal({
               />
             </div>
 
+            {/* Manufacturer */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold uppercase tracking-wider text-text-muted">
+                Pharmaceutical Manufacturer
+              </Label>
+              <Input
+                placeholder="e.g. Micro Labs Ltd, GSK, Cipla"
+                value={formData.manufacturer}
+                onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
+                className="bg-surface-page border-surface text-sm rounded-xl"
+              />
+            </div>
+
             {/* Min Reorder Level */}
             <div className="space-y-1.5">
               <Label className="text-xs font-bold uppercase tracking-wider text-text-muted">
@@ -241,6 +281,61 @@ export function MedicineFormModal({
                 className="bg-surface-page border-surface font-mono font-bold text-sm rounded-xl"
               />
             </div>
+          </div>
+
+          {/* Secondary Therapeutic Indications (Tags) */}
+          <div className="space-y-2 pt-2 border-t border-surface">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5 text-brand-primary" />
+                Secondary Therapeutic Indications / Uses
+              </Label>
+              <span className="text-[11px] text-text-muted">Type tag and press Enter</span>
+            </div>
+
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g. Pain Relief, Fever, Antiplatelet..."
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddTag();
+                  }
+                }}
+                className="bg-surface-page border-surface text-xs rounded-xl"
+              />
+              <Button
+                type="button"
+                onClick={handleAddTag}
+                variant="outline"
+                className="shrink-0 text-xs font-bold cursor-pointer"
+              >
+                + Add
+              </Button>
+            </div>
+
+            {/* Tag Badges list */}
+            {formData.therapeuticClasses.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {formData.therapeuticClasses.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-primary/10 text-brand-primary border border-brand-primary/20"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="hover:text-red-500 cursor-pointer"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0 pt-2">

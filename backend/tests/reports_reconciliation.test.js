@@ -40,6 +40,17 @@ describe('Financial Reports & Mathematical Ledger Reconciliation', { timeout: 30
         });
       cashierAccessToken = cashierLogin.body.data.accessToken;
     }
+
+    // Ensure at least one audit log exists for audit-logs test
+    await prisma.auditLog.create({
+      data: {
+        actorId: adminLogin.body.data.user.id,
+        action: 'SYSTEM_AUDIT_CHECK',
+        entityName: 'SYSTEM',
+        entityId: adminLogin.body.data.user.id,
+        diff: { initialized: true }
+      }
+    });
   }, 30000);
 
   it('GET /api/v1/reports/sales-summary returns sales metrics & trend', async () => {

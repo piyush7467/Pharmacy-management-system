@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, CheckCircle2, ShieldAlert, Award, FileSpreadsheet } from 'lucide-react';
+import { Scale, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 export function RegulatoryComplianceCard() {
   const compliances = [
@@ -7,26 +7,26 @@ export function RegulatoryComplianceCard() {
       title: 'First-Expiry, First-Out (FEFO) Dispatch',
       agency: 'WHO-GMP & Good Distribution Practice (GDP)',
       description:
-        'Enforces automatic chronological sorting by expiry date during checkout. Prevents dispensing newly received stock while older batches remain on shelf, eliminating expired medicine risks.',
-      status: 'Enforced via PostgreSQL Engine'
+        'Enforces chronological sorting by expiry date during checkout. Prevents dispensing newly received stock while older batches remain on shelf, eliminating expired medicine risks.',
+      status: 'Automated Expiry Safeguard'
     },
     {
       title: 'Immutable Movement Audit Log (21 CFR Part 11)',
-      agency: 'FDA & Indian Drugs and Cosmetics Act',
+      agency: 'Drug Regulatory Control Standards',
       description:
         'Every stock intake (GRN), point-of-sale deduction, customer return, and manual adjustment records immutable quantity deltas, batch ID, timestamp, and responsible user ID with required audit reasons.',
       status: 'Strict Append-Only Ledger'
     },
     {
-      title: 'Restricted Batch Intake Regulatory Gate',
-      agency: 'Drug Regulatory Authorities (CDSCO / FDA)',
+      title: 'Restricted Batch Intake Verification',
+      agency: 'State & Central Drug Regulatory Agencies',
       description:
-        'Intake of already-expired batches during Goods Received Note (GRN) processing is blocked with EXPIRED_BATCH_BLOCKED error code at the API schema validation layer.',
-      status: 'Server-Side Regulatory Gate'
+        'Intake of already-expired shipments during Goods Received Note (GRN) processing is automatically rejected at the intake gate to safeguard customer health.',
+      status: 'Intake Regulatory Gate'
     },
     {
       title: 'Itemized GST & Tax Transparency',
-      agency: 'GST Council / Commercial Tax Compliance',
+      agency: 'Commercial Sales Tax Compliance',
       description:
         'Itemized CGST/SGST/IGST tax rates are stored per line item and computed in high-precision currency values to ensure invoices conform to commercial tax billing audits.',
       status: 'Itemized POS Engine'
@@ -72,10 +72,10 @@ export function RegulatoryComplianceCard() {
         <div className="p-4 rounded-xl bg-surface-muted/80 border border-surface space-y-2">
           <div className="flex items-center gap-2 text-text-primary font-semibold text-xs">
             <ShieldAlert className="w-4 h-4 text-amber-500" />
-            Statutory Simulation Disclaimer
+            Statutory Operational Notice
           </div>
           <p className="text-xs text-text-muted leading-relaxed">
-            While PharmaPulse implements technical controls matching WHO-GMP, 21 CFR Part 11, and CDSCO regulatory guidelines, deployment in a live clinical pharmacy or hospital dispensing ward requires jurisdictional licensing, certified cold-chain monitoring hardware integration, and verified pharmacist-in-charge registration.
+            Operating this retail dispensary management system in a clinical healthcare environment requires active drug authority licensing, certified cold-chain monitoring hardware, and registered Pharmacist-in-Charge supervision.
           </p>
         </div>
       </div>

@@ -5,15 +5,27 @@ const initialState = {
   sidebarCollapsed: false,
   receiptFormat: '80mm', // '80mm' | '58mm' | 'A4'
   shopProfile: {
-    pharmacyName: 'PharmaFlow Central Pharmacy',
-    tagline: 'Licensed Retail Dispensary & Clinical Supplies',
-    licenseNumber: 'DL-2026-98442',
-    taxNumber: 'GSTIN-29AABCP1234D1ZK',
-    phone: '+91 80 4123 4567',
-    email: 'dispensary@pharmaflow.demo',
-    address: '42 Brigade Road, Commercial District, Bengaluru, Karnataka 560001',
-    receiptFooter: 'Thank you for choosing PharmaFlow! Wishing you good health.',
-    returnPolicy: 'Medicines once sold cannot be returned without original receipt within 7 days.'
+    pharmacyName: '',
+    legalName: '',
+    tagline: '',
+    category: 'Retail Community Pharmacy',
+    licenseNumber: '',
+    pharmacistInCharge: '',
+    pharmacistCouncilNo: '',
+    licenseExpiry: '',
+    taxNumber: '',
+    phone: '',
+    emergencyHelpline: '',
+    email: '',
+    address: '',
+    operatingHours: 'Mon - Sat: 9:00 AM - 9:00 PM',
+    is24Hours: false,
+    upiId: '',
+    bankName: '',
+    bankAccountNumber: '',
+    bankIfsc: '',
+    receiptFooter: 'Thank you for your visit. Wishing you good health!',
+    returnPolicy: 'Medicines once sold can only be returned with original invoice within 7 days.'
   }
 };
 

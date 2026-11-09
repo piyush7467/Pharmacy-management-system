@@ -161,4 +161,67 @@ describe('Catalogue, Categories & Suppliers Module', { timeout: 20000 }, () => {
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('CATEGORY_NOT_EMPTY');
   });
+
+  // 4. CSV Import, Export & Template
+  it('GET /api/v1/medicines/template returns downloadable CSV template with active categories', async () => {
+    const res = await request(app)
+      .get('/api/v1/medicines/template')
+      .set('Authorization', `Bearer ${adminAccessToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/csv/);
+    expect(res.text).toContain('Medicine Name,Generic Composition,Primary Category');
+    expect(res.text).toContain('Secondary Indications');
+  });
+
+  it('POST /api/v1/medicines/import imports bulk medicines and auto-creates missing categories', async () => {
+    const uniqueCategoryName = `Auto Import Category ${Date.now()}`;
+    const testSku = `IMPORT-SKU-${Date.now()}`;
+
+    const res = await request(app)
+      .post('/api/v1/medicines/import')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        rows: [
+          {
+            name: 'Test Bulk Medicine A',
+            genericName: 'Sample Molecule 500mg',
+            categoryName: uniqueCategoryName,
+            sku: testSku,
+            dosageForm: 'Tablet',
+            strength: '500mg',
+            packageUnit: 'Strip of 10',
+            minReorderLevel: 15,
+            defaultTaxRate: 12.0,
+            therapeuticClasses: ['Fever Relief', 'Headache'],
+            manufacturer: 'Auto Pharma Ltd'
+          }
+        ]
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.created).toBe(1);
+    expect(res.body.data.createdCategories).toBe(1);
+
+    // Verify category was auto-created and matches 'needs_description' filter
+    const catCheck = await request(app)
+      .get(`/api/v1/categories?status=needs_description&search=${encodeURIComponent(uniqueCategoryName)}`)
+      .set('Authorization', `Bearer ${adminAccessToken}`);
+
+    expect(catCheck.status).toBe(200);
+    expect(catCheck.body.data.length).toBeGreaterThanOrEqual(1);
+    expect(catCheck.body.data[0].name).toBe(uniqueCategoryName);
+    expect(catCheck.body.data[0].description).toBeNull();
+  });
+
+  it('GET /api/v1/medicines/export exports entire catalog as CSV', async () => {
+    const res = await request(app)
+      .get('/api/v1/medicines/export')
+      .set('Authorization', `Bearer ${adminAccessToken}`);
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/csv/);
+    expect(res.text).toContain('Medicine Name,Generic Composition');
+  });
 });

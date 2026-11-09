@@ -9,5 +9,7 @@ authRouter.post('/login', authRateLimiter, authController.login);
 authRouter.post('/refresh', authController.refresh);
 authRouter.post('/logout', authController.logout);
 authRouter.get('/me', authenticate, authController.getMe);
+authRouter.patch('/profile', authenticate, authController.updateProfile);
+authRouter.post('/change-password', authenticate, authRateLimiter, authController.changePassword);
 authRouter.post('/forgot-password', authRateLimiter, authController.forgotPassword);
 authRouter.post('/reset-password', authRateLimiter, authController.resetPassword);

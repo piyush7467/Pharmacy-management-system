@@ -35,7 +35,7 @@ export function PrivacyTermsView() {
 
       {/* Action Bar */}
       <div className="flex items-center justify-between text-xs text-text-muted px-1">
-        <span>Displaying regulatory and terms disclosure for PharmaPulse v1.0</span>
+        <span>Dispensary operational policies and statutory compliance documentation</span>
         <div className="flex items-center gap-3">
           <button
             onClick={handlePrint}

@@ -9,6 +9,7 @@ import { MedicinesFilters } from './components/MedicinesFilters.jsx';
 import { MedicinesTable } from './components/MedicinesTable.jsx';
 import { MedicineFormModal } from './components/MedicineFormModal.jsx';
 import { MedicineBatchesModal } from './components/MedicineBatchesModal.jsx';
+import { ImportMedicinesModal } from './components/ImportMedicinesModal.jsx';
 
 export function MedicinesView() {
   const queryClient = useQueryClient();
@@ -21,6 +22,7 @@ export function MedicinesView() {
 
   // Modals state
   const [formModalOpen, setFormModalOpen] = useState(false);
+  const [importModalOpen, setImportModalOpen] = useState(false);
   const [editingMedicine, setEditingMedicine] = useState(null);
   const [batchModalMedicine, setBatchModalMedicine] = useState(null);
 
@@ -107,6 +109,7 @@ export function MedicinesView() {
           setEditingMedicine(null);
           setFormModalOpen(true);
         }}
+        onOpenImportModal={() => setImportModalOpen(true)}
         canManageMedicines={canManageMedicines}
       />
 
@@ -158,6 +161,16 @@ export function MedicinesView() {
         open={Boolean(batchModalMedicine)}
         onOpenChange={(open) => {
           if (!open) setBatchModalMedicine(null);
+        }}
+      />
+
+      {/* 7. Bulk CSV Import Modal */}
+      <ImportMedicinesModal
+        open={importModalOpen}
+        onOpenChange={setImportModalOpen}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ['medicines'] });
+          queryClient.invalidateQueries({ queryKey: ['categoriesList'] });
         }}
       />
     </div>

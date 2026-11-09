@@ -162,6 +162,30 @@ describe('Authentication & Staff Management Module', { timeout: 20000 }, () => {
     expect(res.body.data.message).toContain('If your email is registered');
   });
 
+  it('PATCH /api/v1/auth/profile updates personal staff profile name', async () => {
+    const res = await request(app)
+      .patch('/api/v1/auth/profile')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({ fullName: 'Dr. System Administrator (Updated)' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.user.fullName).toBe('Dr. System Administrator (Updated)');
+  });
+
+  it('POST /api/v1/auth/change-password validates current password before updating', async () => {
+    const failRes = await request(app)
+      .post('/api/v1/auth/change-password')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        currentPassword: 'IncorrectOldPassword123!',
+        newPassword: 'NewAdminPassword456!'
+      });
+
+    expect(failRes.status).toBe(400);
+    expect(failRes.body.error.code).toBe('INVALID_CURRENT_PASSWORD');
+  });
+
   it('POST /api/v1/auth/logout revokes refresh session and clears cookie', async () => {
     const res = await request(app)
       .post('/api/v1/auth/logout')

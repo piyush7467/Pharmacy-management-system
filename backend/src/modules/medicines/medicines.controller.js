@@ -11,6 +11,8 @@ const medicineSchema = z.object({
   packageUnit: z.string().min(1, 'Package unit is required (e.g. Strip of 10)'),
   minReorderLevel: z.coerce.number().int().min(0, 'Reorder level cannot be negative').default(20),
   defaultTaxRate: z.coerce.number().min(0, 'Tax rate cannot be negative').max(100).default(12.0),
+  therapeuticClasses: z.array(z.string()).default([]),
+  manufacturer: z.string().max(150).optional().nullable(),
   isActive: z.boolean().default(true)
 });
 
@@ -97,6 +99,49 @@ export async function deleteMedicine(req, res, next) {
     return res.status(200).json({
       success: true,
       data: result,
+      meta: { requestId: req.id, timestamp: new Date().toISOString() }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function downloadTemplate(req, res, next) {
+  try {
+    const csvContent = await medicinesService.generateCsvTemplate();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="pharmaflow_medicine_import_template.csv"');
+    return res.status(200).send(csvContent);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function exportMedicines(req, res, next) {
+  try {
+    const csvContent = await medicinesService.exportMedicinesToCsv();
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="pharmaflow_active_medicines_catalog.csv"');
+    return res.status(200).send(csvContent);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function importMedicines(req, res, next) {
+  try {
+    const rows = req.body.rows;
+    if (!rows || !Array.isArray(rows)) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'INVALID_IMPORT_PAYLOAD', message: 'Payload must contain a "rows" array of medicine objects.' }
+      });
+    }
+
+    const summary = await medicinesService.importMedicinesFromRows(rows);
+    return res.status(200).json({
+      success: true,
+      data: summary,
       meta: { requestId: req.id, timestamp: new Date().toISOString() }
     });
   } catch (error) {

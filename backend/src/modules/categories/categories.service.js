@@ -1,17 +1,34 @@
 import { prisma } from '../../config/prisma.js';
 import { AppError } from '../../middleware/errorHandler.js';
 
-export async function listCategories({ search, page = 1, limit = 50 }) {
+export async function listCategories({ search, status, page = 1, limit = 50 }) {
   const skip = (page - 1) * limit;
 
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } }
-        ]
-      }
-    : {};
+  const where = {
+    ...(status === 'needs_description'
+      ? {
+          OR: [
+            { description: null },
+            { description: '' }
+          ]
+        }
+      : status === 'complete'
+      ? {
+          AND: [
+            { description: { not: null } },
+            { description: { not: '' } }
+          ]
+        }
+      : {}),
+    ...(search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } }
+          ]
+        }
+      : {})
+  };
 
   const [total, categories] = await Promise.all([
     prisma.category.count({ where }),

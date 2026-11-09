@@ -16,6 +16,15 @@ const resetPasswordSchema = z.object({
   newPassword: z.string().min(8, 'New password must be at least 8 characters')
 });
 
+const updateProfileSchema = z.object({
+  fullName: z.string().min(2, 'Full name must be at least 2 characters').max(100)
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(8, 'New password must be at least 8 characters')
+});
+
 export async function login(req, res, next) {
   try {
     const input = loginSchema.parse(req.body);
@@ -101,6 +110,36 @@ export async function resetPassword(req, res, next) {
   try {
     const input = resetPasswordSchema.parse(req.body);
     const result = await authService.resetPassword(input);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+      meta: { requestId: req.id, timestamp: new Date().toISOString() }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateProfile(req, res, next) {
+  try {
+    const input = updateProfileSchema.parse(req.body);
+    const result = await authService.updateProfile(req.user.id, input);
+
+    return res.status(200).json({
+      success: true,
+      data: result,
+      meta: { requestId: req.id, timestamp: new Date().toISOString() }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function changePassword(req, res, next) {
+  try {
+    const input = changePasswordSchema.parse(req.body);
+    const result = await authService.changePassword(req.user.id, input);
 
     return res.status(200).json({
       success: true,

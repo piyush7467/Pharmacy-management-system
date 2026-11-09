@@ -52,7 +52,7 @@ Pharmacy_management_system/
 | **API Contract & Docs**| **OpenAPI 3.0.3** mounted at `/api/v1/api-docs` via **Swagger UI** |
 | **Security & Crypto** | Argon2id, JWT (`jsonwebtoken`), `cookie-parser`, `helmet`, `express-rate-limit` |
 | **Email Service** | Brevo API (Transactional SMTP) |
-| **Testing** | Vitest v3.2.7 + Supertest v7.0.0 (45 tests, 100% passing) |
+| **Testing** | Vitest v3.2.7 + Supertest v7.0.0 (47 tests, 100% passing) |
 | **Frontend Framework**| React 19 + Vite 6 (Component-wise single-responsibility architecture) |
 | **Styling** | Tailwind CSS v4 (`@tailwindcss/vite`), Custom Hybrid Design System |
 | **State Management** | Redux Toolkit v2 + Redux Persist (Theme & In-Memory Auth) |
@@ -143,7 +143,7 @@ PharmaPulse exposes a complete OpenAPI 3.0.3 specification covering all authenti
 
 ## 🧪 Automated Testing & Acceptance Verification
 
-All **45 automated integration tests** run against the live PostgreSQL database with 100% pass rate:
+All **47 automated integration tests** run against the live PostgreSQL database with 100% pass rate:
 
 ```bash
 cd backend
@@ -153,10 +153,10 @@ npm test
 ### Test Evidence Summary
 ```text
 Test Files  6 passed (6)
-Tests       45 passed (45)
+Tests       47 passed (47)
 
 ✓ tests/health.test.js (4 tests) - Health, 404 envelope, OpenAPI JSON & Swagger UI
-✓ tests/auth.test.js (11 tests) - Argon2id, JWT rotation, Staff RBAC, Password recovery
+✓ tests/auth.test.js (13 tests) - Argon2id, JWT rotation, Staff RBAC, Profile & Password updates
 ✓ tests/catalogue.test.js (9 tests) - Categories, Suppliers, Medicines, Live batch stock
 ✓ tests/purchases.test.js (7 tests) - PO creation, GRN receipt, Expired batch gate
 ✓ tests/sales_fefo_returns.test.js (9 tests) - FEFO allocation, Idempotency, Returns, Stock write-off

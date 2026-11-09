@@ -147,6 +147,8 @@ model Medicine {
   packageUnit     String   @db.VarChar(50)
   minReorderLevel Int      @default(20)
   defaultTaxRate  Decimal  @default(12.00) @db.Decimal(5, 2)
+  therapeuticClasses String[] @default([])
+  manufacturer    String?  @db.VarChar(150)
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now()) @db.Timestamptz(6)
   updatedAt       DateTime @updatedAt @db.Timestamptz(6)
