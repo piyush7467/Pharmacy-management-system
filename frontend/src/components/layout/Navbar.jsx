@@ -1,16 +1,44 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { Menu, Search, ShoppingCart, ShieldCheck, LogOut } from 'lucide-react';
+import {
+  Menu,
+  Search,
+  ShoppingCart,
+  ShieldCheck,
+  LogOut,
+  Bell,
+  Barcode,
+  ChevronDown,
+  Store,
+  Moon,
+  Sun,
+  Laptop
+} from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle.jsx';
 import { Button } from '../ui/button.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { clearCredentials } from '../../features/auth/authSlice.js';
+import { setTheme } from '../../features/preferences/preferencesSlice.js';
 
 export function Navbar({ onMenuClick }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.auth?.user);
+  const activeTheme = useSelector((state) => state.preferences?.theme || 'system');
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setUserDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -30,75 +58,159 @@ export function Navbar({ onMenuClick }) {
         .slice(0, 2)
         .join('')
         .toUpperCase()
-    : 'U';
+    : 'PS';
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-surface bg-surface-card/95 backdrop-blur-md px-4 md:px-7">
-      {/* Left: Mobile Menu Toggle & Search Bar */}
-      <div className="flex items-center gap-3 flex-1 max-w-lg">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-surface bg-surface-card px-4 md:px-6 shrink-0">
+      {/* Left: Brand Logo + Mobile Menu Toggle */}
+      <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
-          className="md:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors"
+          className="md:hidden p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
           aria-label="Open navigation menu"
         >
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="relative w-full hidden sm:block">
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white shadow-xs">
+            <span className="text-lg font-black leading-none">+</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-[16.5px] tracking-tight text-text-primary leading-tight group-hover:text-brand-primary transition-colors">
+              PharmaFlow
+            </span>
+            <span className="text-[11px] font-medium text-text-muted leading-tight">
+              Pharmacy Management
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Middle: Universal Search Bar */}
+      <div className="flex items-center flex-1 max-w-lg mx-6">
+        <div className="relative w-full hidden sm:flex items-center">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
           <input
             type="search"
-            placeholder="Search medicines, SKU, batch, or invoices..."
-            className="w-full pl-10 pr-4 py-2 text-[13.5px] rounded-lg border border-surface bg-surface-page text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all"
+            placeholder="Search medicine, customer, invoice..."
+            className="w-full pl-10 pr-16 py-2 text-[14px] rounded-xl border border-surface bg-surface-page text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all"
           />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] font-medium text-text-muted bg-surface-muted px-1.5 py-0.5 rounded border border-surface">
+            Ctrl + K
+          </div>
         </div>
       </div>
 
-      {/* Right: Quick POS, Theme, and Profile */}
-      <div className="flex items-center gap-3 md:gap-4">
-        {/* Quick POS Button */}
-        <Link
-          to="/pos"
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-brand-primary text-white text-[13.5px] font-semibold hover:opacity-90 shadow-xs transition-all"
+      {/* Right: Quick Tools, Notifications, Branch & User Profile */}
+      <div className="flex items-center gap-2.5 md:gap-3.5">
+        {/* Barcode scanner action */}
+        <button
+          className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors hidden sm:flex"
+          title="Barcode Scanner Mode"
+          aria-label="Barcode Scanner"
         >
-          <ShoppingCart className="w-4 h-4" />
-          <span className="hidden sm:inline">New Sale (POS)</span>
-        </Link>
+          <Barcode className="w-5 h-5" />
+        </button>
 
-        <ThemeToggle />
+        {/* Notifications Bell */}
+        <div className="relative">
+          <button
+            className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors relative"
+            title="Notifications"
+            aria-label="Notifications"
+          >
+            <Bell className="w-5 h-5" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-surface-card" />
+          </button>
+        </div>
 
-        <div className="h-5 w-px bg-surface" />
+        {/* Branch Selector Pill */}
+        <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface bg-surface-page text-[13.5px] font-medium text-text-primary cursor-pointer hover:bg-surface-muted transition-colors">
+          <Store className="w-4 h-4 text-brand-primary" />
+          <span>Main Shop</span>
+          <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
+        </div>
 
-        {/* Current Active Staff Badge & Logout */}
-        {user ? (
-          <div className="flex items-center gap-3 pl-1">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary/10 text-brand-primary font-bold text-sm border border-brand-primary/20">
+        <div className="h-5 w-px bg-surface hidden sm:block" />
+
+        {/* User Profile Pill & Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setUserDropdownOpen((prev) => !prev)}
+            className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-surface-muted transition-colors text-left cursor-pointer"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-primary text-white font-bold text-xs shadow-xs">
               {initials}
             </div>
-            <div className="hidden lg:flex flex-col text-left">
-              <span className="text-[13.5px] font-semibold text-text-primary leading-tight truncate max-w-[130px]">
-                {user.fullName}
+            <div className="hidden md:flex flex-col">
+              <span className="text-[13.5px] font-semibold text-text-primary leading-tight">
+                {user?.fullName || 'Piyush Shakya'}
               </span>
-              <span className="text-[11.5px] text-text-muted flex items-center gap-1 font-medium mt-0.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                {user.role}
+              <span className="text-[11px] text-text-muted leading-tight">
+                {user?.role === 'ADMIN' ? 'Owner' : user?.role || 'Staff'}
               </span>
             </div>
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 text-text-muted hover:text-red-600 hover:bg-red-500/10 ml-1 rounded-lg"
-              title="Sign Out"
-            >
-              <LogOut className="w-4.5 h-4.5" />
-            </Button>
-          </div>
-        ) : (
-          <Button onClick={() => navigate('/login')} size="sm" variant="default">
-            Sign In
-          </Button>
-        )}
+            <ChevronDown className="w-3.5 h-3.5 text-text-muted hidden md:block" />
+          </button>
+
+          {/* User Dropdown Menu */}
+          {userDropdownOpen && (
+            <div className="absolute right-0 mt-2 w-56 rounded-xl border border-surface bg-surface-card p-2 shadow-xl z-50 animate-in fade-in zoom-in-95">
+              <div className="px-3 py-2 border-b border-surface">
+                <p className="text-[13.5px] font-semibold text-text-primary truncate">
+                  {user?.fullName || 'Piyush Shakya'}
+                </p>
+                <p className="text-[11.5px] text-text-muted truncate">
+                  {user?.email || 'admin@pharmaflow.local'}
+                </p>
+              </div>
+
+              {/* Theme Options */}
+              <div className="py-1.5 px-2">
+                <span className="text-[11px] font-semibold text-text-muted uppercase tracking-wider block px-2 pb-1">
+                  Theme
+                </span>
+                <div className="grid grid-cols-3 gap-1 bg-surface-page p-1 rounded-lg border border-surface">
+                  <button
+                    onClick={() => dispatch(setTheme('light'))}
+                    className={`flex items-center justify-center py-1 rounded text-xs transition-colors ${
+                      activeTheme === 'light' ? 'bg-surface-card font-semibold text-brand-primary shadow-xs' : 'text-text-muted'
+                    }`}
+                  >
+                    <Sun className="w-3.5 h-3.5 mr-1" /> Light
+                  </button>
+                  <button
+                    onClick={() => dispatch(setTheme('dark'))}
+                    className={`flex items-center justify-center py-1 rounded text-xs transition-colors ${
+                      activeTheme === 'dark' ? 'bg-surface-card font-semibold text-brand-primary shadow-xs' : 'text-text-muted'
+                    }`}
+                  >
+                    <Moon className="w-3.5 h-3.5 mr-1" /> Dark
+                  </button>
+                  <button
+                    onClick={() => dispatch(setTheme('system'))}
+                    className={`flex items-center justify-center py-1 rounded text-xs transition-colors ${
+                      activeTheme === 'system' ? 'bg-surface-card font-semibold text-brand-primary shadow-xs' : 'text-text-muted'
+                    }`}
+                  >
+                    <Laptop className="w-3.5 h-3.5 mr-1" /> Auto
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-1 border-t border-surface">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

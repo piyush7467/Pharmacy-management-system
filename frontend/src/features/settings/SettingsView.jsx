@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 import {
   Settings,
@@ -10,30 +11,40 @@ import {
   Server,
   Database,
   Lock,
-  Globe
+  Globe,
+  Printer
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card.jsx';
 import { Button } from '../../components/ui/button.jsx';
 import { Input } from '../../components/ui/input.jsx';
 import { Label } from '../../components/ui/label.jsx';
 import { Badge } from '../../components/ui/badge.jsx';
+import { setShopProfile, setReceiptFormat } from '../preferences/preferencesSlice.js';
 
 export function SettingsView() {
+  const dispatch = useDispatch();
+  const savedProfile = useSelector((state) => state.preferences.shopProfile);
+  const savedReceiptFormat = useSelector((state) => state.preferences.receiptFormat || '80mm');
+
   const [profile, setProfile] = useState({
-    pharmacyName: 'PharmaFlow Central Pharmacy',
-    tagline: 'Licensed Retail Dispensary & Clinical Supplies',
-    licenseNumber: 'DL-KA-BNG-2026-98442',
-    taxNumber: '29AABCP1234D1ZK',
-    phone: '+91 80 4123 4567',
-    email: 'dispensary@pharmaflow.demo',
-    address: '42 Brigade Road, Commercial District, Bengaluru, Karnataka 560001',
-    currency: 'USD ($)',
-    defaultTaxRate: 12.0
+    pharmacyName: savedProfile?.pharmacyName || 'PharmaFlow Central Pharmacy',
+    tagline: savedProfile?.tagline || 'Licensed Retail Dispensary & Clinical Supplies',
+    licenseNumber: savedProfile?.licenseNumber || 'DL-2026-98442',
+    taxNumber: savedProfile?.taxNumber || 'GSTIN-29AABCP1234D1ZK',
+    phone: savedProfile?.phone || '+91 80 4123 4567',
+    email: savedProfile?.email || 'dispensary@pharmaflow.demo',
+    address: savedProfile?.address || '42 Brigade Road, Commercial District, Bengaluru, Karnataka 560001',
+    receiptFooter: savedProfile?.receiptFooter || 'Thank you for choosing PharmaFlow! Wishing you good health.',
+    returnPolicy: savedProfile?.returnPolicy || 'Medicines once sold cannot be returned without original receipt within 7 days.'
   });
+
+  const [receiptFormat, setLocalReceiptFormat] = useState(savedReceiptFormat);
 
   const handleSave = (e) => {
     e.preventDefault();
-    toast.success('Pharmacy profile configurations saved successfully');
+    dispatch(setShopProfile(profile));
+    dispatch(setReceiptFormat(receiptFormat));
+    toast.success('Pharmacy profile & thermal printer configurations saved successfully');
   };
 
   return (
@@ -143,9 +154,57 @@ export function SettingsView() {
               />
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-surface">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Receipt Footer Greeting</Label>
+                <Input
+                  value={profile.receiptFooter}
+                  onChange={(e) => setProfile({ ...profile, receiptFooter: e.target.value })}
+                  className="bg-surface-bg border-surface text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold">Return & Exchange Policy</Label>
+                <Input
+                  value={profile.returnPolicy}
+                  onChange={(e) => setProfile({ ...profile, returnPolicy: e.target.value })}
+                  className="bg-surface-bg border-surface text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Printer Roll Format Selection */}
+            <div className="pt-2 border-t border-surface space-y-2">
+              <Label className="text-xs font-semibold flex items-center gap-1.5">
+                <Printer className="w-3.5 h-3.5 text-brand-primary" /> Default Receipt Printer Format
+              </Label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { id: '80mm', label: '80mm Thermal Roll', desc: 'Standard POS receipt printer' },
+                  { id: '58mm', label: '58mm Thermal Roll', desc: 'Compact portable POS printer' },
+                  { id: 'A4', label: 'A4 / A5 Tax Invoice', desc: 'Standard laser / inkjet page' }
+                ].map((fmt) => (
+                  <button
+                    key={fmt.id}
+                    type="button"
+                    onClick={() => setLocalReceiptFormat(fmt.id)}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      receiptFormat === fmt.id
+                        ? 'border-brand-primary bg-brand-primary/10 text-brand-primary'
+                        : 'border-surface bg-surface-bg hover:bg-surface-muted text-text-primary'
+                    }`}
+                  >
+                    <p className="font-bold text-xs">{fmt.label}</p>
+                    <p className="text-[11px] text-text-muted mt-0.5">{fmt.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3">
               <Button type="submit" className="bg-brand-primary hover:bg-brand-secondary text-white font-semibold gap-1.5">
-                <Save className="w-4 h-4" /> Save Profile Configurations
+                <Save className="w-4 h-4" /> Save Profile & Printer Settings
               </Button>
             </div>
           </CardContent>

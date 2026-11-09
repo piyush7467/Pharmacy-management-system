@@ -38,12 +38,24 @@ export async function createReturn(data, userId, context = {}) {
 
       // Map prior returns by saleItemId to calculate already refunded quantity
       const priorReturnedMap = new Map();
+      let priorRefundsTotal = 0;
       sale.returns.forEach((r) => {
+        priorRefundsTotal += Number(r.refundAmount) || 0;
         r.items.forEach((ri) => {
           const current = priorReturnedMap.get(ri.saleItemId) || 0;
           priorReturnedMap.set(ri.saleItemId, current + ri.quantity);
         });
       });
+
+      // Strict Financial Protection: Account for invoice-level discounts so returns cannot refund more than collected
+      const netSaleTotal = Number(sale.totalAmount);
+      const grossSaleTotal = Math.round((Number(sale.subtotal) + Number(sale.taxAmount)) * 100) / 100;
+      const discountRatio = grossSaleTotal > 0 ? Math.min(1, Math.max(0, netSaleTotal / grossSaleTotal)) : 1;
+      const remainingRefundableAmount = Math.max(0, Math.round((netSaleTotal - priorRefundsTotal) * 100) / 100);
+
+      if (remainingRefundableAmount <= 0) {
+        throw new AppError('The total payable balance for this invoice has already been fully refunded', 400, 'INVOICE_ALREADY_REFUNDED');
+      }
 
       const saleItemMap = new Map(sale.items.map((si) => [si.id, si]));
       const returnItemsToCreate = [];
@@ -79,9 +91,13 @@ export async function createReturn(data, userId, context = {}) {
           );
         }
 
-        // Proportional refund calculation based on sold line total
-        const unitRefund = Number(saleItem.totalAmount) / saleItem.quantity;
-        const lineRefund = Math.round(unitRefund * returnQty * 100) / 100;
+        // Proportional refund calculation accounting for trade discounts
+        const unitGrossPrice = Number(saleItem.totalAmount) / saleItem.quantity;
+        const effectiveUnitPrice = unitGrossPrice * discountRatio;
+        const lineRefund = Math.min(
+          Math.round(effectiveUnitPrice * returnQty * 100) / 100,
+          remainingRefundableAmount
+        );
         totalRefund += lineRefund;
 
         // If restocked, batch stock increases and status returns to ACTIVE
@@ -125,14 +141,16 @@ export async function createReturn(data, userId, context = {}) {
 
       const returnNumber = `RET-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-      // Create Customer Return record
+      // Create Customer Return record with strict cap against net collected cash
+      const finalRefundAmount = Math.min(Math.round(totalRefund * 100) / 100, remainingRefundableAmount);
+
       const returnRecord = await tx.customerReturn.create({
         data: {
           returnNumber,
           saleId: sale.id,
           processedByUserId: userId,
           reason: reason.trim(),
-          refundAmount: Math.round(totalRefund * 100) / 100,
+          refundAmount: finalRefundAmount,
           items: {
             create: returnItemsToCreate
           }

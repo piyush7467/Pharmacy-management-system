@@ -376,4 +376,66 @@ describe('POS, FEFO Engine, Invoicing & Returns Module', { timeout: 40000 }, () 
     expect(adjMovement).toBeDefined();
     expect(adjMovement.quantityDelta).toBe(-2);
   });
+
+  // Strict Financial Discount & Proportional Return Protection Tests
+  it('POST /api/v1/sales rejects negative or excessive discounts', async () => {
+    // 1. Negative discount
+    const negRes = await request(app)
+      .post('/api/v1/sales')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        customerName: 'Discount Exploiter',
+        discountAmount: -50,
+        items: [{ medicineId: testMedicineId, quantity: 1 }]
+      });
+    expect(negRes.status).toBe(400);
+    expect(negRes.body.error.code).toBe('NEGATIVE_DISCOUNT');
+
+    // 2. Discount exceeding bill total
+    const excessRes = await request(app)
+      .post('/api/v1/sales')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        customerName: 'Discount Exploiter',
+        discountAmount: 999999,
+        items: [{ medicineId: testMedicineId, quantity: 1 }]
+      });
+    expect(excessRes.status).toBe(400);
+    expect(excessRes.body.error.code).toBe('DISCOUNT_EXCEEDS_TOTAL');
+  });
+
+  it('POST /api/v1/returns refunds proportionally when discount was applied on original sale', async () => {
+    // Sell 2 units with a 50% discount
+    // Unit price is 14.00, subtotal = 28.00, tax 12% = 3.36, gross = 31.36
+    // Discount = 15.68 (50% off), Net Total = 15.68
+    const saleRes = await request(app)
+      .post('/api/v1/sales')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        customerName: 'Discounted Buyer',
+        discountAmount: 15.68,
+        items: [{ medicineId: testMedicineId, quantity: 2 }]
+      });
+
+    expect(saleRes.status).toBe(201);
+    const saleData = saleRes.body.data;
+    expect(saleData.discountAmount).toBe(15.68);
+    expect(saleData.totalAmount).toBe(10.72); // 26.40 gross - 15.68 discount = 10.72 net
+
+    const saleItemId = saleData.items[0].id;
+
+    // Return 1 unit (50% of items)
+    const returnRes = await request(app)
+      .post('/api/v1/returns')
+      .set('Authorization', `Bearer ${adminAccessToken}`)
+      .send({
+        saleId: saleData.id,
+        reason: 'Customer returned 1 discounted tablet',
+        items: [{ saleItemId, quantity: 1, disposition: 'RESTOCKED' }]
+      });
+
+    expect(returnRes.status).toBe(201);
+    // Refund for 1 unit should be 10.72 / 2 = 5.36, NOT the full undiscounted 13.20!
+    expect(returnRes.body.data.refundAmount).toBe(5.36);
+  });
 });

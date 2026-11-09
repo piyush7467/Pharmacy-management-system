@@ -65,6 +65,19 @@ export async function listMedicines({
     const isLowStock = totalAvailableStock <= m.minReorderLevel;
     const earliestExpiry = m.batches[0]?.expiryDate || null;
 
+    const activeBatches = m.batches.map((b) => ({
+      id: b.id,
+      batchNumber: b.batchNumber,
+      expiryDate: b.expiryDate,
+      currentQuantity: b.currentQuantity,
+      salePrice: Number(b.salePrice),
+      mrp: b.mrp ? Number(b.mrp) : Math.round(Number(b.salePrice) * 1.15 * 100) / 100,
+      status: b.status
+    }));
+
+    const earliestBatch = activeBatches[0] || null;
+    const salePrice = earliestBatch ? earliestBatch.salePrice : 0;
+
     return {
       id: m.id,
       name: m.name,
@@ -80,6 +93,9 @@ export async function listMedicines({
       totalAvailableStock,
       activeBatchCount: m.batches.length,
       earliestExpiry,
+      salePrice,
+      earliestBatch: earliestBatch ? earliestBatch.batchNumber : null,
+      batches: activeBatches,
       isLowStock,
       createdAt: m.createdAt,
       updatedAt: m.updatedAt

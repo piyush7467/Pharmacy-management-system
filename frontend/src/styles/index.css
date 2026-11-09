@@ -2,81 +2,82 @@
 
 @layer base {
   :root {
-    --background: #F8FAF8;
-    --foreground: #131F17;
+    /* Crisp, High-Contrast Medical UI Theme */
+    --background: #F4F6F5;
+    --foreground: #0F172A;
 
     --card: #FFFFFF;
-    --card-foreground: #131F17;
+    --card-foreground: #0F172A;
 
     --popover: #FFFFFF;
-    --popover-foreground: #131F17;
+    --popover-foreground: #0F172A;
 
-    /* Authoritative Forest Emerald Primary */
-    --primary: #1C673D;
-    --primary-hover: #144D2D;
+    /* Crisp Authoritative Medical Emerald Primary */
+    --primary: #15803D;
+    --primary-hover: #166534;
     --primary-foreground: #FFFFFF;
 
-    /* Secondary Soft Sage */
-    --secondary: #EDF3EE;
-    --secondary-foreground: #131F17;
+    /* Clean Soft Mint / Sage Secondary */
+    --secondary: #F0FDF4;
+    --secondary-foreground: #166534;
 
-    /* Muted High-Legibility Neutrals */
-    --muted: #EDF3EE;
-    --muted-foreground: #526357;
+    /* Crisp High-Legibility Slate Neutrals */
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
 
-    /* Warm Amber Accent */
-    --accent: #C89249;
-    --accent-foreground: #131F17;
+    /* Warm Gold/Amber Accent */
+    --accent: #D97706;
+    --accent-foreground: #FFFFFF;
 
-    --destructive: #D32F2F;
+    --destructive: #DC2626;
     --destructive-foreground: #FFFFFF;
 
-    --border: #DFE6E0;
-    --input: #DFE6E0;
-    --ring: #1C673D;
+    --border: #E2E8F0;
+    --input: #CBD5E1;
+    --ring: #15803D;
 
-    --radius: 0.625rem;
+    --radius: 0.75rem;
 
     /* Operational Statuses */
-    --status-success: #1E7E34;
+    --status-success: #15803D;
     --status-warning: #D97706;
     --status-danger: #DC2626;
   }
 
   .dark {
-    --background: #0E1410;
-    --foreground: #F1F5F2;
+    --background: #0B1120;
+    --foreground: #F8FAFC;
 
-    --card: #151D18;
-    --card-foreground: #F1F5F2;
+    --card: #151F32;
+    --card-foreground: #F8FAFC;
 
-    --popover: #151D18;
-    --popover-foreground: #F1F5F2;
+    --popover: #151F32;
+    --popover-foreground: #F8FAFC;
 
-    /* Luminous Emerald Mint in Dark Mode */
-    --primary: #2EB872;
-    --primary-hover: #269B5F;
-    --primary-foreground: #08150C;
+    /* Luminous Emerald in Dark Mode */
+    --primary: #22C55E;
+    --primary-hover: #16A34A;
+    --primary-foreground: #022C22;
 
-    /* Secondary Dark Sage/Charcoal */
-    --secondary: #1E2822;
-    --secondary-foreground: #F1F5F2;
+    /* Secondary Dark Emerald Surface */
+    --secondary: #162C24;
+    --secondary-foreground: #86EFAC;
 
-    --muted: #1E2822;
-    --muted-foreground: #98A99C;
+    --muted: #1E293B;
+    --muted-foreground: #94A3B8;
 
-    /* Warm Neutral Accent */
-    --accent: #E5B26E;
-    --accent-foreground: #0E1410;
+    /* Warm Accent */
+    --accent: #F59E0B;
+    --accent-foreground: #0B1120;
 
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
 
-    --border: #25332A;
-    --input: #25332A;
-    --ring: #2EB872;
+    --border: #24334A;
+    --input: #24334A;
+    --ring: #22C55E;
 
-    --status-success: #34D399;
+    --status-success: #22C55E;
     --status-warning: #FBBF24;
     --status-danger: #F87171;
   }
@@ -85,11 +86,28 @@
     border-color: var(--border);
   }
 
+  /* High-Contrast Text Selection (Never disappears when copying) */
+  ::selection {
+    background-color: #15803D !important;
+    color: #FFFFFF !important;
+  }
+
+  .dark ::selection {
+    background-color: #22C55E !important;
+    color: #022C22 !important;
+  }
+
+  /* Receipt white paper text selection */
+  #thermal-receipt-print-area ::selection {
+    background-color: #A7F3D0 !important;
+    color: #064E3B !important;
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-size: 15px;
-    line-height: 1.6;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";

@@ -41,7 +41,18 @@ export async function createSale(data, cashierId, context = {}) {
     throw new AppError(`Invalid payment method: ${paymentMethod}`, 400, 'INVALID_PAYMENT_METHOD');
   }
 
-  const numericDiscount = Math.max(0, parseFloat(discountAmount) || 0);
+  // Strict Financial Discount Validation
+  if (discountAmount !== undefined && discountAmount !== null && discountAmount !== '') {
+    const rawDiscount = Number(discountAmount);
+    if (isNaN(rawDiscount) || !isFinite(rawDiscount)) {
+      throw new AppError('Discount amount must be a valid number', 400, 'INVALID_DISCOUNT');
+    }
+    if (rawDiscount < 0) {
+      throw new AppError('Discount amount cannot be negative', 400, 'NEGATIVE_DISCOUNT');
+    }
+  }
+
+  const numericDiscount = Math.round((Math.max(0, Number(discountAmount) || 0)) * 100) / 100;
 
   // 3. Execute Checkout with FEFO Allocation inside Interactive Transaction
   return await prisma.$transaction(
@@ -149,10 +160,20 @@ export async function createSale(data, cashierId, context = {}) {
         }
       }
 
-      // 4. Calculate Final Bill Totals
+      // 4. Calculate Final Bill Totals with Strict Financial Guardrails
       const subtotal = Math.round(calculatedSubtotal * 100) / 100;
       const taxAmount = Math.round(calculatedTaxTotal * 100) / 100;
-      const finalDiscount = Math.min(numericDiscount, subtotal + taxAmount);
+      const maxEligibleDiscount = Math.round((subtotal + taxAmount) * 100) / 100;
+
+      if (numericDiscount > maxEligibleDiscount) {
+        throw new AppError(
+          `Discount amount (${numericDiscount}) cannot exceed payable bill total (${maxEligibleDiscount})`,
+          400,
+          'DISCOUNT_EXCEEDS_TOTAL'
+        );
+      }
+
+      const finalDiscount = numericDiscount;
       const totalAmount = Math.max(0, Math.round((subtotal + taxAmount - finalDiscount) * 100) / 100);
 
       // Generate Unique Fiscal Invoice Number

@@ -1,57 +1,60 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import {
-  ShoppingCart,
-  Search,
-  Plus,
-  Minus,
-  Trash2,
-  CreditCard,
-  Banknote,
-  QrCode,
-  Printer,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  Sparkles,
-  ArrowRight,
-  RotateCcw,
-  User,
-  Phone
-} from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card.jsx';
-import { Button } from '../../components/ui/button.jsx';
-import { Badge } from '../../components/ui/badge.jsx';
-import { Input } from '../../components/ui/input.jsx';
-import { Label } from '../../components/ui/label.jsx';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '../../components/ui/dialog.jsx';
+
 import { apiClient } from '../../services/api/apiClient.js';
-import { formatCurrency, formatDate } from '../../lib/utils.js';
+import { PosHeader } from './components/PosHeader.jsx';
+import { MedicineCatalog } from './components/MedicineCatalog.jsx';
+import { ActiveCartPanel } from './components/ActiveCartPanel.jsx';
+import { BillingSettlementView } from './components/BillingSettlementView.jsx';
+import { CustomerModal } from './components/CustomerModal.jsx';
+import { ShortcutsModal } from './components/ShortcutsModal.jsx';
+import { ThermalInvoiceModal } from './components/ThermalInvoiceModal.jsx';
 
 export function PosView() {
   const queryClient = useQueryClient();
+  const user = useSelector((state) => state.auth?.user);
+  const shopProfile = useSelector((state) => state.preferences?.shopProfile);
+
+  // Workflow Step State: 'SELECTION' (Step 1) | 'SETTLEMENT' (Step 2)
+  const [posStep, setPosStep] = useState('SELECTION');
+
+  // Search & Filter State
+  const [activeTab, setActiveTab] = useState('SEARCH');
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterStock, setFilterStock] = useState('ALL');
+  const [selectedDosageForm, setSelectedDosageForm] = useState('ALL');
+  const [sortBy, setSortBy] = useState('RELEVANCE');
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [expandedMedIds, setExpandedMedIds] = useState(new Set());
+  const searchInputRef = useRef(null);
+
+  // Cart & Customer State
+  const [tempBillNumber] = useState(() => `TMP-${Math.floor(100000 + Math.random() * 900000)}`);
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('Walk-in Customer');
   const [customerPhone, setCustomerPhone] = useState('');
+
+  // Payment Tender State
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [tenderedAmount, setTenderedAmount] = useState('');
-  const [discountAmount, setDiscountAmount] = useState(0);
+  const [splitCashAmount, setSplitCashAmount] = useState('');
+  const [splitOnlineAmount, setSplitOnlineAmount] = useState('');
+  const [paymentReference, setPaymentReference] = useState('');
 
-  // Success Invoice Modal state
+  // Discount & Round-Off State
+  const [discountType, setDiscountType] = useState('PERCENT');
+  const [discountValue, setDiscountValue] = useState('');
+  const [roundOffEnabled, setRoundOffEnabled] = useState(false);
+
+  // Modals State
+  const [customerModalOpen, setCustomerModalOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [completedSale, setCompletedSale] = useState(null);
   const [invoiceModalOpen, setInvoiceModalOpen] = useState(false);
-  const printRef = useRef(null);
 
-  // Fetch active medicines with stock
+  // 1. Fetch active medicines from backend
   const { data: medicinesData, isLoading } = useQuery({
     queryKey: ['pos-medicines', searchTerm],
     queryFn: async () => {
@@ -59,16 +62,55 @@ export function PosView() {
         params: {
           search: searchTerm,
           isActive: true,
-          limit: 30
+          limit: 50
         }
       });
       return res.data?.medicines || res.data || [];
     }
   });
 
-  const medicines = Array.isArray(medicinesData) ? medicinesData : medicinesData?.medicines || [];
+  const rawMedicines = Array.isArray(medicinesData) ? medicinesData : medicinesData?.medicines || [];
 
-  // Mutation to process checkout
+  // Filter & Sort medicines in memory
+  const filteredMedicines = useMemo(() => {
+    let result = [...rawMedicines];
+
+    if (filterStock === 'IN_STOCK') {
+      result = result.filter((m) => m.totalAvailableStock > 0);
+    } else if (filterStock === 'LOW_STOCK') {
+      result = result.filter((m) => m.isLowStock || (m.totalAvailableStock > 0 && m.totalAvailableStock <= 10));
+    } else if (filterStock === 'NEAR_EXPIRY') {
+      const ninetyDaysAhead = new Date();
+      ninetyDaysAhead.setDate(ninetyDaysAhead.getDate() + 90);
+      result = result.filter((m) => {
+        if (!m.earliestExpiry) return false;
+        return new Date(m.earliestExpiry) <= ninetyDaysAhead;
+      });
+    }
+
+    if (selectedDosageForm !== 'ALL') {
+      result = result.filter((m) => m.dosageForm?.toLowerCase() === selectedDosageForm.toLowerCase());
+    }
+
+    if (sortBy === 'NAME_ASC') {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'PRICE_LOW') {
+      result.sort((a, b) => (a.salePrice || 0) - (b.salePrice || 0));
+    } else if (sortBy === 'PRICE_HIGH') {
+      result.sort((a, b) => (b.salePrice || 0) - (a.salePrice || 0));
+    } else if (sortBy === 'STOCK_HIGH') {
+      result.sort((a, b) => (b.totalAvailableStock || 0) - (a.totalAvailableStock || 0));
+    }
+
+    return result;
+  }, [rawMedicines, filterStock, selectedDosageForm, sortBy]);
+
+  // Reset highlighted index on search/filter changes
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [searchTerm, filterStock, selectedDosageForm]);
+
+  // 2. Checkout Mutation
   const checkoutMutation = useMutation({
     mutationFn: async (payload) => {
       const res = await apiClient.post('/sales', payload);
@@ -83,27 +125,24 @@ export function PosView() {
       } else {
         toast.success('Sale processed successfully!');
       }
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
       queryClient.invalidateQueries({ queryKey: ['medicines'] });
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-sales-summary'] });
-      queryClient.invalidateQueries({ queryKey: ['dashboard-inventory-overview'] });
       clearCart();
+      setPosStep('SELECTION');
     },
     onError: (err) => {
       const message =
-        err?.message ||
         err?.response?.data?.message ||
         err?.response?.data?.error?.message ||
+        err?.message ||
         'Checkout failed. Please check stock levels.';
       toast.error(message);
     }
   });
 
-  // Cart operations
-  const addToCart = (med) => {
+  // 3. Cart Actions
+  const addToCart = useCallback((med, selectedBatch = null) => {
     if (med.totalAvailableStock <= 0) {
       toast.error(`${med.name} is out of stock!`);
       return;
@@ -123,8 +162,9 @@ export function PosView() {
         );
       }
 
-      // Read earliest batch price as estimate (server FEFO determines exact amount)
-      const estimatedPrice = med.batches?.[0]?.salePrice || 10;
+      const batchToUse = selectedBatch || med.batches?.[0];
+      const actualPrice = Number(batchToUse?.salePrice ?? med.salePrice ?? 0);
+
       return [
         ...prevCart,
         {
@@ -133,18 +173,19 @@ export function PosView() {
           sku: med.sku,
           strength: med.strength,
           dosageForm: med.dosageForm,
+          packageUnit: med.packageUnit,
           availableStock: med.totalAvailableStock,
-          earliestBatch: med.batches?.[0]?.batchNumber || 'FEFO Auto',
-          earliestExpiry: med.earliestExpiryDate,
-          unitPrice: estimatedPrice,
-          taxRate: med.defaultTaxRate || 10,
+          earliestBatch: batchToUse?.batchNumber || med.earliestBatch || 'FEFO Auto',
+          earliestExpiry: batchToUse?.expiryDate || med.earliestExpiry,
+          unitPrice: actualPrice,
+          taxRate: med.defaultTaxRate || 12,
           quantity: 1
         }
       ];
     });
-  };
+  }, []);
 
-  const updateQuantity = (medicineId, newQty) => {
+  const updateQuantity = useCallback((medicineId, newQty) => {
     if (newQty <= 0) {
       removeFromCart(medicineId);
       return;
@@ -161,49 +202,103 @@ export function PosView() {
         return item;
       })
     );
-  };
+  }, []);
 
-  const removeFromCart = (medicineId) => {
+  const removeFromCart = useCallback((medicineId) => {
     setCart((prev) => prev.filter((item) => item.medicineId !== medicineId));
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
     setCustomerName('Walk-in Customer');
     setCustomerPhone('');
     setTenderedAmount('');
-    setDiscountAmount(0);
-  };
+    setSplitCashAmount('');
+    setSplitOnlineAmount('');
+    setDiscountValue('');
+  }, []);
 
-  // Calculations
-  const subtotal = cart.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-  const estimatedTax = cart.reduce(
-    (sum, item) => sum + item.quantity * item.unitPrice * (item.taxRate / 100),
-    0
-  );
-  const numericDiscount = Math.max(0, parseFloat(discountAmount) || 0);
-  const grandTotal = Math.max(0, subtotal + estimatedTax - numericDiscount);
+  const toggleExpandMed = useCallback((medId) => {
+    setExpandedMedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(medId)) {
+        next.delete(medId);
+      } else {
+        next.add(medId);
+      }
+      return next;
+    });
+  }, []);
 
-  const tendered = parseFloat(tenderedAmount) || 0;
-  const changeDue = Math.max(0, tendered - grandTotal);
+  // 4. Financial Calculations
+  const subtotal = Math.round(
+    cart.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0) * 100
+  ) / 100;
 
-  const handleCheckout = (e) => {
-    e.preventDefault();
+  const estimatedTax = Math.round(
+    cart.reduce(
+      (sum, item) => sum + item.quantity * item.unitPrice * (item.taxRate / 100),
+      0
+    ) * 100
+  ) / 100;
+
+  const grossPayable = Math.round((subtotal + estimatedTax) * 100) / 100;
+
+  const calculatedDiscount = useMemo(() => {
+    if (!discountValue || isNaN(Number(discountValue))) return 0;
+    const num = Math.max(0, Number(discountValue));
+    if (discountType === 'PERCENT') {
+      const validPercent = Math.min(100, num);
+      return Math.round(grossPayable * (validPercent / 100) * 100) / 100;
+    }
+    return Math.min(grossPayable, Math.round(num * 100) / 100);
+  }, [grossPayable, discountValue, discountType]);
+
+  const basePayable = Math.max(0, Math.round((grossPayable - calculatedDiscount) * 100) / 100);
+
+  const roundOffAmount = roundOffEnabled
+    ? Math.round((Math.round(basePayable) - basePayable) * 100) / 100
+    : 0;
+
+  const finalNetPayable = Math.max(0, Math.round((basePayable + roundOffAmount) * 100) / 100);
+
+  const changeAmount = useMemo(() => {
+    if (paymentMethod !== 'CASH' || !tenderedAmount) return 0;
+    const received = parseFloat(tenderedAmount);
+    if (isNaN(received) || received < finalNetPayable) return 0;
+    return Math.round((received - finalNetPayable) * 100) / 100;
+  }, [paymentMethod, tenderedAmount, finalNetPayable]);
+
+  // 5. Checkout Handler
+  const handleCheckout = () => {
     if (cart.length === 0) {
       toast.error('Cart is empty');
       return;
     }
 
-    if (paymentMethod === 'CASH' && tendered > 0 && tendered < grandTotal) {
-      toast.error('Tendered cash is less than payable amount');
-      return;
+    if (paymentMethod === 'CASH') {
+      const received = parseFloat(tenderedAmount);
+      if (received && received < finalNetPayable) {
+        toast.error('Cash received cannot be less than payable total');
+        return;
+      }
+    }
+
+    if (paymentMethod === 'SPLIT') {
+      const cash = parseFloat(splitCashAmount) || 0;
+      const online = parseFloat(splitOnlineAmount) || 0;
+      if (Math.abs(cash + online - finalNetPayable) > 0.5) {
+        toast.error(`Split amounts (₹${cash + online}) must equal Payable Amount (₹${finalNetPayable})`);
+        return;
+      }
     }
 
     checkoutMutation.mutate({
       customerName: customerName.trim() || 'Walk-in Customer',
       customerPhone: customerPhone.trim() || undefined,
       paymentMethod,
-      discountAmount: numericDiscount,
+      discountAmount: calculatedDiscount,
+      roundOffAmount,
       items: cart.map((i) => ({
         medicineId: i.medicineId,
         quantity: i.quantity
@@ -211,436 +306,247 @@ export function PosView() {
     });
   };
 
-  const handlePrint = () => {
-    window.print();
+  // 6. Voice Search
+  const handleVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast.info('Voice search not supported in this browser. Please type to search.');
+      return;
+    }
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRec();
+    recognition.lang = 'en-IN';
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setSearchTerm(transcript);
+      toast.success(`Voice: "${transcript}"`);
+    };
+    recognition.start();
   };
 
+  // 7. Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Escape handling
+      if (invoiceModalOpen && e.key === 'Escape') {
+        setInvoiceModalOpen(false);
+        return;
+      }
+      if (shortcutsModalOpen && e.key === 'Escape') {
+        setShortcutsModalOpen(false);
+        return;
+      }
+      if (customerModalOpen && e.key === 'Escape') {
+        setCustomerModalOpen(false);
+        return;
+      }
+      if (posStep === 'SETTLEMENT' && e.key === 'Escape') {
+        setPosStep('SELECTION');
+        return;
+      }
+
+      // F1: Focus Search Bar or toggle Shortcuts
+      if (e.key === 'F1') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          setShortcutsModalOpen((prev) => !prev);
+        } else {
+          if (posStep === 'SETTLEMENT') setPosStep('SELECTION');
+          setTimeout(() => searchInputRef.current?.focus(), 50);
+        }
+        return;
+      }
+
+      // F2/F3/F4: Payment Mode hotkeys
+      if (e.key === 'F2') {
+        e.preventDefault();
+        setPaymentMethod('CASH');
+        toast.info('Payment mode: Cash (F2)');
+        return;
+      }
+      if (e.key === 'F3') {
+        e.preventDefault();
+        setPaymentMethod('UPI');
+        toast.info('Payment mode: UPI (F3)');
+        return;
+      }
+      if (e.key === 'F4') {
+        e.preventDefault();
+        setPaymentMethod('CARD');
+        toast.info('Payment mode: Card (F4)');
+        return;
+      }
+
+      // F6 or Ctrl+Enter: Proceed or Checkout
+      if (e.key === 'F6' || ((e.ctrlKey || e.metaKey) && e.key === 'Enter')) {
+        e.preventDefault();
+        if (posStep === 'SELECTION') {
+          if (cart.length > 0) {
+            setPosStep('SETTLEMENT');
+          } else {
+            toast.warning('Please add medicines to cart first');
+          }
+        } else if (posStep === 'SETTLEMENT') {
+          if (!checkoutMutation.isPending) {
+            handleCheckout();
+          }
+        }
+        return;
+      }
+
+      // Step 1: Search arrow navigation & enter to select
+      if (posStep === 'SELECTION' && document.activeElement === searchInputRef.current && filteredMedicines.length > 0) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setHighlightedIndex((prev) => Math.min(filteredMedicines.length - 1, prev + 1));
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setHighlightedIndex((prev) => Math.max(0, prev - 1));
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const target = filteredMedicines[highlightedIndex];
+          if (target && target.totalAvailableStock > 0) {
+            addToCart(target);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [invoiceModalOpen, shortcutsModalOpen, customerModalOpen, posStep, filteredMedicines, highlightedIndex, cart, checkoutMutation.isPending]);
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary flex items-center gap-2">
-            <ShoppingCart className="w-6 h-6 text-brand-primary" />
-            Point of Sale (POS) Checkout
-          </h1>
-          <p className="text-sm text-text-muted mt-0.5">
-            Real-time automated FEFO inventory deduction and instant fiscal billing.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-brand-primary border-brand-primary/20 bg-brand-primary/5 py-1 px-3">
-            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-            Active FEFO Engine
-          </Badge>
-          {cart.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={clearCart} className="text-text-muted hover:text-rose-500 h-8">
-              <RotateCcw className="w-3.5 h-3.5 mr-1" />
-              Reset Cart
-            </Button>
-          )}
-        </div>
-      </div>
+    <div className="h-full w-full flex flex-col space-y-3 overflow-hidden select-none">
+      {/* STEP 1: Medicine Selection & Cart Staging */}
+      {posStep === 'SELECTION' ? (
+        <>
+          {/* Header */}
+          <PosHeader
+            onReset={() => {
+              clearCart();
+              toast.info('Billing cart cleared');
+            }}
+            onNewBill={() => {
+              clearCart();
+              searchInputRef.current?.focus();
+              toast.success('Ready for new bill');
+            }}
+            onOpenShortcuts={() => setShortcutsModalOpen(true)}
+            cartCount={cart.length}
+          />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN: Medication Catalog / Barcode Search */}
-        <div className="lg:col-span-7 space-y-4">
-          <Card className="bg-surface-card border-surface">
-            <CardHeader className="p-4 pb-3 border-b border-surface">
-              <div className="relative">
-                <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  placeholder="Scan barcode or type medication name / SKU..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 bg-surface-bg border-surface text-sm"
-                  autoFocus
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="p-4">
-              {isLoading ? (
-                <div className="py-12 text-center text-text-muted">Loading available medications...</div>
-              ) : medicines.length === 0 ? (
-                <div className="py-12 text-center text-text-muted">
-                  <AlertCircle className="w-8 h-8 mx-auto text-text-muted/40 mb-2" />
-                  <p className="font-medium text-text-primary">No matching medications found</p>
-                  <p className="text-xs text-text-muted mt-1">Check spelling or create a purchase intake.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[620px] overflow-y-auto pr-1">
-                  {medicines.map((med) => {
-                    const inStock = med.totalAvailableStock > 0;
-                    return (
-                      <div
-                        key={med.id}
-                        onClick={() => inStock && addToCart(med)}
-                        className={`p-3.5 rounded-xl border transition-all text-left flex flex-col justify-between ${
-                          inStock
-                            ? 'border-surface bg-surface-bg/40 hover:bg-surface-card hover:border-brand-primary/40 cursor-pointer shadow-sm hover:shadow'
-                            : 'border-surface/40 bg-surface-bg/10 opacity-60 cursor-not-allowed'
-                        }`}
-                      >
-                        <div className="space-y-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <h3 className="font-semibold text-sm text-text-primary line-clamp-1">{med.name}</h3>
-                            <span className="font-bold text-xs text-brand-primary shrink-0">
-                              {formatCurrency(med.batches?.[0]?.salePrice || 10)}
-                            </span>
-                          </div>
-                          <p className="text-xs text-text-muted font-mono">{med.sku}</p>
-                          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
-                            <span>{med.dosageForm}</span>
-                            <span>•</span>
-                            <span>{med.strength}</span>
-                          </div>
-                        </div>
-
-                        <div className="pt-3 mt-2 border-t border-surface/50 flex items-center justify-between">
-                          <span
-                            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                              inStock
-                                ? med.isLowStock
-                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                                : 'bg-rose-500/10 text-rose-500'
-                            }`}
-                          >
-                            {inStock ? `${med.totalAvailableStock} in stock` : 'Out of Stock'}
-                          </span>
-
-                          {inStock && (
-                            <span className="text-xs text-text-muted flex items-center gap-1">
-                              <Plus className="w-3.5 h-3.5 text-brand-primary" />
-                              Add
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* RIGHT COLUMN: Active Cart & Fast Checkout */}
-        <div className="lg:col-span-5 space-y-4">
-          <Card className="bg-surface-card border-surface flex flex-col h-full">
-            <CardHeader className="p-4 pb-3 border-b border-surface">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base font-semibold text-text-primary flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4 text-brand-primary" />
-                  Current Checkout Bill
-                </CardTitle>
-                <Badge variant="outline" className="text-xs">
-                  {cart.reduce((sum, i) => sum + i.quantity, 0)} items
-                </Badge>
-              </div>
-            </CardHeader>
-
-            <CardContent className="p-4 space-y-4 flex-1 flex flex-col justify-between">
-              {/* Customer Inputs */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="space-y-1">
-                  <Label className="text-[11px] text-text-muted flex items-center gap-1">
-                    <User className="w-3 h-3" /> Customer Name
-                  </Label>
-                  <Input
-                    placeholder="Walk-in Customer"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="h-8 text-xs bg-surface-bg border-surface"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-[11px] text-text-muted flex items-center gap-1">
-                    <Phone className="w-3 h-3" /> Phone (Optional)
-                  </Label>
-                  <Input
-                    placeholder="e.g. 9876543210"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="h-8 text-xs bg-surface-bg border-surface"
-                  />
-                </div>
-              </div>
-
-              {/* Cart Items List */}
-              <div className="flex-1 overflow-y-auto max-h-[300px] space-y-2 border-t border-b border-surface py-2">
-                {cart.length === 0 ? (
-                  <div className="py-12 text-center text-text-muted">
-                    <ShoppingCart className="w-8 h-8 mx-auto text-text-muted/40 mb-2" />
-                    <p className="text-sm font-medium">Cart is currently empty</p>
-                    <p className="text-xs text-text-muted mt-0.5">Select items from the catalog on the left.</p>
-                  </div>
-                ) : (
-                  cart.map((item) => (
-                    <div
-                      key={item.medicineId}
-                      className="p-2.5 rounded-xl border border-surface bg-surface-bg/40 flex items-center justify-between gap-3 text-xs"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-text-primary truncate">{item.name}</h4>
-                        <div className="flex items-center gap-2 text-[10px] text-text-muted mt-0.5">
-                          <span className="font-mono">{formatCurrency(item.unitPrice)}</span>
-                          <span>•</span>
-                          <span className="text-brand-primary flex items-center gap-0.5">
-                            <Clock className="w-2.5 h-2.5" /> FEFO: {item.earliestBatch}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Quantity Selector */}
-                      <div className="flex items-center gap-1 bg-surface-card border border-surface rounded-lg p-0.5">
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.medicineId, item.quantity - 1)}
-                          className="w-6 h-6 flex items-center justify-center text-text-muted hover:text-text-primary rounded"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="w-7 text-center font-bold text-text-primary text-xs">{item.quantity}</span>
-                        <button
-                          type="button"
-                          onClick={() => updateQuantity(item.medicineId, item.quantity + 1)}
-                          className="w-6 h-6 flex items-center justify-center text-text-muted hover:text-text-primary rounded"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <div className="font-bold text-text-primary">
-                          {formatCurrency(item.quantity * item.unitPrice)}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFromCart(item.medicineId)}
-                          className="text-[10px] text-rose-500 hover:text-rose-600 mt-0.5"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* Payment Method Selector */}
-              <div className="space-y-1.5 pt-1">
-                <Label className="text-[11px] font-medium text-text-muted">Payment Tender</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('CASH')}
-                    className={`py-2 px-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                      paymentMethod === 'CASH'
-                        ? 'border-brand-primary bg-brand-primary/10 text-brand-primary shadow-sm'
-                        : 'border-surface bg-surface-bg text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    <Banknote className="w-3.5 h-3.5" /> Cash
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('CARD')}
-                    className={`py-2 px-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                      paymentMethod === 'CARD'
-                        ? 'border-brand-primary bg-brand-primary/10 text-brand-primary shadow-sm'
-                        : 'border-surface bg-surface-bg text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    <CreditCard className="w-3.5 h-3.5" /> Card
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod('UPI')}
-                    className={`py-2 px-2.5 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                      paymentMethod === 'UPI'
-                        ? 'border-brand-primary bg-brand-primary/10 text-brand-primary shadow-sm'
-                        : 'border-surface bg-surface-bg text-text-muted hover:text-text-primary'
-                    }`}
-                  >
-                    <QrCode className="w-3.5 h-3.5" /> UPI
-                  </button>
-                </div>
-              </div>
-
-              {/* Cash change calculator */}
-              {paymentMethod === 'CASH' && (
-                <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                  <div className="space-y-1">
-                    <Label className="text-[11px] text-text-muted">Cash Tendered ($)</Label>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={tenderedAmount}
-                      onChange={(e) => setTenderedAmount(e.target.value)}
-                      className="h-8 text-xs bg-surface-bg border-surface font-semibold"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] text-text-muted">Change Return ($)</Label>
-                    <div className="h-8 px-3 rounded-md bg-surface-bg/80 border border-surface flex items-center justify-end font-bold text-brand-primary text-xs">
-                      {formatCurrency(changeDue)}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Financial Totals Box */}
-              <div className="p-3.5 rounded-xl border border-surface bg-surface-bg/60 space-y-2 text-xs">
-                <div className="flex items-center justify-between text-text-muted">
-                  <span>Subtotal</span>
-                  <span className="font-medium text-text-primary">{formatCurrency(subtotal)}</span>
-                </div>
-                <div className="flex items-center justify-between text-text-muted">
-                  <span>Estimated Tax</span>
-                  <span className="font-medium text-text-primary">{formatCurrency(estimatedTax)}</span>
-                </div>
-                {numericDiscount > 0 && (
-                  <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
-                    <span>Discount</span>
-                    <span>-{formatCurrency(numericDiscount)}</span>
-                  </div>
-                )}
-                <div className="pt-2 border-t border-surface flex items-center justify-between">
-                  <span className="font-bold text-sm text-text-primary">Net Total</span>
-                  <span className="font-extrabold text-lg text-brand-primary">{formatCurrency(grandTotal)}</span>
-                </div>
-              </div>
-
-              {/* Checkout Button */}
-              <Button
-                type="button"
-                onClick={handleCheckout}
-                disabled={cart.length === 0 || checkoutMutation.isPending}
-                className="w-full bg-brand-primary hover:bg-brand-secondary text-white py-5 text-sm font-bold shadow-md flex items-center justify-center gap-2"
-              >
-                {checkoutMutation.isPending ? (
-                  'Allocating Batches & Billing...'
-                ) : (
-                  <>
-                    Complete Checkout <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* PRINTABLE FISCAL INVOICE MODAL */}
-      <Dialog open={invoiceModalOpen} onOpenChange={setInvoiceModalOpen}>
-        <DialogContent className="max-w-xl bg-surface-card border-surface">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-text-primary flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              Transaction Completed
-            </DialogTitle>
-            <DialogDescription className="text-xs text-text-muted">
-              Fiscal tax receipt and FEFO batch distribution slip.
-            </DialogDescription>
-          </DialogHeader>
-
-          {completedSale && (
-            <div className="space-y-4 pt-2">
-              {/* Receipt Body (Print Target) */}
-              <div
-                ref={printRef}
-                className="p-5 rounded-xl border border-surface bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-mono text-xs space-y-3"
-              >
-                <div className="text-center pb-3 border-b border-dashed border-zinc-300 dark:border-zinc-700 space-y-1">
-                  <h2 className="text-base font-bold tracking-tight uppercase">PharmaFlow Pharmacy</h2>
-                  <p className="text-[11px] text-zinc-500">Licensed Retail Dispensary • Demo Suite</p>
-                  <p className="text-[11px] text-zinc-500 font-semibold">TAX INVOICE #{completedSale.invoiceNumber}</p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-[11px] text-zinc-600 dark:text-zinc-400 pb-2 border-b border-dashed border-zinc-300 dark:border-zinc-700">
-                  <div>
-                    <span className="block text-zinc-400">Date:</span>
-                    <span>{formatDate(completedSale.createdAt)}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-zinc-400">Cashier:</span>
-                    <span>{completedSale.cashier?.fullName || 'Staff'}</span>
-                  </div>
-                  <div>
-                    <span className="block text-zinc-400">Customer:</span>
-                    <span className="font-semibold">{completedSale.customerName}</span>
-                  </div>
-                  <div className="text-right">
-                    <span className="block text-zinc-400">Payment:</span>
-                    <span className="font-semibold">{completedSale.paymentMethod}</span>
-                  </div>
-                </div>
-
-                {/* Items Breakdown */}
-                <div className="space-y-2 py-1">
-                  <div className="grid grid-cols-12 text-[10px] font-bold text-zinc-500 border-b border-zinc-200 dark:border-zinc-800 pb-1">
-                    <span className="col-span-6">Item (Batch #)</span>
-                    <span className="col-span-2 text-center">Qty</span>
-                    <span className="col-span-2 text-right">Price</span>
-                    <span className="col-span-2 text-right">Total</span>
-                  </div>
-                  {completedSale.items?.map((item) => (
-                    <div key={item.id} className="grid grid-cols-12 text-[11px] py-0.5">
-                      <div className="col-span-6">
-                        <span className="font-semibold block truncate">{item.medicine?.name}</span>
-                        <span className="text-[9px] text-zinc-500">
-                          Lot: {item.batch?.batchNumber} • Exp: {formatDate(item.batch?.expiryDate)}
-                        </span>
-                      </div>
-                      <span className="col-span-2 text-center">{item.quantity}</span>
-                      <span className="col-span-2 text-right">{formatCurrency(item.unitPrice)}</span>
-                      <span className="col-span-2 text-right font-bold">{formatCurrency(item.totalAmount)}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Totals Breakdown */}
-                <div className="pt-2 border-t border-dashed border-zinc-300 dark:border-zinc-700 space-y-1 text-[11px]">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>{formatCurrency(completedSale.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Tax (GST/VAT):</span>
-                    <span>{formatCurrency(completedSale.taxAmount)}</span>
-                  </div>
-                  {completedSale.discountAmount > 0 && (
-                    <div className="flex justify-between text-emerald-600">
-                      <span>Discount:</span>
-                      <span>-{formatCurrency(completedSale.discountAmount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between text-sm font-bold pt-1 border-t border-zinc-200 dark:border-zinc-800">
-                    <span>GRAND TOTAL:</span>
-                    <span>{formatCurrency(completedSale.totalAmount)}</span>
-                  </div>
-                </div>
-
-                <div className="text-center pt-2 text-[10px] text-zinc-400">
-                  <p>Medicines once sold cannot be returned without original receipt.</p>
-                  <p className="mt-0.5">Thank you for choosing PharmaFlow!</p>
-                </div>
-              </div>
-
-              <DialogFooter className="gap-2 sm:gap-0">
-                <Button variant="outline" onClick={() => setInvoiceModalOpen(false)}>
-                  Close
-                </Button>
-                <Button onClick={handlePrint} className="bg-brand-primary text-white gap-2">
-                  <Printer className="w-4 h-4" /> Print Receipt
-                </Button>
-              </DialogFooter>
+          {/* Side-By-Side Workspace */}
+          <div className="w-full flex-1 min-h-0 flex flex-row flex-nowrap gap-4 overflow-hidden">
+            {/* Left Panel: Medicine Search & Inventory */}
+            <div className="flex-1 min-w-[360px] h-full overflow-hidden">
+              <MedicineCatalog
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                filterStock={filterStock}
+                setFilterStock={setFilterStock}
+                selectedDosageForm={selectedDosageForm}
+                setSelectedDosageForm={setSelectedDosageForm}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                highlightedIndex={highlightedIndex}
+                expandedMedIds={expandedMedIds}
+                toggleExpandMed={toggleExpandMed}
+                addToCart={addToCart}
+                handleVoiceSearch={handleVoiceSearch}
+                searchInputRef={searchInputRef}
+                isLoading={isLoading}
+                medicines={filteredMedicines}
+              />
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
+            {/* Right Panel: Spacious Active Cart */}
+            <div className="w-[420px] 2xl:w-[460px] shrink-0 h-full overflow-hidden">
+              <ActiveCartPanel
+                tempBillNumber={tempBillNumber}
+                customerName={customerName}
+                setCustomerName={setCustomerName}
+                customerPhone={customerPhone}
+                onOpenCustomerModal={() => setCustomerModalOpen(true)}
+                cart={cart}
+                updateQuantity={updateQuantity}
+                removeFromCart={removeFromCart}
+                clearCart={clearCart}
+                subtotal={subtotal}
+                estimatedTax={estimatedTax}
+                grossPayable={grossPayable}
+                onProceedToBilling={() => {
+                  if (cart.length === 0) {
+                    toast.warning('Please add at least 1 medicine to proceed');
+                    return;
+                  }
+                  setPosStep('SETTLEMENT');
+                }}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        /* STEP 2: Dedicated Billing Settlement & Payment Screen */
+        <BillingSettlementView
+          onBackToSelection={() => setPosStep('SELECTION')}
+          tempBillNumber={tempBillNumber}
+          customerName={customerName}
+          customerPhone={customerPhone}
+          cart={cart}
+          updateQuantity={updateQuantity}
+          removeFromCart={removeFromCart}
+          paymentMethod={paymentMethod}
+          setPaymentMethod={setPaymentMethod}
+          tenderedAmount={tenderedAmount}
+          setTenderedAmount={setTenderedAmount}
+          splitCashAmount={splitCashAmount}
+          setSplitCashAmount={setSplitCashAmount}
+          splitOnlineAmount={splitOnlineAmount}
+          setSplitOnlineAmount={setSplitOnlineAmount}
+          paymentReference={paymentReference}
+          setPaymentReference={setPaymentReference}
+          discountType={discountType}
+          setDiscountType={setDiscountType}
+          discountValue={discountValue}
+          setDiscountValue={setDiscountValue}
+          calculatedDiscount={calculatedDiscount}
+          grossPayable={grossPayable}
+          roundOffEnabled={roundOffEnabled}
+          setRoundOffEnabled={setRoundOffEnabled}
+          roundOffAmount={roundOffAmount}
+          subtotal={subtotal}
+          estimatedTax={estimatedTax}
+          finalNetPayable={finalNetPayable}
+          changeAmount={changeAmount}
+          handleCheckout={handleCheckout}
+          isCheckingOut={checkoutMutation.isPending}
+        />
+      )}
+
+      {/* Shared Dialog Modals */}
+      <CustomerModal
+        open={customerModalOpen}
+        onOpenChange={setCustomerModalOpen}
+        onCustomerSet={(name, phone) => {
+          setCustomerName(name);
+          setCustomerPhone(phone);
+        }}
+      />
+
+      <ShortcutsModal
+        open={shortcutsModalOpen}
+        onOpenChange={setShortcutsModalOpen}
+      />
+
+      <ThermalInvoiceModal
+        open={invoiceModalOpen}
+        onOpenChange={setInvoiceModalOpen}
+        completedSale={completedSale}
+        shopProfile={shopProfile}
+        user={user}
+      />
     </div>
   );
 }

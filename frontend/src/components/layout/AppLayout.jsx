@@ -11,15 +11,17 @@ export function AppLayout() {
   useThemeEffect();
 
   return (
-    <div className="flex min-h-screen bg-surface-page text-text-primary">
-      {/* Sidebar Navigation */}
-      <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+    <div className="flex flex-col h-screen overflow-hidden bg-surface-page text-text-primary">
+      {/* Top Navbar spans 100% full screen width */}
+      <Navbar onMenuClick={() => setMobileOpen(true)} />
 
-      {/* Main Content Area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Navbar onMenuClick={() => setMobileOpen(true)} />
-        
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+      {/* Main Workspace below Navbar */}
+      <div className="flex flex-1 h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Left Sidebar */}
+        <Sidebar mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} />
+
+        {/* Dynamic Route Content */}
+        <main className="flex-1 h-full overflow-y-auto p-3 sm:p-4 lg:p-5">
           <Outlet />
         </main>
       </div>
