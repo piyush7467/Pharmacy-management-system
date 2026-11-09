@@ -49,10 +49,11 @@ Pharmacy_management_system/
 | **Backend Runtime** | Node.js v24+, Express 5 |
 | **Database** | Serverless PostgreSQL via **Neon DB** |
 | **ORM & Migrations** | Prisma 6.19 with pooled + direct connection strings |
+| **API Contract & Docs**| **OpenAPI 3.0.3** mounted at `/api/v1/api-docs` via **Swagger UI** |
 | **Security & Crypto** | Argon2id, JWT (`jsonwebtoken`), `cookie-parser`, `helmet`, `express-rate-limit` |
 | **Email Service** | Brevo API (Transactional SMTP) |
-| **Testing** | Vitest v3.2.7 + Supertest v7.0.0 (41 tests, 100% passing) |
-| **Frontend Framework**| React 19 + Vite 6 |
+| **Testing** | Vitest v3.2.7 + Supertest v7.0.0 (45 tests, 100% passing) |
+| **Frontend Framework**| React 19 + Vite 6 (Component-wise single-responsibility architecture) |
 | **Styling** | Tailwind CSS v4 (`@tailwindcss/vite`), Custom Hybrid Design System |
 | **State Management** | Redux Toolkit v2 + Redux Persist (Theme & In-Memory Auth) |
 | **Data Fetching** | TanStack React Query v5 |
@@ -131,9 +132,18 @@ npm run dev
 
 ---
 
+## 📖 OpenAPI 3.0 Documentation & Swagger UI
+
+PharmaPulse exposes a complete OpenAPI 3.0.3 specification covering all authentication, catalogue, purchases, inventory, POS sales, returns, reports, and audit trail endpoints.
+
+- **Interactive Swagger UI**: [http://localhost:5000/api/v1/api-docs](http://localhost:5000/api/v1/api-docs)
+- **Raw OpenAPI JSON**: [http://localhost:5000/api/v1/openapi.json](http://localhost:5000/api/v1/openapi.json)
+
+---
+
 ## 🧪 Automated Testing & Acceptance Verification
 
-All **41 automated integration tests** run against the live PostgreSQL database:
+All **45 automated integration tests** run against the live PostgreSQL database with 100% pass rate:
 
 ```bash
 cd backend
@@ -143,22 +153,88 @@ npm test
 ### Test Evidence Summary
 ```text
 Test Files  6 passed (6)
-Tests       41 passed (41)
+Tests       45 passed (45)
 
-✓ tests/health.test.js (2 tests)
-✓ tests/auth.test.js (11 tests)
-✓ tests/catalogue.test.js (9 tests)
-✓ tests/purchases.test.js (7 tests)
-✓ tests/sales_fefo_returns.test.js (7 tests)
-✓ tests/reports_reconciliation.test.js (5 tests)
+✓ tests/health.test.js (4 tests) - Health, 404 envelope, OpenAPI JSON & Swagger UI
+✓ tests/auth.test.js (11 tests) - Argon2id, JWT rotation, Staff RBAC, Password recovery
+✓ tests/catalogue.test.js (9 tests) - Categories, Suppliers, Medicines, Live batch stock
+✓ tests/purchases.test.js (7 tests) - PO creation, GRN receipt, Expired batch gate
+✓ tests/sales_fefo_returns.test.js (9 tests) - FEFO allocation, Idempotency, Returns, Stock write-off
+✓ tests/reports_reconciliation.test.js (5 tests) - Ledger reconciliation audit, Valuation, RBAC
 ```
 
 ### 5 Non-Negotiable Release Blockers Verified:
 1. **FEFO Batch Allocation**: Earlier batches are completely exhausted first, later batches are tapped for the remainder, and immutable `SALE_DEDUCTION` movements are appended.
-2. **Expired Batch Shielding**: Batches past `expiryDate` are strictly excluded from checkouts; sales fail if only expired batches exist.
+2. **Expired Batch Shielding**: Batches past `expiryDate` are strictly excluded from checkouts; intake of expired batches at GRN is rejected with `EXPIRED_BATCH_BLOCKED`.
 3. **Alerts Engine**: Dynamic calculation of live active stock across valid batches and `< 60d` expiry flags.
-4. **Auditable Returns**: Enforces return quantity $\le$ sold quantity on invoice, handles `RESTOCKED` vs `DAMAGED_DISCARDED` disposition, and rejects blank reasons.
+4. **Auditable Returns**: Enforces return quantity $\le$ sold quantity on invoice, handles `RESTOCKED` vs `DAMAGED_DISCARDED` disposition, refunds proportional discounts, and rejects blank reasons.
 5. **Ledger Reconciliation**: Mathematical verification that `CurrentStock == InwardReceipts - Sales + Returns - Adjustments` with 0 discrepancy (`BALANCED`).
+
+---
+
+## ⏱️ 3–5 Minute Technical Evaluation Walkthrough Script
+
+This script guides the **ALGIONS AI LABS** evaluation team through verifying the system's core requirements end-to-end:
+
+### Pre-requisite Demo Credentials:
+- **Admin**: `admin@pharmapulse.demo` / `AdminSecurePassword123!`
+- **Pharmacist**: `pharmacist@pharmapulse.demo` / `PharmacistPass123!`
+- **Cashier**: `cashier@pharmapulse.demo` / `CashierPass123!`
+
+---
+
+### Step 1: Authentication & Role Boundary Check (1 Minute)
+1. Navigate to `http://localhost:5173/login`.
+2. Click the quick-fill pill **"Cashier (POS & Sales)"** to sign in as cashier.
+3. Observe the restricted sidebar: Cashiers have access to **POS**, **Sales**, and **Returns**.
+4. Attempt to navigate directly to `http://localhost:5173/staff` or `http://localhost:5173/audit`.
+5. Observe the automated client-side and server-side RBAC block gracefully redirecting with notification.
+6. Sign out and log back in as **Admin** via the **"Admin (Full Control)"** quick-fill button.
+
+---
+
+### Step 2: FEFO Batch Intake via Purchases / GRN (1 Minute)
+1. Click **Purchases** in the sidebar (`/purchases`).
+2. Click **"+ New Purchase Order"**, choose a supplier (e.g. *Apex Pharma Distributors*), select a medicine, set quantity `100`, purchase unit price `$10.00`, batch number `APEX-2026-X1`, and expiry date (e.g. `2027-12-31`).
+3. Click **"Save Purchase Order"** — status displays as `ORDERED`.
+4. Click **"Receive Goods"** on the newly created order. Verify batch details and confirm intake.
+5. Status changes to `RECEIVED`.
+6. Navigate to **Inventory** (`/inventory`) and observe the new batch `APEX-2026-X1` live with 100 units in stock.
+
+---
+
+### Step 3: High-Speed POS Checkout & FEFO Allocation (1 Minute)
+1. Open the **POS** terminal (`/pos`).
+2. Select or search for the medicine received in Step 2.
+3. Notice that multiple batches exist with different expiry dates.
+4. Add items to cart (e.g. quantity 5).
+5. Open the **Payment Settlement** view. Select payment method (Cash / UPI / Card).
+6. Enter customer phone number and optional discount (e.g. 5%).
+7. Observe instant real-time calculation:
+   - Subtotal, Itemized CGST/SGST tax, and Net Payable.
+8. Click **"Complete Sale & Generate Invoice"**.
+9. The high-contrast **Thermal Invoice Modal** pops up displaying itemized batch numbers, tax breakdown, and barcode.
+10. Check **Inventory** (`/inventory`): The earliest expiring batch has been automatically decremented by 5.
+
+---
+
+### Step 4: Customer Return & Proportional Restock (45 Seconds)
+1. Go to **Sales** (`/sales`), locate the invoice generated in Step 3, and click **"Process Return"**.
+2. Select 1 unit to return, choose disposition **"Return to Shelf (Restock)"**, and provide a regulatory justification reason: `"Customer ordered incorrect dosage prescribed by physician"`.
+3. Submit the return.
+4. Notice the proportional discount refund is mathematically computed.
+5. In **Inventory**, observe the batch quantity immediately restores by 1 unit.
+6. In **Audit Trail** (`/audit`), an immutable `RETURN_RESTOCK` movement is recorded with the cashier's user ID and reason string.
+
+---
+
+### Step 5: Double-Entry Mathematical Ledger Reconciliation (45 Seconds)
+1. Open **Reports** (`/reports`).
+2. Examine the **Double-Entry Ledger Reconciliation** card:
+   $$\text{Current Physical Stock} = \text{Inward Receipts} - \text{Sales Deductions} + \text{Customer Returns} \pm \text{Audit Adjustments}$$
+3. Observe **0 Discrepancy** with a green `BALANCED` badge, proving mathematical zero-loophole inventory integrity.
+4. Click **Swagger 3.0 API Docs** in the header or visit `http://localhost:5000/api/v1/api-docs` to inspect the full RESTful OpenAPI contract.
+5. Click **Legal & Privacy** (`/privacy`) to inspect the regulatory disclaimers, WHO-GMP simulation standards, and DPDPA/HIPAA privacy policies.
 
 ---
 
@@ -167,17 +243,17 @@ Tests       41 passed (41)
 - **Role-Based Access Control (RBAC)**:
   - `ADMIN`: Full access (Staff provisioning, audit logs, catalog, purchases, reports, settings).
   - `PHARMACIST`: Catalog management, purchase orders, goods receiving, POS sales, stock adjustments, reports.
-  - `CASHIER`: POS sales, invoice search, customer returns. Cannot manage staff or access audit logs.
+  - `CASHIER`: POS sales, invoice search, customer returns. Blocked from managing staff, editing purchase prices, or viewing audit logs.
 - **Session Protection**:
   - Short-lived Access Tokens (15 minutes).
   - Long-lived Opaque Refresh Tokens (7 days) stored as SHA-256 hashes in database and sent via `HttpOnly`, `SameSite=Lax` cookies.
   - Refresh Token Family Rotation: If an old revoked refresh token is re-submitted, the entire token family is immediately invalidated to thwart replay attacks.
 - **Educational / Demo Compliance Notice**:
-  - PharmaPulse is an operational software engineering demonstration built strictly for assessment purposes.
-  - It does not provide medical advice or handle sensitive patient health records (PHI/HIPAA).
+  - PharmaPulse is an operational software engineering demonstration built strictly for assessment purposes for **ALGIONS AI LABS PRIVATE LIMITED**.
+  - All statutory simulation disclaimers and privacy notices are available within the app at `/privacy` and `/legal`.
 
 ---
 
 ## 📄 License
 
-Developed for evaluation by **ALGIONS AI LABS PRIVATE LIMITED**. All rights reserved.
+Developed for technical evaluation by **ALGIONS AI LABS PRIVATE LIMITED**. All rights reserved.

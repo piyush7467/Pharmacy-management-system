@@ -19,4 +19,18 @@ describe('Healthcheck & Global Middleware', () => {
     expect(res.body.error.code).toBe('RESOURCE_NOT_FOUND');
     expect(res.body.meta).toHaveProperty('requestId');
   });
+
+  it('GET /api/v1/openapi.json returns 200 with OpenAPI 3.0 specification', async () => {
+    const res = await request(app).get('/api/v1/openapi.json');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/json/);
+    expect(res.body.openapi).toBe('3.0.3');
+    expect(res.body.info.title).toContain('PharmaPulse');
+    expect(res.body.paths).toHaveProperty('/auth/login');
+  });
+
+  it('GET /api/v1/api-docs/ redirects or serves Swagger UI html', async () => {
+    const res = await request(app).get('/api/v1/api-docs/');
+    expect([200, 301, 302]).toContain(res.status);
+  });
 });

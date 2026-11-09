@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'sonner';
 import {
@@ -372,6 +372,16 @@ export function LoginView() {
               <BarChart3 className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
               <span className="text-[10px] font-semibold text-text-primary">Sales &amp; Billing</span>
             </div>
+          </div>
+
+          {/* Privacy & Legal Disclaimer Link */}
+          <div className="mt-4 text-center">
+            <Link
+              to="/privacy"
+              className="text-[11px] text-text-muted hover:text-brand-primary hover:underline transition-colors"
+            >
+              Privacy Policy &bull; Terms of Service &bull; Legal Disclaimer
+            </Link>
           </div>
         </div>
       </div>

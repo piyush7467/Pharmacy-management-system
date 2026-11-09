@@ -17,11 +17,17 @@ import { returnsRouter } from './modules/returns/returns.routes.js';
 import { inventoryRouter } from './modules/inventory/inventory.routes.js';
 import { reportsRouter } from './modules/reports/reports.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
+import swaggerUi from 'swagger-ui-express';
+import { openapiSpec } from './docs/openapiSpec.js';
 
 export const app = express();
 
 // Security Headers
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
 
 // CORS Configuration
 app.use(
@@ -65,6 +71,23 @@ app.get('/api/v1/health', (req, res) => {
     }
   });
 });
+
+// -------------------------------------------------------------
+// OPENAPI 3.0 / SWAGGER DOCUMENTATION
+// -------------------------------------------------------------
+app.get('/api/v1/openapi.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.status(200).send(openapiSpec);
+});
+
+app.use(
+  '/api/v1/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(openapiSpec, {
+    customSiteTitle: 'PharmaPulse API Docs | ALGIONS Assessment',
+    customCss: '.swagger-ui .topbar { display: none }'
+  })
+);
 
 // -------------------------------------------------------------
 // MODULE ROUTERS

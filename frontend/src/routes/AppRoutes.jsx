@@ -17,6 +17,7 @@ import { ReturnsView } from '../features/returns/ReturnsView.jsx';
 import { ReportsView } from '../features/reports/ReportsView.jsx';
 import { AuditView } from '../features/audit/AuditView.jsx';
 import { SettingsView } from '../features/settings/SettingsView.jsx';
+import { PrivacyTermsView } from '../features/legal/PrivacyTermsView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -41,9 +42,12 @@ function PlaceholderView({ title, description, moduleName }) {
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Public Authentication Routes */}
+      {/* Public Authentication & Information Routes */}
       <Route path="/login" element={<LoginView />} />
       <Route path="/reset-password" element={<ResetPasswordView />} />
+      <Route path="/privacy" element={<PrivacyTermsView />} />
+      <Route path="/terms" element={<PrivacyTermsView />} />
+      <Route path="/legal" element={<PrivacyTermsView />} />
 
       {/* Protected Operations Application */}
       <Route
@@ -65,6 +69,9 @@ export function AppRoutes() {
         <Route path="sales" element={<SalesView />} />
         <Route path="returns" element={<ReturnsView />} />
         <Route path="reports" element={<ReportsView />} />
+        <Route path="privacy" element={<PrivacyTermsView />} />
+        <Route path="terms" element={<PrivacyTermsView />} />
+        <Route path="legal" element={<PrivacyTermsView />} />
 
         {/* Admin-Only Staff Management & Audit */}
         <Route
