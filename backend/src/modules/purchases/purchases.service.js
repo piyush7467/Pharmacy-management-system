@@ -244,8 +244,9 @@ export async function createPurchase(data, actorId) {
 
   if (status === 'RECEIVED') {
     // Immediate Direct Receipt: Create Purchase, items, Batches, and StockMovements inside a single transaction
-    const purchase = await prisma.$transaction(async (tx) => {
-      const createdPurchase = await tx.purchase.create({
+    const purchase = await prisma.$transaction(
+      async (tx) => {
+        const createdPurchase = await tx.purchase.create({
         data: {
           purchaseNumber,
           supplierId,
@@ -340,8 +341,10 @@ export async function createPurchase(data, actorId) {
         }
       });
 
-      return createdPurchase;
-    });
+        return createdPurchase;
+      },
+      { maxWait: 15000, timeout: 30000 }
+    );
 
     return {
       ...purchase,

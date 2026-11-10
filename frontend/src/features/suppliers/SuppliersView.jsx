@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -36,25 +37,13 @@ import {
   TableRow,
   TableCell
 } from '../../components/ui/table.jsx';
-import { SupplierFormModal } from './components/SupplierFormModal.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { formatDate } from '../../lib/utils.js';
 
 export function SuppliersView() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingSupplier, setEditingSupplier] = useState(null);
-
-  const [formData, setFormData] = useState({
-    name: '',
-    contactPerson: '',
-    phone: '',
-    email: '',
-    address: '',
-    taxNumber: '',
-    isActive: true
-  });
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['suppliers', { search: searchTerm }],
@@ -63,28 +52,6 @@ export function SuppliersView() {
       if (searchTerm) params.append('search', searchTerm);
       const res = await apiClient.get(`/suppliers?${params.toString()}`);
       return res.data;
-    }
-  });
-
-  const saveMutation = useMutation({
-    mutationFn: (supData) => {
-      if (editingSupplier) {
-        return apiClient.patch(`/suppliers/${editingSupplier.id}`, supData);
-      }
-      return apiClient.post('/suppliers', supData);
-    },
-    onSuccess: (res) => {
-      toast.success(editingSupplier ? 'Supplier updated' : 'Supplier registered', {
-        description: `Supplier "${res.data?.supplier?.name || res.data?.name || formData.name}" saved successfully.`
-      });
-      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      queryClient.invalidateQueries({ queryKey: ['suppliers-active'] });
-      handleCloseModal();
-    },
-    onError: (err) => {
-      toast.error('Failed to save supplier', {
-        description: err.message || 'Please check the submitted details.'
-      });
     }
   });
 
@@ -102,41 +69,11 @@ export function SuppliersView() {
   });
 
   const handleOpenAdd = () => {
-    setEditingSupplier(null);
-    setFormData({
-      name: '',
-      contactPerson: '',
-      phone: '',
-      email: '',
-      address: '',
-      taxNumber: '',
-      isActive: true
-    });
-    setModalOpen(true);
+    navigate('/suppliers/new');
   };
 
   const handleOpenEdit = (sup) => {
-    setEditingSupplier(sup);
-    setFormData({
-      name: sup.name,
-      contactPerson: sup.contactPerson || '',
-      phone: sup.phone || '',
-      email: sup.email || '',
-      address: sup.address || '',
-      taxNumber: sup.taxNumber || '',
-      isActive: sup.isActive
-    });
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setEditingSupplier(null);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    saveMutation.mutate(formData);
+    navigate(`/suppliers/${sup.id}/edit`);
   };
 
   const suppliers = Array.isArray(data) ? data : (data?.suppliers || data?.data || []);
@@ -293,18 +230,6 @@ export function SuppliersView() {
           )}
         </CardContent>
       </Card>
-
-      {/* Add / Edit Supplier Modal */}
-      <SupplierFormModal
-        open={modalOpen}
-        onOpenChange={(val) => {
-          if (!val) handleCloseModal();
-          else setModalOpen(val);
-        }}
-        editingSupplier={editingSupplier}
-        onSubmit={(payload) => saveMutation.mutate(payload)}
-        isSubmitting={saveMutation.isPending}
-      />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -7,11 +8,11 @@ import { PurchasesHeader } from './components/PurchasesHeader.jsx';
 import { PurchasesMetricsCards } from './components/PurchasesMetricsCards.jsx';
 import { PurchasesFilters } from './components/PurchasesFilters.jsx';
 import { PurchasesTable } from './components/PurchasesTable.jsx';
-import { CreatePurchaseModal } from './components/CreatePurchaseModal.jsx';
 import { ReceiveGoodsModal } from './components/ReceiveGoodsModal.jsx';
 import { PurchaseDetailsModal } from './components/PurchaseDetailsModal.jsx';
 
 export function PurchasesView() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useSelector((state) => state.auth?.user);
   const canManagePurchases = user?.role === 'ADMIN' || user?.role === 'PHARMACIST';
@@ -20,7 +21,6 @@ export function PurchasesView() {
   const [statusFilter, setStatusFilter] = useState('');
 
   // Modals state
-  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [receiveModalPurchase, setReceiveModalPurchase] = useState(null);
   const [detailModalPurchase, setDetailModalPurchase] = useState(null);
 
@@ -67,24 +67,6 @@ export function PurchasesView() {
     .reduce((sum, p) => sum + (Number(p.grandTotal) || 0), 0);
 
   // Mutations
-  const createPurchaseMutation = useMutation({
-    mutationFn: async (payload) => {
-      const res = await apiClient.post('/purchases', payload);
-      return res.data;
-    },
-    onSuccess: (data, variables, context) => {
-      toast.success(data?.meta?.message || 'Purchase order created successfully');
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-batches'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
-      queryClient.invalidateQueries({ queryKey: ['medicines'] });
-      queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
-    },
-    onError: (err) => {
-      toast.error(err?.message || err?.response?.data?.message || 'Failed to create purchase order');
-    }
-  });
-
   const receivePurchaseMutation = useMutation({
     mutationFn: async ({ id, data }) => {
       const res = await apiClient.post(`/purchases/${id}/receive`, data);
@@ -117,12 +99,6 @@ export function PurchasesView() {
     }
   });
 
-  const handleCreateSubmit = (payload, onSuccessCallback) => {
-    createPurchaseMutation.mutate(payload, {
-      onSuccess: () => onSuccessCallback()
-    });
-  };
-
   const handleReceiveConfirm = (purchaseId, payload, onSuccessCallback) => {
     receivePurchaseMutation.mutate(
       { id: purchaseId, data: payload },
@@ -145,7 +121,7 @@ export function PurchasesView() {
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* 1. Header with Title & Action */}
       <PurchasesHeader
-        onOpenCreateModal={() => setCreateModalOpen(true)}
+        onOpenCreateModal={() => navigate('/purchases/new')}
         canCreatePurchase={canManagePurchases}
       />
 
@@ -176,17 +152,7 @@ export function PurchasesView() {
         canManagePurchases={canManagePurchases}
       />
 
-      {/* 5. Create Purchase Order Modal */}
-      <CreatePurchaseModal
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        suppliers={suppliers}
-        medicines={medicines}
-        onSubmit={handleCreateSubmit}
-        isSubmitting={createPurchaseMutation.isPending}
-      />
-
-      {/* 6. Goods Received Note (GRN) Intake Modal */}
+      {/* 5. Goods Received Note (GRN) Intake Modal */}
       <ReceiveGoodsModal
         purchase={receiveModalPurchase}
         open={Boolean(receiveModalPurchase)}

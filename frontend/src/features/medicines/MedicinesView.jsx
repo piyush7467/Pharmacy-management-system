@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -7,11 +8,11 @@ import { MedicinesHeader } from './components/MedicinesHeader.jsx';
 import { MedicinesMetricsCards } from './components/MedicinesMetricsCards.jsx';
 import { MedicinesFilters } from './components/MedicinesFilters.jsx';
 import { MedicinesTable } from './components/MedicinesTable.jsx';
-import { MedicineFormModal } from './components/MedicineFormModal.jsx';
 import { MedicineBatchesModal } from './components/MedicineBatchesModal.jsx';
 import { ImportMedicinesModal } from './components/ImportMedicinesModal.jsx';
 
 export function MedicinesView() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useSelector((state) => state.auth?.user);
   const canManageMedicines = user?.role === 'ADMIN' || user?.role === 'PHARMACIST';
@@ -21,9 +22,7 @@ export function MedicinesView() {
   const [lowStockFilter, setLowStockFilter] = useState(false);
 
   // Modals state
-  const [formModalOpen, setFormModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [editingMedicine, setEditingMedicine] = useState(null);
   const [batchModalMedicine, setBatchModalMedicine] = useState(null);
 
   // Fetch Categories for dropdown
@@ -57,26 +56,6 @@ export function MedicinesView() {
     : (medicinesData?.medicines || medicinesData?.data || []);
 
   // Mutations
-  const saveMutation = useMutation({
-    mutationFn: (medData) => {
-      if (editingMedicine) {
-        return apiClient.patch(`/medicines/${editingMedicine.id}`, medData);
-      }
-      return apiClient.post('/medicines', medData);
-    },
-    onSuccess: (res) => {
-      toast.success(editingMedicine ? 'Medicine updated successfully' : 'Medicine registered successfully');
-      queryClient.invalidateQueries({ queryKey: ['medicines'] });
-      queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
-      setFormModalOpen(false);
-      setEditingMedicine(null);
-    },
-    onError: (err) => {
-      toast.error(err?.message || err?.response?.data?.message || 'Failed to save medicine');
-    }
-  });
-
   const deleteMutation = useMutation({
     mutationFn: (medId) => apiClient.delete(`/medicines/${medId}`),
     onSuccess: () => {
@@ -91,8 +70,7 @@ export function MedicinesView() {
   });
 
   const handleEdit = (med) => {
-    setEditingMedicine(med);
-    setFormModalOpen(true);
+    navigate(`/medicines/${med.id}/edit`);
   };
 
   const handleDelete = (med) => {
@@ -111,10 +89,7 @@ export function MedicinesView() {
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* 1. Header with Title & Action */}
       <MedicinesHeader
-        onOpenAddModal={() => {
-          setEditingMedicine(null);
-          setFormModalOpen(true);
-        }}
+        onOpenAddModal={() => navigate('/medicines/new')}
         onOpenImportModal={() => setImportModalOpen(true)}
         canManageMedicines={canManageMedicines}
       />
@@ -144,24 +119,7 @@ export function MedicinesView() {
         canManageMedicines={canManageMedicines}
       />
 
-      {/* 5. Add / Edit Formulation Modal */}
-      <MedicineFormModal
-        open={formModalOpen}
-        onOpenChange={(open) => {
-          setFormModalOpen(open);
-          if (!open) setEditingMedicine(null);
-        }}
-        editingMedicine={editingMedicine}
-        categories={categories}
-        onSubmit={(payload, callback) => {
-          saveMutation.mutate(payload, {
-            onSuccess: () => callback()
-          });
-        }}
-        isSubmitting={saveMutation.isPending}
-      />
-
-      {/* 6. Batch Lots Inspection Modal */}
+      {/* 5. Batch Lots Inspection Modal */}
       <MedicineBatchesModal
         medicine={batchModalMedicine}
         open={Boolean(batchModalMedicine)}

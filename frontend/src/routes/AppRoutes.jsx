@@ -10,6 +10,9 @@ import { CategoriesView } from '../features/categories/CategoriesView.jsx';
 import { SuppliersView } from '../features/suppliers/SuppliersView.jsx';
 import { MedicinesView } from '../features/medicines/MedicinesView.jsx';
 import { PurchasesView } from '../features/purchases/PurchasesView.jsx';
+import { CreatePurchaseView } from '../features/purchases/CreatePurchaseView.jsx';
+import { MedicineFormView } from '../features/medicines/MedicineFormView.jsx';
+import { SupplierFormView } from '../features/suppliers/SupplierFormView.jsx';
 import { PosView } from '../features/pos/PosView.jsx';
 import { InventoryView } from '../features/inventory/InventoryView.jsx';
 import { SalesView } from '../features/sales/SalesView.jsx';
@@ -63,9 +66,14 @@ export function AppRoutes() {
         {/* POS & Operations */}
         <Route path="pos" element={<PosView />} />
         <Route path="medicines" element={<MedicinesView />} />
+        <Route path="medicines/new" element={<MedicineFormView />} />
+        <Route path="medicines/:id/edit" element={<MedicineFormView />} />
         <Route path="categories" element={<CategoriesView />} />
         <Route path="suppliers" element={<SuppliersView />} />
+        <Route path="suppliers/new" element={<SupplierFormView />} />
+        <Route path="suppliers/:id/edit" element={<SupplierFormView />} />
         <Route path="purchases" element={<PurchasesView />} />
+        <Route path="purchases/new" element={<CreatePurchaseView />} />
         <Route path="inventory" element={<InventoryView />} />
         <Route path="sales" element={<SalesView />} />
         <Route path="returns" element={<ReturnsView />} />
