@@ -128,6 +128,15 @@ export function PosView() {
       queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
       queryClient.invalidateQueries({ queryKey: ['medicines'] });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
+      queryClient.invalidateQueries({ queryKey: ['sales-ledger'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-batches'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-sales-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-recent-sales'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-inventory-overview'] });
+      queryClient.invalidateQueries({ queryKey: ['report-sales-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['report-stock-valuation'] });
+      queryClient.invalidateQueries({ queryKey: ['report-reconciliation'] });
       clearCart();
       setPosStep('SELECTION');
     },

@@ -13,7 +13,7 @@ export function ReportsView() {
     queryKey: ['report-sales-summary'],
     queryFn: async () => {
       const res = await apiClient.get('/reports/sales-summary');
-      return res.data?.data || {};
+      return res.data || res || {};
     }
   });
 
@@ -21,7 +21,7 @@ export function ReportsView() {
     queryKey: ['report-stock-valuation'],
     queryFn: async () => {
       const res = await apiClient.get('/reports/stock-valuation');
-      return res.data?.data || {};
+      return res.data || res || {};
     }
   });
 
@@ -29,7 +29,7 @@ export function ReportsView() {
     queryKey: ['report-reconciliation'],
     queryFn: async () => {
       const res = await apiClient.get('/reports/reconciliation');
-      return res.data?.data || {};
+      return res.data || res || {};
     }
   });
 

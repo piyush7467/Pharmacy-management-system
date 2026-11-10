@@ -47,7 +47,9 @@ export async function listMedicines({
             batchNumber: true,
             expiryDate: true,
             currentQuantity: true,
-            salePrice: true
+            salePrice: true,
+            mrp: true,
+            status: true
           },
           orderBy: { expiryDate: 'asc' }
         }

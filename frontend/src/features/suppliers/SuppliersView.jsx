@@ -36,6 +36,7 @@ import {
   TableRow,
   TableCell
 } from '../../components/ui/table.jsx';
+import { SupplierFormModal } from './components/SupplierFormModal.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { formatDate } from '../../lib/utils.js';
 
@@ -74,9 +75,10 @@ export function SuppliersView() {
     },
     onSuccess: (res) => {
       toast.success(editingSupplier ? 'Supplier updated' : 'Supplier registered', {
-        description: `Supplier "${res.data?.supplier?.name}" saved successfully.`
+        description: `Supplier "${res.data?.supplier?.name || res.data?.name || formData.name}" saved successfully.`
       });
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      queryClient.invalidateQueries({ queryKey: ['suppliers-active'] });
       handleCloseModal();
     },
     onError: (err) => {
@@ -137,7 +139,7 @@ export function SuppliersView() {
     saveMutation.mutate(formData);
   };
 
-  const suppliers = data || [];
+  const suppliers = Array.isArray(data) ? data : (data?.suppliers || data?.data || []);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -293,117 +295,16 @@ export function SuppliersView() {
       </Card>
 
       {/* Add / Edit Supplier Modal */}
-      <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{editingSupplier ? 'Edit Supplier' : 'Register Distributor'}</DialogTitle>
-            <DialogDescription>
-              Record pharmaceutical distributor details for purchase ordering and receiving.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-3.5 py-1">
-            <div className="space-y-1.5">
-              <Label htmlFor="sup-name">Distributor / Company Name</Label>
-              <Input
-                id="sup-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Apex Pharma Logistics Ltd."
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="sup-person">Representative Name</Label>
-                <Input
-                  id="sup-person"
-                  value={formData.contactPerson}
-                  onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
-                  placeholder="e.g. Sanjay Mehra"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="sup-phone">Phone / Mobile</Label>
-                <Input
-                  id="sup-phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+91 98200 11223"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="sup-email">Order Email</Label>
-                <Input
-                  id="sup-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="orders@apexpharma.demo"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="sup-tax">GSTIN / Tax ID</Label>
-                <Input
-                  id="sup-tax"
-                  value={formData.taxNumber}
-                  onChange={(e) => setFormData({ ...formData, taxNumber: e.target.value })}
-                  placeholder="27AABCU9603R1ZM"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="sup-address">Warehouse / Registered Address</Label>
-              <textarea
-                id="sup-address"
-                rows={2}
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Industrial Area, City, State, PIN..."
-                className="w-full rounded-lg border border-surface bg-surface-card p-2 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="sup-active"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="rounded border-surface text-brand-primary focus:ring-brand-primary"
-              />
-              <Label htmlFor="sup-active" className="cursor-pointer">
-                Active Vendor (Eligible for purchase orders)
-              </Label>
-            </div>
-
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="outline" onClick={handleCloseModal}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="default" disabled={saveMutation.isPending}>
-                {saveMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                    Saving...
-                  </>
-                ) : editingSupplier ? (
-                  'Update Supplier'
-                ) : (
-                  'Register Supplier'
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <SupplierFormModal
+        open={modalOpen}
+        onOpenChange={(val) => {
+          if (!val) handleCloseModal();
+          else setModalOpen(val);
+        }}
+        editingSupplier={editingSupplier}
+        onSubmit={(payload) => saveMutation.mutate(payload)}
+        isSubmitting={saveMutation.isPending}
+      />
     </div>
   );
 }

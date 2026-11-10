@@ -15,7 +15,8 @@ export async function listSuppliers(req, res, next) {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 50;
-    const { search, status } = req.query;
+    const { search } = req.query;
+    const status = req.query.status !== undefined ? req.query.status : req.query.isActive;
 
     const result = await suppliersService.listSuppliers({ search, status, page, limit });
 

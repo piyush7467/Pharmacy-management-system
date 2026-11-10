@@ -26,7 +26,7 @@ export function ReturnsView() {
     }
   });
 
-  const returns = Array.isArray(returnsData) ? returnsData : returnsData?.returns || [];
+  const returns = Array.isArray(returnsData) ? returnsData : (returnsData?.returns || returnsData?.data || []);
 
   // Summary Metrics
   const totalReturnsCount = returns.length;
@@ -48,7 +48,7 @@ export function ReturnsView() {
       queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to process return');
+      toast.error(err.message || err.response?.data?.message || 'Failed to process return');
     }
   });
 

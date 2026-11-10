@@ -24,11 +24,11 @@ export function SalesView() {
       if (paymentFilter) params.paymentMethod = paymentFilter;
       if (statusFilter) params.status = statusFilter;
       const res = await apiClient.get('/sales', { params });
-      return res.data;
+      return res.data?.sales || res.data || res || [];
     }
   });
 
-  const sales = salesData?.data || [];
+  const sales = Array.isArray(salesData) ? salesData : (salesData?.sales || salesData?.data || []);
 
   // Summary Metrics
   const totalCount = sales.length;
@@ -39,7 +39,7 @@ export function SalesView() {
   const handleViewReceipt = async (saleId) => {
     try {
       const res = await apiClient.get(`/sales/${saleId}`);
-      setSelectedSale(res.data.data);
+      setSelectedSale(res.data?.data || res.data || res);
       setDetailsModalOpen(true);
     } catch (err) {
       toast.error('Failed to load invoice details');

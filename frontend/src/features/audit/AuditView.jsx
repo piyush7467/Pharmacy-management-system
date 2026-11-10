@@ -49,11 +49,11 @@ export function AuditView() {
       const params = {};
       if (actionFilter) params.action = actionFilter;
       const res = await apiClient.get('/audit-logs', { params });
-      return res.data?.data || [];
+      return Array.isArray(res.data) ? res.data : (res.data?.logs || res.data?.data || res || []);
     }
   });
 
-  const logs = Array.isArray(auditData) ? auditData : [];
+  const logs = Array.isArray(auditData) ? auditData : (auditData?.data || auditData?.logs || []);
 
   const getActionBadge = (action) => {
     switch (action) {

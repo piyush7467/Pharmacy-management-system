@@ -42,7 +42,7 @@ export function DashboardView() {
     queryKey: ['dashboard-sales-summary', dateRange],
     queryFn: async () => {
       const res = await apiClient.get('/reports/sales-summary', { params: dateParams });
-      return res.data?.data || {};
+      return res.data || res || {};
     }
   });
 
@@ -55,7 +55,7 @@ export function DashboardView() {
     queryKey: ['dashboard-inventory-overview'],
     queryFn: async () => {
       const res = await apiClient.get('/inventory/overview');
-      return res.data?.data || {};
+      return res.data || res || {};
     }
   });
 
@@ -64,7 +64,7 @@ export function DashboardView() {
     queryKey: ['dashboard-stock-valuation'],
     queryFn: async () => {
       const res = await apiClient.get('/reports/stock-valuation');
-      return res.data?.data || {};
+      return res.data || res || {};
     },
     enabled: user?.role !== 'CASHIER'
   });
@@ -74,7 +74,7 @@ export function DashboardView() {
     queryKey: ['dashboard-recent-sales'],
     queryFn: async () => {
       const res = await apiClient.get('/sales', { params: { limit: 5 } });
-      return res.data?.data || [];
+      return Array.isArray(res.data) ? res.data : (res.data?.sales || res.data?.data || res || []);
     }
   });
 
@@ -83,7 +83,7 @@ export function DashboardView() {
     queryKey: ['dashboard-recent-purchases'],
     queryFn: async () => {
       const res = await apiClient.get('/purchases', { params: { limit: 5 } });
-      return res.data?.data || [];
+      return Array.isArray(res.data) ? res.data : (res.data?.purchases || res.data?.data || res || []);
     }
   });
 

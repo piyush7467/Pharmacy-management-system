@@ -2,82 +2,82 @@
 
 @layer base {
   :root {
-    /* Crisp, High-Contrast Medical UI Theme */
-    --background: #F4F6F5;
-    --foreground: #0F172A;
+    /* PharmaFlow Medical UI Theme */
+    --background: #F7F9F8;
+    --foreground: #334155;
 
     --card: #FFFFFF;
-    --card-foreground: #0F172A;
+    --card-foreground: #334155;
 
     --popover: #FFFFFF;
-    --popover-foreground: #0F172A;
+    --popover-foreground: #334155;
 
-    /* Crisp Authoritative Medical Emerald Primary */
-    --primary: #15803D;
-    --primary-hover: #166534;
+    /* Authoritative Forest Green Primary */
+    --primary: #166534;
+    --primary-hover: #14532D;
     --primary-foreground: #FFFFFF;
 
-    /* Clean Soft Mint / Sage Secondary */
-    --secondary: #F0FDF4;
+    /* Clean Soft Mint / Sage Surface */
+    --secondary: #DCFCE7;
     --secondary-foreground: #166534;
 
-    /* Crisp High-Legibility Slate Neutrals */
+    /* High-Legibility Slate Neutrals */
     --muted: #F1F5F9;
     --muted-foreground: #64748B;
 
     /* Warm Gold/Amber Accent */
-    --accent: #D97706;
-    --accent-foreground: #FFFFFF;
+    --accent: #FDE68A;
+    --accent-foreground: #78350F;
 
     --destructive: #DC2626;
     --destructive-foreground: #FFFFFF;
 
     --border: #E2E8F0;
-    --input: #CBD5E1;
-    --ring: #15803D;
+    --input: #E2E8F0;
+    --ring: #166534;
 
     --radius: 0.75rem;
 
     /* Operational Statuses */
-    --status-success: #15803D;
+    --status-success: #166534;
     --status-warning: #D97706;
     --status-danger: #DC2626;
   }
 
   .dark {
-    --background: #0B1120;
-    --foreground: #F8FAFC;
+    --background: #171C19;
+    --foreground: #EDF2ED;
 
-    --card: #151F32;
-    --card-foreground: #F8FAFC;
+    --card: #222A25;
+    --card-foreground: #EDF2ED;
 
-    --popover: #151F32;
-    --popover-foreground: #F8FAFC;
+    --popover: #222A25;
+    --popover-foreground: #EDF2ED;
 
-    /* Luminous Emerald in Dark Mode */
-    --primary: #22C55E;
-    --primary-hover: #16A34A;
-    --primary-foreground: #022C22;
+    /* Luminous Forest / Sage in Dark Mode */
+    --primary: #4ADE80;
+    --primary-hover: #22C55E;
+    --primary-foreground: #052E16;
 
     /* Secondary Dark Emerald Surface */
-    --secondary: #162C24;
+    --secondary: #2C3B30;
     --secondary-foreground: #86EFAC;
 
-    --muted: #1E293B;
-    --muted-foreground: #94A3B8;
+    --muted: #1E2721;
+    --muted-foreground: #A2AEA5;
 
     /* Warm Accent */
-    --accent: #F59E0B;
-    --accent-foreground: #0B1120;
+    --accent: #FDE68A;
+    --accent-foreground: #171C19;
 
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
 
-    --border: #24334A;
-    --input: #24334A;
-    --ring: #22C55E;
+    --border: #37433B;
+    --input: #37433B;
+    --ring: #4ADE80;
 
-    --status-success: #22C55E;
+    --status-success: #4ADE80;
     --status-warning: #FBBF24;
     --status-danger: #F87171;
   }

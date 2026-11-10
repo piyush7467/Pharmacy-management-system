@@ -27,28 +27,34 @@ export function MedicinesView() {
   const [batchModalMedicine, setBatchModalMedicine] = useState(null);
 
   // Fetch Categories for dropdown
-  const { data: categories = [] } = useQuery({
+  const { data: categoriesData } = useQuery({
     queryKey: ['categoriesList'],
     queryFn: async () => {
       const res = await apiClient.get('/categories?limit=100');
-      return res.data?.categories || res.data || [];
+      return res.data?.categories || res.data || res || [];
     }
   });
+
+  const categories = Array.isArray(categoriesData)
+    ? categoriesData
+    : (categoriesData?.categories || categoriesData?.data || []);
 
   // Fetch Medicines
   const { data: medicinesData, isLoading } = useQuery({
     queryKey: ['medicines', searchTerm, categoryFilter, lowStockFilter],
     queryFn: async () => {
-      const params = {};
+      const params = { limit: 100 };
       if (searchTerm) params.search = searchTerm.trim();
       if (categoryFilter) params.categoryId = categoryFilter;
       if (lowStockFilter) params.lowStockOnly = 'true';
       const res = await apiClient.get('/medicines', { params });
-      return res.data;
+      return res.data?.medicines || res.data || res || [];
     }
   });
 
-  const medicines = medicinesData?.medicines || medicinesData?.data || [];
+  const medicines = Array.isArray(medicinesData)
+    ? medicinesData
+    : (medicinesData?.medicines || medicinesData?.data || []);
 
   // Mutations
   const saveMutation = useMutation({
@@ -67,7 +73,7 @@ export function MedicinesView() {
       setEditingMedicine(null);
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to save medicine');
+      toast.error(err?.message || err?.response?.data?.message || 'Failed to save medicine');
     }
   });
 
@@ -80,7 +86,7 @@ export function MedicinesView() {
       queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to delete medicine');
+      toast.error(err?.message || err?.response?.data?.message || 'Failed to delete medicine');
     }
   });
 

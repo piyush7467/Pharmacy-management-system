@@ -108,7 +108,7 @@ export function PurchasesTable({
                       )}
                     </TableCell>
                     <TableCell className="text-center font-mono font-bold text-xs text-text-primary">
-                      {purchase.items?.length || 0}
+                      {purchase.itemsCount ?? purchase.items?.length ?? 0}
                     </TableCell>
                     <TableCell className="text-right font-black text-sm text-text-primary font-mono">
                       {formatCurrency(purchase.grandTotal)}

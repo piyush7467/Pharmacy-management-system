@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { Search, Loader2, RotateCcw, AlertTriangle, CheckCircle2, ShieldCheck, X } from 'lucide-react';
+import { Search, Loader2, RotateCcw, AlertTriangle, CheckCircle2, ShieldCheck, X, FileText, User, Receipt } from 'lucide-react';
 import {
   Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
+  DialogContent
 } from '../../../components/ui/dialog.jsx';
 import { Button } from '../../../components/ui/button.jsx';
-import { Input } from '../../../components/ui/input.jsx';
-import { Label } from '../../../components/ui/label.jsx';
 import { Badge } from '../../../components/ui/badge.jsx';
+import {
+  FormField,
+  FormInput,
+  FormSelect
+} from '../../../components/ui/form-system.jsx';
 import { apiClient } from '../../../services/api/apiClient.js';
 import { formatCurrency, formatDate } from '../../../lib/utils.js';
 import { toast } from 'sonner';
@@ -41,7 +40,8 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
     setIsSearching(true);
     try {
       const res = await apiClient.get('/sales', { params: { search: query } });
-      const match = res.data?.data?.[0];
+      const salesList = Array.isArray(res.data) ? res.data : (res.data?.sales || res.data?.data || res || []);
+      const match = salesList[0];
       if (!match) {
         toast.error(`No invoice found matching "${query}"`);
         setTargetSale(null);
@@ -50,7 +50,7 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
 
       // Fetch full sale details with all items and existing returns
       const fullRes = await apiClient.get(`/sales/${match.id}`);
-      const saleData = fullRes.data.data;
+      const saleData = fullRes.data?.data || fullRes.data || fullRes;
       setTargetSale(saleData);
 
       // Pre-calculate prior returns per saleItem
@@ -77,6 +77,7 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
         };
       });
       setItemsState(initial);
+      toast.success(`Loaded invoice ${saleData.invoiceNumber}`);
     } catch (err) {
       toast.error('Failed to look up invoice');
     } finally {
@@ -138,87 +139,107 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
         onOpenChange(val);
       }}
     >
-      <DialogContent className="max-w-2xl bg-surface-card border-surface shadow-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-black text-text-primary flex items-center gap-2">
-            <RotateCcw className="w-5 h-5 text-brand-primary" />
-            <span>Process Customer Return Note</span>
-          </DialogTitle>
-          <DialogDescription className="text-xs text-text-muted">
-            Lookup the original sale invoice, select returnable items, and specify inventory restitution condition.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="max-w-2xl w-[95vw] max-h-[92vh] p-0 gap-0 overflow-hidden bg-surface-card border-surface shadow-2xl rounded-2xl flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-surface bg-surface-card shrink-0">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary text-primary shrink-0 shadow-2xs">
+              <RotateCcw className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-text-primary">
+                  Process Customer Return
+                </h2>
+                <Badge
+                  variant="outline"
+                  className="font-medium bg-secondary text-primary border-primary/20 px-2 py-0.5 text-xs rounded-md"
+                >
+                  Credit Note
+                </Badge>
+              </div>
+              <p className="text-xs sm:text-sm text-text-muted mt-0.5">
+                Lookup the original sale invoice, select returnable lines, and restitution condition.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 pt-3">
-          {/* Step 1: Invoice Lookup */}
-          <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-wider text-text-muted">
-              1. Original Sale Invoice #
-            </Label>
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
+          {/* Step 1: Search Invoice */}
+          <FormField label="Original Fiscal Tax Invoice Number" required helperText="Enter or scan the customer invoice number">
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  placeholder="Enter full invoice number (e.g. INV-20261109-1234)"
+                <FormInput
+                  leadingIcon={Search}
+                  placeholder="e.g. INV-20261109-1234"
                   value={invoiceLookup}
                   onChange={(e) => setInvoiceLookup(e.target.value)}
-                  className="pl-9 bg-surface-page border-surface font-mono text-sm rounded-xl"
                   disabled={isSearching || isSubmitting}
+                  className="font-mono text-sm"
+                  autoFocus
                 />
               </div>
               <Button
                 type="button"
                 onClick={handleLookup}
                 disabled={isSearching || isSubmitting || !invoiceLookup.trim()}
-                className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold px-4 rounded-xl cursor-pointer"
+                className="h-[46px] px-5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground font-semibold shrink-0 cursor-pointer"
               >
-                {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Find Invoice'}
+                {isSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search Invoice'}
               </Button>
             </div>
-          </div>
+          </FormField>
 
           {/* Invoice Summary Banner */}
           {targetSale && (
-            <div className="p-4 rounded-xl border border-surface bg-surface-page space-y-3">
+            <div className="p-4 rounded-xl border border-surface bg-surface-page space-y-3 animate-in fade-in duration-150">
               <div className="flex items-center justify-between">
-                <div>
-                  <span className="font-mono font-bold text-brand-primary text-sm">
+                <div className="flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-primary" />
+                  <span className="font-mono font-bold text-text-primary text-sm">
                     {targetSale.invoiceNumber}
                   </span>
-                  <span className="text-xs text-text-muted ml-2">
+                  <span className="text-xs text-text-muted">
                     ({formatDate(targetSale.createdAt)})
                   </span>
                 </div>
-                <Badge variant="outline" className="font-bold border-brand-primary/30 text-brand-primary">
+                <Badge variant="outline" className="font-semibold bg-secondary text-primary border-primary/30">
                   {targetSale.status}
                 </Badge>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 text-xs">
+              <div className="grid grid-cols-3 gap-2 text-xs pt-1 border-t border-surface">
                 <div>
-                  <span className="text-text-muted block">Customer:</span>
-                  <span className="font-bold text-text-primary">{targetSale.customerName}</span>
+                  <span className="text-text-muted block font-medium">Customer</span>
+                  <span className="font-bold text-text-primary">{targetSale.customerName || 'Walk-in'}</span>
                 </div>
                 <div>
-                  <span className="text-text-muted block">Payment:</span>
+                  <span className="text-text-muted block font-medium">Payment Method</span>
                   <span className="font-bold text-text-primary">{targetSale.paymentMethod}</span>
                 </div>
                 <div>
-                  <span className="text-text-muted block">Invoice Total:</span>
+                  <span className="text-text-muted block font-medium">Invoice Value</span>
                   <span className="font-bold text-text-primary font-mono">{formatCurrency(targetSale.totalAmount)}</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Step 2: Line Items to Return */}
+          {/* Line Items to Return */}
           {targetSale && (
-            <div className="space-y-3">
-              <Label className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                2. Select Items to Return
-              </Label>
+            <div className="space-y-3 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-text-primary">
+                  Select Line Items to Return
+                </span>
+                <span className="text-xs text-text-muted">
+                  Check items and select quantity
+                </span>
+              </div>
 
-              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
                 {targetSale.items?.map((item) => {
                   const state = itemsState[item.id] || {};
                   const isAvailable = state.maxReturnable > 0;
@@ -226,14 +247,14 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
                   return (
                     <div
                       key={item.id}
-                      className={`p-3 rounded-xl border transition-all ${
+                      className={`p-3.5 rounded-xl border transition-all ${
                         state.selected
-                          ? 'border-brand-primary bg-brand-primary/5'
+                          ? 'border-primary bg-secondary/20 shadow-2xs'
                           : 'border-surface bg-surface-card'
                       } ${!isAvailable ? 'opacity-50 pointer-events-none' : ''}`}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <input
                             type="checkbox"
                             checked={Boolean(state.selected)}
@@ -244,13 +265,13 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
                                 [item.id]: { ...prev[item.id], selected: e.target.checked }
                               }));
                             }}
-                            className="h-4 w-4 rounded border-surface text-brand-primary focus:ring-brand-primary"
+                            className="h-4 w-4 rounded border-surface text-primary focus:ring-primary cursor-pointer"
                           />
                           <div className="min-w-0">
-                            <span className="font-bold text-sm text-text-primary block truncate">
+                            <span className="font-semibold text-sm text-text-primary block truncate">
                               {state.name}
                             </span>
-                            <span className="text-[11px] text-text-muted font-mono">
+                            <span className="text-xs text-text-muted font-mono">
                               Lot: {state.batchNumber} • Sold: {item.quantity} • Max Returnable: {state.maxReturnable}
                             </span>
                           </div>
@@ -258,9 +279,8 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
 
                         {state.selected && (
                           <div className="flex items-center gap-3 shrink-0">
-                            {/* Qty Input */}
                             <div className="flex items-center gap-1.5">
-                              <span className="text-xs text-text-muted font-bold">Qty:</span>
+                              <span className="text-xs text-text-muted font-medium">Qty:</span>
                               <input
                                 type="number"
                                 min="1"
@@ -280,7 +300,6 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
                               />
                             </div>
 
-                            {/* Disposition Selector */}
                             <select
                               value={state.disposition}
                               onChange={(e) => {
@@ -289,7 +308,7 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
                                   [item.id]: { ...prev[item.id], disposition: e.target.value }
                                 }));
                               }}
-                              className="h-8 px-2 text-xs font-bold bg-surface-page border border-surface rounded-lg text-text-primary"
+                              className="h-8 px-2 text-xs font-semibold bg-surface-page border border-surface rounded-lg text-text-primary"
                             >
                               <option value="RESTOCKED">Restock Batch (Saleable)</option>
                               <option value="DAMAGED_DISCARDED">Damaged / Discarded</option>
@@ -304,38 +323,36 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
             </div>
           )}
 
-          {/* Step 3: Mandatory Reason */}
+          {/* Mandatory Reason */}
           {targetSale && (
-            <div className="space-y-1.5">
-              <Label className="text-xs font-bold uppercase tracking-wider text-text-muted">
-                3. Mandatory Return Reason (Min. 3 characters) *
-              </Label>
-              <Input
-                placeholder="e.g., Doctor changed prescription; unopened blister packaging verified"
+            <FormField label="Mandatory Reason for Credit Note" required helperText="Statutory audit requirement for medicines return">
+              <FormInput
+                placeholder="e.g. Unopened blister pack, doctor modified prescription dosage"
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
-                className="bg-surface-page border-surface text-sm rounded-xl"
                 disabled={isSubmitting}
+                required
               />
-            </div>
+            </FormField>
           )}
 
-          {/* Estimated Refund Summary */}
+          {/* Estimated Refund Summary Pill */}
           {targetSale && (
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-surface-page border border-surface">
-              <span className="text-xs font-bold text-text-muted uppercase">Estimated Refund to Customer:</span>
-              <span className="text-lg font-black text-rose-600 dark:text-rose-400 font-mono">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/40 border border-primary/20">
+              <span className="text-xs font-bold text-primary uppercase">Estimated Customer Refund:</span>
+              <span className="text-lg font-black text-primary font-mono">
                 {formatCurrency(estimatedRefund)}
               </span>
             </div>
           )}
 
-          <DialogFooter className="gap-2 sm:gap-0 pt-2">
+          {/* Footer Actions */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-surface">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className="border-surface font-bold cursor-pointer"
+              className="h-10 px-5 text-sm font-medium rounded-xl cursor-pointer"
               disabled={isSubmitting}
             >
               Cancel
@@ -343,12 +360,12 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
             <Button
               type="submit"
               disabled={!targetSale || isSubmitting}
-              className="bg-brand-primary hover:bg-brand-primary/90 text-white font-bold gap-2 cursor-pointer shadow-sm"
+              className="h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground shadow-sm gap-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Processing Return...</span>
+                  <span>Issuing Note...</span>
                 </>
               ) : (
                 <>
@@ -357,7 +374,7 @@ export function ProcessReturnModal({ open, onOpenChange, onSubmitReturn, isSubmi
                 </>
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

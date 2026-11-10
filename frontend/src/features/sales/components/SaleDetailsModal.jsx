@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { Printer, CheckCircle2, RotateCcw, X } from 'lucide-react';
 import {
   Dialog,
@@ -13,6 +14,7 @@ import { Badge } from '../../../components/ui/badge.jsx';
 import { formatCurrency, formatDate } from '../../../lib/utils.js';
 
 export function SaleDetailsModal({ sale, open, onOpenChange }) {
+  const shopProfile = useSelector((state) => state.preferences?.shopProfile);
   if (!sale) return null;
 
   const handlePrint = () => {
@@ -42,7 +44,9 @@ export function SaleDetailsModal({ sale, open, onOpenChange }) {
           >
             {/* Header */}
             <div className="text-center pb-3 border-b border-dashed border-zinc-300 dark:border-zinc-700 space-y-1">
-              <h2 className="text-base font-black tracking-tight uppercase">PharmaFlow Pharmacy</h2>
+              <h2 className="text-base font-black tracking-tight uppercase">
+                {shopProfile?.pharmacyName || 'PharmaPulse Pharmacy'}
+              </h2>
               <p className="text-[11px] text-zinc-500">Official Fiscal Receipt</p>
               <p className="text-[11px] text-zinc-500 font-bold">TAX INVOICE #{sale.invoiceNumber}</p>
             </div>

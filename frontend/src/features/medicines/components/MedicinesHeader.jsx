@@ -7,18 +7,29 @@ import { toast } from 'sonner';
 export function MedicinesHeader({ onOpenAddModal, onOpenImportModal, canManageMedicines }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const downloadFile = (data, filename) => {
+    // If response is already a Blob (from axios responseType: 'blob'), use it directly.
+    // Otherwise wrap text content in a UTF-8 CSV Blob.
+    const blob = data instanceof Blob
+      ? data
+      : new Blob([typeof data === 'string' ? data : JSON.stringify(data)], { type: 'text/csv;charset=utf-8;' });
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+  };
+
   const handleDownloadTemplate = async () => {
     try {
       setDropdownOpen(false);
       toast.info('Generating CSV template with active categories...');
       const res = await apiClient.get('/medicines/template', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'pharmaflow_medicine_import_template.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      downloadFile(res, 'pharmapulse_medicine_import_template.csv');
       toast.success('Template downloaded successfully');
     } catch (err) {
       toast.error('Failed to download template', { description: err.message });
@@ -30,13 +41,7 @@ export function MedicinesHeader({ onOpenAddModal, onOpenImportModal, canManageMe
       setDropdownOpen(false);
       toast.info('Exporting current medicine catalog...');
       const res = await apiClient.get('/medicines/export', { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'pharmaflow_medicines_catalog.csv');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      downloadFile(res, 'pharmapulse_medicines_catalog.csv');
       toast.success('Catalog exported successfully');
     } catch (err) {
       toast.error('Failed to export catalog', { description: err.message });

@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/button.jsx';
 import { Badge } from '../../components/ui/badge.jsx';
 import { Input } from '../../components/ui/input.jsx';
 import { Label } from '../../components/ui/label.jsx';
+import { FormField, FormInput } from '../../components/ui/form-system.jsx';
 import {
   Dialog,
   DialogContent,
@@ -70,9 +71,10 @@ export function CategoriesView() {
     },
     onSuccess: (res) => {
       toast.success(editingCategory ? 'Category updated' : 'Category created', {
-        description: `Category "${res.data?.category?.name}" is ready.`
+        description: `Category "${res.data?.category?.name || res.data?.name || formData.name}" is ready.`
       });
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['categoriesList'] });
       handleCloseModal();
     },
     onError: (err) => {
@@ -118,7 +120,7 @@ export function CategoriesView() {
     saveMutation.mutate(formData);
   };
 
-  const categories = data || [];
+  const categories = Array.isArray(data) ? data : (data?.categories || data?.data || []);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -279,55 +281,69 @@ export function CategoriesView() {
 
       {/* Add / Edit Category Dialog */}
       <Dialog open={modalOpen} onOpenChange={handleCloseModal}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{editingCategory ? 'Edit Category' : 'Create Therapeutic Category'}</DialogTitle>
-            <DialogDescription>
-              Define a pharmacological classification for medicines in your catalogue.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden bg-surface-card border-surface shadow-2xl rounded-2xl">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-surface bg-surface-card shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary text-primary shrink-0 shadow-2xs">
+                <Tags className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight text-text-primary">
+                  {editingCategory ? 'Edit Category' : 'Create Therapeutic Category'}
+                </h2>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Define a pharmacological classification for medicines in your catalogue.
+                </p>
+              </div>
+            </div>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="cat-name">Category Name</Label>
-              <Input
-                id="cat-name"
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <FormField label="Category Name" required helperText="e.g. Cardiovascular & Antihypertensives, Antibiotics">
+              <FormInput
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Cardiovascular & Antihypertensives"
+                placeholder="e.g. Analgesics & Antipyretics"
                 required
+                autoFocus
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="cat-desc">Description (Optional)</Label>
+            <FormField label="Description (Optional)" helperText="Brief therapeutic scope or clinical note">
               <textarea
-                id="cat-desc"
                 rows={3}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Indications, class details, or clinical notes..."
-                className="w-full rounded-lg border border-surface bg-surface-card p-2.5 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                placeholder="Indications, pharmacological mechanism or clinical notes..."
+                className="w-full rounded-xl border border-surface bg-surface-card p-3 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-2xs"
               />
-            </div>
+            </FormField>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseModal}>
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-surface">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCloseModal}
+                disabled={saveMutation.isPending}
+                className="h-10 px-5 text-sm font-medium rounded-xl cursor-pointer"
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="default" disabled={saveMutation.isPending}>
-                {saveMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
-                    Saving...
-                  </>
-                ) : editingCategory ? (
-                  'Update Category'
-                ) : (
-                  'Create Category'
-                )}
+              <Button
+                type="submit"
+                disabled={saveMutation.isPending}
+                className="h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground shadow-sm gap-2 cursor-pointer"
+              >
+                <Tags className="w-4 h-4" />
+                <span>
+                  {saveMutation.isPending
+                    ? 'Saving...'
+                    : editingCategory
+                    ? 'Update Category'
+                    : 'Create Category'}
+                </span>
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

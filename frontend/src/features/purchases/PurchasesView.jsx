@@ -32,7 +32,7 @@ export function PurchasesView() {
       if (searchTerm) params.search = searchTerm.trim();
       if (statusFilter) params.status = statusFilter;
       const res = await apiClient.get('/purchases', { params });
-      return res.data;
+      return res.data?.purchases || res.data || res || [];
     }
   });
 
@@ -40,7 +40,7 @@ export function PurchasesView() {
     queryKey: ['suppliers-active'],
     queryFn: async () => {
       const res = await apiClient.get('/suppliers?isActive=true');
-      return res.data?.suppliers || res.data || [];
+      return res.data?.suppliers || res.data || res || [];
     }
   });
 
@@ -48,13 +48,15 @@ export function PurchasesView() {
     queryKey: ['medicines-active'],
     queryFn: async () => {
       const res = await apiClient.get('/medicines?isActive=true&limit=100');
-      return res.data?.medicines || res.data || [];
+      return res.data?.medicines || res.data || res || [];
     }
   });
 
-  const purchases = purchasesData?.data || [];
-  const suppliers = Array.isArray(suppliersData) ? suppliersData : suppliersData?.suppliers || [];
-  const medicines = Array.isArray(medicinesData) ? medicinesData : medicinesData?.medicines || [];
+  const purchases = Array.isArray(purchasesData)
+    ? purchasesData
+    : (purchasesData?.purchases || purchasesData?.data || []);
+  const suppliers = Array.isArray(suppliersData) ? suppliersData : (suppliersData?.suppliers || suppliersData?.data || []);
+  const medicines = Array.isArray(medicinesData) ? medicinesData : (medicinesData?.medicines || medicinesData?.data || []);
 
   // Summary Metrics
   const totalPurchases = purchases.length;
@@ -73,12 +75,13 @@ export function PurchasesView() {
     onSuccess: (data, variables, context) => {
       toast.success(data?.meta?.message || 'Purchase order created successfully');
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-batches'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
       queryClient.invalidateQueries({ queryKey: ['medicines'] });
       queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to create purchase order');
+      toast.error(err?.message || err?.response?.data?.message || 'Failed to create purchase order');
     }
   });
 
@@ -90,12 +93,13 @@ export function PurchasesView() {
     onSuccess: (data) => {
       toast.success(data?.meta?.message || 'Goods received and inventory batches updated!');
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-batches'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
       queryClient.invalidateQueries({ queryKey: ['medicines'] });
       queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
-      queryClient.invalidateQueries({ queryKey: ['inventory-overview'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to receive goods');
+      toast.error(err?.message || err?.response?.data?.message || 'Failed to receive goods');
     }
   });
 
@@ -109,7 +113,7 @@ export function PurchasesView() {
       queryClient.invalidateQueries({ queryKey: ['purchases'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to cancel purchase order');
+      toast.error(err?.message || err?.response?.data?.message || 'Failed to cancel purchase order');
     }
   });
 

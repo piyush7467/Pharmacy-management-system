@@ -11,13 +11,19 @@ import {
   Loader2,
   RefreshCw,
   Search,
-  ShieldAlert
+  ShieldAlert,
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card.jsx';
 import { Button } from '../../components/ui/button.jsx';
 import { Badge } from '../../components/ui/badge.jsx';
 import { Input } from '../../components/ui/input.jsx';
 import { Label } from '../../components/ui/label.jsx';
+import { FormField, FormInput, FormSelect } from '../../components/ui/form-system.jsx';
 import {
   Dialog,
   DialogContent,
@@ -115,7 +121,7 @@ export function StaffManagementView() {
     createMutation.mutate(formData);
   };
 
-  const usersList = data || [];
+  const usersList = Array.isArray(data) ? data : (data?.users || data?.data || []);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -182,7 +188,7 @@ export function StaffManagementView() {
           {isLoading ? (
             <div className="flex items-center justify-center p-12 text-text-muted gap-2 text-xs">
               <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
-              Loading staff accounts from Neon DB...
+              Loading staff accounts...
             </div>
           ) : isError ? (
             <div className="p-8 text-center text-xs text-red-600 space-y-2">
@@ -287,84 +293,89 @@ export function StaffManagementView() {
 
       {/* Add Staff Modal */}
       <Dialog open={addModalOpen} onOpenChange={setAddModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary mb-2">
-              <UserPlus className="h-5 w-5" />
+        <DialogContent className="max-w-md p-0 gap-0 overflow-hidden bg-surface-card border-surface shadow-2xl rounded-2xl">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-surface bg-surface-card shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-secondary text-primary shrink-0 shadow-2xs">
+                <UserPlus className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight text-text-primary">
+                  Add Staff Member
+                </h2>
+                <p className="text-xs text-text-muted mt-0.5">
+                  Create a staff account with role-based operational permissions.
+                </p>
+              </div>
             </div>
-            <DialogTitle>Add Staff Member</DialogTitle>
-            <DialogDescription>
-              Create a new operational staff profile. The user can immediately sign in with these credentials.
-            </DialogDescription>
-          </DialogHeader>
+          </div>
 
-          <form onSubmit={handleCreateSubmit} className="space-y-3.5 py-1">
-            <div className="space-y-1.5">
-              <Label htmlFor="staff-name">Full Name</Label>
-              <Input
-                id="staff-name"
+          <form onSubmit={handleCreateSubmit} className="p-6 space-y-4">
+            <FormField label="Full Name" required helperText="e.g. Diya Sharma">
+              <FormInput
+                leadingIcon={User}
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                placeholder="e.g. Diya Sharma"
+                placeholder="Staff full legal name"
                 required
+                autoFocus
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="staff-email">Staff Email</Label>
-              <Input
-                id="staff-email"
+            <FormField label="Staff Email Address" required helperText="Used for system sign-in and security notifications">
+              <FormInput
                 type="email"
+                leadingIcon={Mail}
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="e.g. diya.sharma@pharmapulse.demo"
+                placeholder="diya.sharma@pharmapulse.com"
                 required
               />
-            </div>
+            </FormField>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="staff-role">Role Assignment</Label>
-              <select
-                id="staff-role"
+            <FormField label="Role & Access Scope" required>
+              <FormSelect
+                leadingIcon={Shield}
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full h-9 rounded-lg border border-surface bg-surface-card px-3 text-xs text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary"
               >
-                <option value="PHARMACIST">Lead Pharmacist (Inventory & Dispensing)</option>
-                <option value="CASHIER">Cashier (POS & Invoicing)</option>
-              </select>
-              <p className="text-[11px] text-text-muted">
-                Note: Creating secondary ADMIN accounts through staff management is strictly disabled by policy.
-              </p>
-            </div>
+                <option value="PHARMACIST">Lead Pharmacist (Inventory, GRN & Dispensing)</option>
+                <option value="CASHIER">Cashier (POS Checkout & Invoice Billing)</option>
+              </FormSelect>
+            </FormField>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="staff-password">Initial Password</Label>
-              <Input
-                id="staff-password"
+            <FormField label="Initial Password" required helperText="Minimum 8 characters">
+              <FormInput
                 type="password"
+                leadingIcon={Lock}
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                placeholder="Minimum 8 characters"
+                placeholder="••••••••"
                 required
               />
-            </div>
+            </FormField>
 
-            <DialogFooter className="pt-2">
-              <Button type="button" variant="outline" onClick={() => setAddModalOpen(false)}>
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-surface">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAddModalOpen(false)}
+                disabled={createMutation.isPending}
+                className="h-10 px-5 text-sm font-medium rounded-xl cursor-pointer"
+              >
                 Cancel
               </Button>
-              <Button type="submit" variant="default" disabled={createMutation.isPending}>
-                {createMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                    Creating Profile...
-                  </>
-                ) : (
-                  'Create Staff Account'
-                )}
+              <Button
+                type="submit"
+                disabled={createMutation.isPending}
+                className="h-10 px-6 text-sm font-semibold rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground shadow-sm gap-2 cursor-pointer"
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>
+                  {createMutation.isPending ? 'Provisioning...' : 'Create Staff Account'}
+                </span>
               </Button>
-            </DialogFooter>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

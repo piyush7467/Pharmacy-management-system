@@ -24,7 +24,7 @@ export function InventoryView() {
     queryKey: ['inventory-overview'],
     queryFn: async () => {
       const res = await apiClient.get('/inventory/overview');
-      return res.data?.data || {};
+      return res.data || res || {};
     }
   });
 
@@ -36,12 +36,12 @@ export function InventoryView() {
       if (statusFilter) params.status = statusFilter;
       if (expiryFilter) params.expiringWithinDays = expiryFilter;
       const res = await apiClient.get('/inventory/batches', { params });
-      return res.data;
+      return res.data?.batches || res.data || res || [];
     }
   });
 
-  const batches = batchesData?.data || [];
-  const overview = overviewData || {};
+  const batches = Array.isArray(batchesData) ? batchesData : (batchesData?.batches || batchesData?.data || []);
+  const overview = overviewData?.data || overviewData || {};
 
   // Mutation: Record Stock Adjustment
   const adjustMutation = useMutation({
@@ -57,7 +57,7 @@ export function InventoryView() {
       queryClient.invalidateQueries({ queryKey: ['pos-medicines'] });
     },
     onError: (err) => {
-      toast.error(err.response?.data?.message || 'Failed to record stock adjustment');
+      toast.error(err.message || err.response?.data?.message || 'Failed to record stock adjustment');
     }
   });
 

@@ -52,9 +52,9 @@ export function PurchaseDetailsModal({ purchase, open, onOpenChange }) {
                   <Building2 className="w-3.5 h-3.5 text-brand-primary" />
                   {purchase.supplier?.name}
                 </span>
-                {purchase.supplier?.gstin && (
+                {(purchase.supplier?.taxNumber || purchase.supplier?.gstin) && (
                   <span className="text-[11px] text-text-muted font-mono block">
-                    GSTIN: {purchase.supplier.gstin}
+                    GSTIN / Tax ID: {purchase.supplier?.taxNumber || purchase.supplier?.gstin}
                   </span>
                 )}
               </div>

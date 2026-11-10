@@ -34,6 +34,13 @@ export async function listPurchases({
         receivedByUser: {
           select: { id: true, fullName: true, role: true }
         },
+        items: {
+          include: {
+            medicine: {
+              select: { id: true, name: true, genericName: true, sku: true, dosageForm: true, strength: true }
+            }
+          }
+        },
         _count: {
           select: { items: true }
         }
@@ -56,7 +63,21 @@ export async function listPurchases({
       taxTotal: Number(p.taxTotal),
       grandTotal: Number(p.grandTotal),
       receivedByUser: p.receivedByUser,
-      itemsCount: p._count.items,
+      itemsCount: p._count?.items ?? p.items?.length ?? 0,
+      items: (p.items || []).map((item) => ({
+        id: item.id,
+        purchaseId: item.purchaseId,
+        medicineId: item.medicineId,
+        medicine: item.medicine,
+        batchNumber: item.batchNumber,
+        manufacturingDate: item.manufacturingDate,
+        expiryDate: item.expiryDate,
+        orderedQuantity: item.orderedQuantity,
+        receivedQuantity: item.receivedQuantity,
+        unitCost: Number(item.unitCost),
+        unitSalePrice: Number(item.unitSalePrice),
+        lineTotal: Number(item.lineTotal)
+      })),
       notes: p.notes,
       createdAt: p.createdAt
     })),
@@ -211,7 +232,7 @@ export async function createPurchase(data, actorId) {
       manufacturingDate: item.manufacturingDate ? new Date(item.manufacturingDate) : null,
       expiryDate,
       orderedQuantity: orderedQty,
-      receivedQuantity: 0,
+      receivedQuantity: status === 'RECEIVED' ? orderedQty : 0,
       unitCost,
       unitSalePrice,
       lineTotal
@@ -220,6 +241,121 @@ export async function createPurchase(data, actorId) {
 
   const grandTotal = Math.round((calculatedSubtotal + calculatedTaxTotal) * 100) / 100;
   const purchaseNumber = `PO-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+  if (status === 'RECEIVED') {
+    // Immediate Direct Receipt: Create Purchase, items, Batches, and StockMovements inside a single transaction
+    const purchase = await prisma.$transaction(async (tx) => {
+      const createdPurchase = await tx.purchase.create({
+        data: {
+          purchaseNumber,
+          supplierId,
+          status: 'RECEIVED',
+          orderedDate: now,
+          receivedDate: now,
+          receivedByUserId: actorId,
+          subtotal: calculatedSubtotal,
+          taxTotal: calculatedTaxTotal,
+          grandTotal,
+          notes,
+          items: {
+            create: validatedItems
+          }
+        },
+        include: {
+          supplier: true,
+          receivedByUser: { select: { id: true, fullName: true, role: true } },
+          items: {
+            include: { medicine: true }
+          }
+        }
+      });
+
+      // Stock each item into active inventory
+      for (const item of createdPurchase.items) {
+        let batch = await tx.batch.findUnique({
+          where: {
+            medicineId_batchNumber: {
+              medicineId: item.medicineId,
+              batchNumber: item.batchNumber
+            }
+          }
+        });
+
+        let balanceAfter = 0;
+        if (batch) {
+          balanceAfter = batch.currentQuantity + item.orderedQuantity;
+          batch = await tx.batch.update({
+            where: { id: batch.id },
+            data: {
+              currentQuantity: balanceAfter,
+              purchaseCost: item.unitCost,
+              salePrice: item.unitSalePrice,
+              status: 'ACTIVE'
+            }
+          });
+        } else {
+          balanceAfter = item.orderedQuantity;
+          batch = await tx.batch.create({
+            data: {
+              medicineId: item.medicineId,
+              batchNumber: item.batchNumber,
+              purchaseItemId: item.id,
+              manufacturingDate: item.manufacturingDate,
+              expiryDate: item.expiryDate,
+              initialQuantity: item.orderedQuantity,
+              currentQuantity: item.orderedQuantity,
+              purchaseCost: item.unitCost,
+              salePrice: item.unitSalePrice,
+              status: 'ACTIVE'
+            }
+          });
+        }
+
+        // Create immutable StockMovement
+        await tx.stockMovement.create({
+          data: {
+            batchId: batch.id,
+            movementType: 'PURCHASE_RECEIPT',
+            quantityDelta: item.orderedQuantity,
+            balanceAfter,
+            performedByUserId: actorId,
+            referenceId: createdPurchase.id,
+            reason: `Direct purchase intake receipt ${createdPurchase.purchaseNumber}`
+          }
+        });
+      }
+
+      // Record Audit Log
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          action: 'PURCHASE_CREATED_AND_RECEIVED',
+          entityName: 'PURCHASE',
+          entityId: createdPurchase.id,
+          diff: {
+            purchaseNumber: createdPurchase.purchaseNumber,
+            grandTotal,
+            itemCount: createdPurchase.items.length
+          }
+        }
+      });
+
+      return createdPurchase;
+    });
+
+    return {
+      ...purchase,
+      subtotal: Number(purchase.subtotal),
+      taxTotal: Number(purchase.taxTotal),
+      grandTotal: Number(purchase.grandTotal),
+      items: purchase.items.map((item) => ({
+        ...item,
+        unitCost: Number(item.unitCost),
+        unitSalePrice: Number(item.unitSalePrice),
+        lineTotal: Number(item.lineTotal)
+      }))
+    };
+  }
 
   const purchase = await prisma.purchase.create({
     data: {
