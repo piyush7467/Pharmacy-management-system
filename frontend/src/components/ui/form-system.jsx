@@ -274,6 +274,29 @@ export const FormSelect = React.forwardRef(
 FormSelect.displayName = 'FormSelect';
 
 /**
+ * FormTextarea — Standard Multi-line Control
+ */
+export const FormTextarea = React.forwardRef(
+  ({ error, className, rows = 3, ...props }, ref) => {
+    return (
+      <textarea
+        ref={ref}
+        rows={rows}
+        className={cn(
+          'flex w-full rounded-xl border border-surface bg-surface-card px-3.5 py-2.5 text-[15px] text-text-primary placeholder:text-text-muted/70 transition-all shadow-2xs resize-none',
+          'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
+          'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-surface-page',
+          error && 'border-red-500 focus:ring-red-500/20 focus:border-red-500',
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+FormTextarea.displayName = 'FormTextarea';
+
+/**
  * TagInput — Interactive Pill Tag Editor for Classifications
  */
 export function TagInput({ tags = [], onAddTag, onRemoveTag, placeholder = 'Add tag...' }) {

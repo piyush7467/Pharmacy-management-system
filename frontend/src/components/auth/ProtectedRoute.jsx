@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ShieldAlert, Loader2 } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 import { apiClient } from '../../services/api/apiClient.js';
 import { setCredentials, clearCredentials } from '../../features/auth/authSlice.js';
 import { Button } from '../ui/button.jsx';
+import { GlobalLoadingScreen } from '../common/GlobalLoadingScreen.jsx';
 
 export function ProtectedRoute({ children, allowedRoles }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, isAuthenticated, isInitialized } = useSelector((state) => state.auth);
   const [checking, setChecking] = useState(!isInitialized);
+  const [authError, setAuthError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -24,10 +27,15 @@ export function ProtectedRoute({ children, allowedRoles }) {
               user: res.data.user,
               accessToken: res.data.accessToken
             }));
+            setAuthError(null);
           }
-        } catch {
+        } catch (err) {
           if (isMounted) {
             dispatch(clearCredentials());
+            // If offline or network error, let user know rather than infinite loop
+            if (!err.response && err.message) {
+              setAuthError('Unable to connect to authentication server. Please verify your connection.');
+            }
           }
         } finally {
           if (isMounted) {
@@ -45,10 +53,17 @@ export function ProtectedRoute({ children, allowedRoles }) {
 
   if (checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-page text-text-muted text-xs gap-2">
-        <Loader2 className="w-5 h-5 animate-spin text-brand-primary" />
-        Verifying session security...
-      </div>
+      <GlobalLoadingScreen
+        title="Verifying your session"
+        subtitle="Please wait while we prepare your workspace."
+        error={authError}
+        onRetry={() => {
+          setChecking(true);
+          setAuthError(null);
+          dispatch(clearCredentials());
+        }}
+        onGoToLogin={() => navigate('/login', { replace: true })}
+      />
     );
   }
 
@@ -77,3 +92,4 @@ export function ProtectedRoute({ children, allowedRoles }) {
 
   return children;
 }
+

@@ -17,11 +17,13 @@ import { PosView } from '../features/pos/PosView.jsx';
 import { InventoryView } from '../features/inventory/InventoryView.jsx';
 import { SalesView } from '../features/sales/SalesView.jsx';
 import { ReturnsView } from '../features/returns/ReturnsView.jsx';
+import { CustomersView } from '../features/customers/CustomersView.jsx';
 import { ReportsView } from '../features/reports/ReportsView.jsx';
 import { AuditView } from '../features/audit/AuditView.jsx';
 import { SettingsView } from '../features/settings/SettingsView.jsx';
 import { PrivacyTermsView } from '../features/legal/PrivacyTermsView.jsx';
 import { PharmacyProfileView } from '../features/profile/PharmacyProfileView.jsx';
+import { AccountSettingsView } from '../features/account/AccountSettingsView.jsx';
 
 function PlaceholderView({ title, description, moduleName }) {
   return (
@@ -77,6 +79,7 @@ export function AppRoutes() {
         <Route path="inventory" element={<InventoryView />} />
         <Route path="sales" element={<SalesView />} />
         <Route path="returns" element={<ReturnsView />} />
+        <Route path="customers" element={<CustomersView />} />
         <Route path="reports" element={<ReportsView />} />
         <Route path="privacy" element={<PrivacyTermsView />} />
         <Route path="terms" element={<PrivacyTermsView />} />
@@ -102,6 +105,7 @@ export function AppRoutes() {
         />
         <Route path="settings" element={<SettingsView />} />
         <Route path="profile" element={<PharmacyProfileView />} />
+        <Route path="account" element={<AccountSettingsView />} />
       </Route>
 
       {/* Fallback to root */}

@@ -37,7 +37,8 @@ const NAV_GROUPS = [
     title: 'Sales & Customers',
     items: [
       { to: '/sales', label: 'Sales', icon: Receipt },
-      { to: '/returns', label: 'Returns', icon: RotateCcw }
+      { to: '/returns', label: 'Returns', icon: RotateCcw },
+      { to: '/customers', label: 'Customers', icon: UserCheck }
     ]
   },
   {
@@ -170,7 +171,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
         {/* Settings & Legal Navigation Items at Bottom */}
         <div className="p-2.5 border-t border-surface space-y-1">
           <NavLink
-            to="/profile"
+            to="/settings"
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
               cn(
@@ -182,10 +183,10 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
             }
           >
             <Settings className="w-4 h-4 shrink-0 text-text-muted group-hover:text-text-primary" />
-            {!collapsed && <span className="truncate">Pharmacy Profile</span>}
+            {!collapsed && <span className="truncate">Pharmacy Settings</span>}
             {collapsed && (
               <div className="absolute left-full ml-3 hidden rounded-lg bg-zinc-900 dark:bg-zinc-800 px-3 py-1.5 text-[12px] font-medium text-white shadow-xl group-hover:flex items-center gap-1.5 z-50 whitespace-nowrap">
-                Pharmacy Profile
+                Pharmacy Settings
               </div>
             )}
           </NavLink>

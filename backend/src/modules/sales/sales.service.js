@@ -3,6 +3,7 @@ import { AppError } from '../../middleware/errorHandler.js';
 
 export async function createSale(data, cashierId, context = {}) {
   const {
+    customerId = null,
     customerName = 'Walk-in Customer',
     customerPhone = null,
     paymentMethod = 'CASH',
@@ -17,6 +18,9 @@ export async function createSale(data, cashierId, context = {}) {
       where: { idempotencyKey },
       include: {
         cashier: { select: { id: true, fullName: true, role: true } },
+        customer: {
+          select: { id: true, customerCode: true, type: true, name: true, phone: true, companyName: true, taxNumber: true }
+        },
         items: {
           include: {
             medicine: { select: { id: true, name: true, sku: true, dosageForm: true } },
@@ -36,10 +40,11 @@ export async function createSale(data, cashierId, context = {}) {
     throw new AppError('Sale must contain at least one item', 400, 'EMPTY_SALE_ITEMS');
   }
 
-  const validPaymentMethods = ['CASH', 'CARD', 'UPI', 'SPLIT'];
+  const validPaymentMethods = ['CASH', 'CARD', 'UPI', 'SPLIT', 'CREDIT_LEDGER', 'CREDIT'];
   if (!validPaymentMethods.includes(paymentMethod)) {
     throw new AppError(`Invalid payment method: ${paymentMethod}`, 400, 'INVALID_PAYMENT_METHOD');
   }
+  const resolvedPaymentMethod = paymentMethod === 'CREDIT' ? 'CREDIT_LEDGER' : paymentMethod;
 
   // Strict Financial Discount Validation
   if (discountAmount !== undefined && discountAmount !== null && discountAmount !== '') {
@@ -176,6 +181,32 @@ export async function createSale(data, cashierId, context = {}) {
       const finalDiscount = numericDiscount;
       const totalAmount = Math.max(0, Math.round((subtotal + taxAmount - finalDiscount) * 100) / 100);
 
+      // Customer verification and Credit Ledger validation
+      let linkedCustomer = null;
+      if (customerId) {
+        linkedCustomer = await tx.customer.findUnique({
+          where: { id: customerId }
+        });
+        if (!linkedCustomer || !linkedCustomer.isActive) {
+          throw new AppError('Customer profile not found or is currently inactive', 404, 'CUSTOMER_NOT_FOUND');
+        }
+      }
+
+      if (resolvedPaymentMethod === 'CREDIT_LEDGER') {
+        if (!linkedCustomer) {
+          throw new AppError('A registered customer account is required for Credit Ledger settlement', 400, 'CUSTOMER_REQUIRED_FOR_CREDIT');
+        }
+        const creditLimit = Number(linkedCustomer.creditLimit) || 0;
+        const currentBalance = Number(linkedCustomer.currentBalance) || 0;
+        if (creditLimit > 0 && (currentBalance + totalAmount) > creditLimit) {
+          throw new AppError(
+            `Credit limit exceeded. Outstanding balance: ₹${currentBalance.toFixed(2)}, Available limit: ₹${creditLimit.toFixed(2)}, Order total: ₹${totalAmount.toFixed(2)}`,
+            400,
+            'CREDIT_LIMIT_EXCEEDED'
+          );
+        }
+      }
+
       // Generate Unique Fiscal Invoice Number
       const invoiceNumber = `INV-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -184,13 +215,14 @@ export async function createSale(data, cashierId, context = {}) {
         data: {
           invoiceNumber,
           cashierId,
-          customerName: customerName.trim(),
-          customerPhone: customerPhone ? customerPhone.trim() : null,
+          customerId: linkedCustomer ? linkedCustomer.id : null,
+          customerName: linkedCustomer ? linkedCustomer.name : customerName.trim(),
+          customerPhone: linkedCustomer ? (linkedCustomer.phone || customerPhone) : (customerPhone ? customerPhone.trim() : null),
           subtotal,
           discountAmount: finalDiscount,
           taxAmount,
           totalAmount,
-          paymentMethod,
+          paymentMethod: resolvedPaymentMethod,
           status: 'COMPLETED',
           idempotencyKey,
           items: {
@@ -199,6 +231,9 @@ export async function createSale(data, cashierId, context = {}) {
         },
         include: {
           cashier: { select: { id: true, fullName: true, role: true } },
+          customer: {
+            select: { id: true, customerCode: true, type: true, name: true, phone: true, companyName: true, taxNumber: true }
+          },
           items: {
             include: {
               medicine: {
@@ -211,6 +246,16 @@ export async function createSale(data, cashierId, context = {}) {
           }
         }
       });
+
+      // Update Customer Ledger Balance if settled on credit
+      if (resolvedPaymentMethod === 'CREDIT_LEDGER' && linkedCustomer) {
+        await tx.customer.update({
+          where: { id: linkedCustomer.id },
+          data: {
+            currentBalance: { increment: totalAmount }
+          }
+        });
+      }
 
       // 6. Record Stock Movements linked to Sale
       for (const sm of stockMovementsToCreate) {
@@ -276,7 +321,9 @@ export async function listSales({
           OR: [
             { invoiceNumber: { contains: search, mode: 'insensitive' } },
             { customerName: { contains: search, mode: 'insensitive' } },
-            { customerPhone: { contains: search, mode: 'insensitive' } }
+            { customerPhone: { contains: search, mode: 'insensitive' } },
+            { customer: { name: { contains: search, mode: 'insensitive' } } },
+            { customer: { customerCode: { contains: search, mode: 'insensitive' } } }
           ]
         }
       : {})
@@ -288,6 +335,7 @@ export async function listSales({
       where,
       include: {
         cashier: { select: { id: true, fullName: true, role: true } },
+        customer: { select: { id: true, customerCode: true, type: true, name: true, phone: true } },
         _count: { select: { items: true, returns: true } }
       },
       orderBy: { createdAt: 'desc' },
@@ -300,6 +348,8 @@ export async function listSales({
     sales: sales.map((s) => ({
       id: s.id,
       invoiceNumber: s.invoiceNumber,
+      customerId: s.customerId,
+      customer: s.customer,
       customerName: s.customerName,
       customerPhone: s.customerPhone,
       subtotal: Number(s.subtotal),
@@ -327,6 +377,22 @@ export async function getSaleById(id) {
     where: { id },
     include: {
       cashier: { select: { id: true, fullName: true, email: true, role: true } },
+      customer: {
+        select: {
+          id: true,
+          customerCode: true,
+          type: true,
+          name: true,
+          phone: true,
+          email: true,
+          companyName: true,
+          taxNumber: true,
+          drugLicenseNo: true,
+          address: true,
+          creditLimit: true,
+          currentBalance: true
+        }
+      },
       items: {
         include: {
           medicine: {
@@ -411,6 +477,13 @@ function formatSaleResponse(sale) {
     discountAmount: Number(sale.discountAmount),
     taxAmount: Number(sale.taxAmount),
     totalAmount: Number(sale.totalAmount),
+    customer: sale.customer
+      ? {
+          ...sale.customer,
+          creditLimit: sale.customer.creditLimit !== undefined ? Number(sale.customer.creditLimit) : undefined,
+          currentBalance: sale.customer.currentBalance !== undefined ? Number(sale.customer.currentBalance) : undefined
+        }
+      : null,
     items: sale.items?.map((item) => ({
       ...item,
       unitPrice: Number(item.unitPrice),

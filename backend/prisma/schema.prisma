@@ -43,11 +43,20 @@ enum StockMovementType {
   EXPIRED_DISPOSAL
 }
 
+enum CustomerType {
+  GENERAL
+  REGULAR
+  HOSPITAL_CLINIC
+  WHOLESALE_BULK
+  CORPORATE_TPA
+}
+
 enum PaymentMethod {
   CASH
   CARD
   UPI
   SPLIT
+  CREDIT_LEDGER
 }
 
 enum SaleStatus {
@@ -274,10 +283,40 @@ model StockMovement {
   @@index([performedByUserId])
 }
 
+model Customer {
+  id                 String       @id @default(uuid()) @db.Uuid
+  customerCode       String       @unique @db.VarChar(50)
+  type               CustomerType @default(GENERAL)
+  name               String       @db.VarChar(100)
+  phone              String?      @db.VarChar(20)
+  email              String?      @db.VarChar(255)
+  companyName        String?      @db.VarChar(150)
+  taxNumber          String?      @db.VarChar(50)
+  drugLicenseNo      String?      @db.VarChar(50)
+  defaultDiscountPct Decimal      @default(0.00) @db.Decimal(5, 2)
+  creditLimit        Decimal      @default(0.00) @db.Decimal(12, 2)
+  currentBalance     Decimal      @default(0.00) @db.Decimal(12, 2)
+  paymentTermsDays   Int          @default(0)
+  address            String?      @db.Text
+  notes              String?      @db.Text
+  isActive           Boolean      @default(true)
+  deletedAt          DateTime?    @db.Timestamptz(6)
+  createdAt          DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime     @updatedAt @db.Timestamptz(6)
+
+  sales              Sale[]       @relation("CustomerSales")
+
+  @@index([customerCode])
+  @@index([phone])
+  @@index([type])
+  @@index([isActive])
+}
+
 model Sale {
   id             String        @id @default(uuid()) @db.Uuid
   invoiceNumber  String        @unique @db.VarChar(50)
   cashierId      String        @db.Uuid
+  customerId     String?       @db.Uuid
   customerName   String        @default("Walk-in Customer") @db.VarChar(100)
   customerPhone  String?       @db.VarChar(20)
   subtotal       Decimal       @default(0.00) @db.Decimal(12, 2)
@@ -290,12 +329,14 @@ model Sale {
   createdAt      DateTime      @default(now()) @db.Timestamptz(6)
   updatedAt      DateTime      @updatedAt @db.Timestamptz(6)
 
-  cashier User             @relation("SalesByCashier", fields: [cashierId], references: [id], onDelete: Restrict)
-  items   SaleItem[]
-  returns CustomerReturn[]
+  cashier  User             @relation("SalesByCashier", fields: [cashierId], references: [id], onDelete: Restrict)
+  customer Customer?        @relation("CustomerSales", fields: [customerId], references: [id], onDelete: SetNull)
+  items    SaleItem[]
+  returns  CustomerReturn[]
 
   @@index([invoiceNumber])
   @@index([cashierId])
+  @@index([customerId])
   @@index([createdAt])
   @@index([status])
 }

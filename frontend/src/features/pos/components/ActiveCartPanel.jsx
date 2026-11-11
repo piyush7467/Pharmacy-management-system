@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ShoppingCart,
   User,
@@ -6,16 +6,25 @@ import {
   Minus,
   Trash2,
   ArrowRight,
-  RotateCcw
+  RotateCcw,
+  Search,
+  X,
+  Building2,
+  Percent,
+  CreditCard,
+  CheckCircle2
 } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import { formatCurrency, formatDate } from '../../../lib/utils.js';
+import { apiClient } from '../../../services/api/apiClient.js';
 
 export function ActiveCartPanel({
   tempBillNumber,
   customerName,
   setCustomerName,
   customerPhone,
+  selectedCustomer,
+  onSelectCustomer,
   onOpenCustomerModal,
   cart,
   updateQuantity,
@@ -27,6 +36,60 @@ export function ActiveCartPanel({
   onProceedToBilling
 }) {
   const totalUnits = cart.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Customer Autocomplete Search State
+  const [lookupQuery, setLookupQuery] = useState('');
+  const [lookupResults, setLookupResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (!lookupQuery.trim() || lookupQuery.trim().length < 2) {
+      setLookupResults([]);
+      setDropdownOpen(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await apiClient.get('/customers/lookup', {
+          params: { q: lookupQuery.trim(), limit: 6 }
+        });
+        const results = res.data?.data || res.data || [];
+        setLookupResults(results);
+        setDropdownOpen(results.length > 0);
+      } catch (err) {
+        console.error('Customer lookup error', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [lookupQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handlePickCustomer = (cust) => {
+    onSelectCustomer(cust);
+    setLookupQuery('');
+    setDropdownOpen(false);
+  };
+
+  const handleUnlinkCustomer = () => {
+    onSelectCustomer(null);
+    setCustomerName('Walk-in Customer');
+  };
 
   return (
     <div className="flex flex-col h-full rounded-2xl border border-surface bg-surface-card shadow-xs overflow-hidden">
@@ -58,38 +121,148 @@ export function ActiveCartPanel({
         )}
       </div>
 
-      {/* 2. Customer Row (Clean, Single Card) */}
+      {/* 2. Customer Row (Intelligent Segment Autocomplete & Dynamic Badge) */}
       <div className="px-5 py-3 border-b border-surface shrink-0 bg-surface-card">
         <div className="flex items-center justify-between mb-1.5">
           <label className="text-xs font-bold text-text-muted uppercase tracking-wider flex items-center gap-1.5">
-            <User className="w-4 h-4 text-brand-primary" /> Customer Name
+            <User className="w-4 h-4 text-brand-primary" /> Customer Account
           </label>
-          {customerPhone && (
-            <span className="text-xs font-mono text-text-muted">Ph: {customerPhone}</span>
+          {selectedCustomer ? (
+            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+              ● Linked Profile
+            </span>
+          ) : (
+            customerPhone && (
+              <span className="text-xs font-mono text-text-muted">Ph: {customerPhone}</span>
+            )
           )}
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <div className="relative flex-1">
-            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-            <input
-              type="text"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="Walk-in Customer (or click New)"
-              className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-surface bg-surface-page text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary font-medium"
-            />
-          </div>
+        {selectedCustomer ? (
+          /* Linked Customer Card Pill */
+          <div className="flex items-center justify-between p-2.5 rounded-xl border border-brand-primary/30 bg-brand-primary/5 dark:bg-brand-primary/10">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-brand-primary/15 text-brand-primary flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                {selectedCustomer.name.slice(0, 2)}
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-bold text-sm text-text-primary truncate">
+                    {selectedCustomer.name}
+                  </span>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-surface-card border border-surface text-text-muted">
+                    {selectedCustomer.customerCode}
+                  </span>
+                  <span
+                    className={`text-[10px] font-semibold px-1.5 py-0.2 rounded border ${
+                      selectedCustomer.type === 'HOSPITAL_CLINIC'
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : selectedCustomer.type === 'WHOLESALE_BULK'
+                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                        : selectedCustomer.type === 'REGULAR'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    {selectedCustomer.type.replace('_', ' ')}
+                  </span>
+                </div>
 
-          <Button
-            size="default"
-            variant="outline"
-            onClick={onOpenCustomerModal}
-            className="h-9 px-3.5 text-xs md:text-sm font-bold border-surface gap-1.5 shrink-0 hover:bg-surface-muted cursor-pointer"
-          >
-            <Plus className="w-4 h-4" /> New
-          </Button>
-        </div>
+                <div className="flex items-center gap-2 text-[11px] text-text-muted mt-0.5">
+                  {selectedCustomer.phone && <span>Ph: {selectedCustomer.phone}</span>}
+                  {selectedCustomer.defaultDiscountPct > 0 && (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                      {selectedCustomer.defaultDiscountPct}% Discount
+                    </span>
+                  )}
+                  {selectedCustomer.creditLimit > 0 && (
+                    <span className="text-text-muted">
+                      Bal: {formatCurrency(selectedCustomer.currentBalance || 0)}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleUnlinkCustomer}
+              className="p-1.5 rounded-lg text-text-muted hover:text-red-600 hover:bg-surface-card transition-colors cursor-pointer shrink-0 ml-2"
+              title="Unlink Customer (Switch to Walk-in)"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          /* Walk-in Input with Live Autocomplete */
+          <div className="relative flex items-center gap-2" ref={dropdownRef}>
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+              <input
+                type="text"
+                value={lookupQuery || customerName}
+                onChange={(e) => {
+                  setLookupQuery(e.target.value);
+                  setCustomerName(e.target.value);
+                }}
+                onFocus={() => {
+                  if (lookupResults.length > 0) setDropdownOpen(true);
+                }}
+                placeholder="Walk-in Customer (type name or phone to search)"
+                className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-surface bg-surface-page text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary font-medium"
+              />
+
+              {/* Autocomplete Dropdown */}
+              {dropdownOpen && lookupResults.length > 0 && (
+                <div className="absolute left-0 right-0 top-full mt-1 z-50 rounded-xl border border-surface bg-surface-card shadow-xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-surface">
+                  {lookupResults.map((cust) => (
+                    <div
+                      key={cust.id}
+                      onClick={() => handlePickCustomer(cust)}
+                      className="p-2.5 hover:bg-surface-page/80 cursor-pointer transition-colors flex items-center justify-between text-left"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-text-primary truncate">
+                            {cust.name}
+                          </span>
+                          <span className="text-[10px] font-mono text-text-muted">
+                            ({cust.customerCode})
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[11px] text-text-muted mt-0.5">
+                          {cust.phone && <span>{cust.phone}</span>}
+                          {cust.companyName && <span className="truncate max-w-[120px]">• {cust.companyName}</span>}
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0 ml-2">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-surface-page text-brand-primary">
+                          {cust.type.replace('_', ' ')}
+                        </span>
+                        {cust.defaultDiscountPct > 0 && (
+                          <div className="text-[10px] text-emerald-600 font-bold mt-0.5">
+                            {cust.defaultDiscountPct}% Off
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Button
+              size="default"
+              variant="outline"
+              onClick={onOpenCustomerModal}
+              className="h-9 px-3 text-xs md:text-sm font-bold border-surface gap-1.5 shrink-0 hover:bg-surface-muted cursor-pointer"
+              title="Register new customer profile"
+            >
+              <Plus className="w-4 h-4" /> New
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* 3. Spacious Cart Items List */}

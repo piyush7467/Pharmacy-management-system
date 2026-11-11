@@ -17,6 +17,8 @@ import { returnsRouter } from './modules/returns/returns.routes.js';
 import { inventoryRouter } from './modules/inventory/inventory.routes.js';
 import { reportsRouter } from './modules/reports/reports.routes.js';
 import { auditRouter } from './modules/audit/audit.routes.js';
+import { notificationsRouter } from './modules/notifications/notifications.routes.js';
+import { customersRouter } from './modules/customers/customers.routes.js';
 import swaggerUi from 'swagger-ui-express';
 import { openapiSpec } from './docs/openapiSpec.js';
 
@@ -103,6 +105,8 @@ app.use('/api/v1/returns', returnsRouter);
 app.use('/api/v1/inventory', inventoryRouter);
 app.use('/api/v1/reports', reportsRouter);
 app.use('/api/v1/audit-logs', auditRouter);
+app.use('/api/v1/notifications', notificationsRouter);
+app.use('/api/v1/customers', customersRouter);
 
 // -------------------------------------------------------------
 // 404 CATCH-ALL

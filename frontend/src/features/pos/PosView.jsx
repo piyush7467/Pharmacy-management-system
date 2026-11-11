@@ -33,6 +33,7 @@ export function PosView() {
   // Cart & Customer State
   const [tempBillNumber] = useState(() => `TMP-${Math.floor(100000 + Math.random() * 900000)}`);
   const [cart, setCart] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerName, setCustomerName] = useState('Walk-in Customer');
   const [customerPhone, setCustomerPhone] = useState('');
 
@@ -219,12 +220,29 @@ export function PosView() {
 
   const clearCart = useCallback(() => {
     setCart([]);
+    setSelectedCustomer(null);
     setCustomerName('Walk-in Customer');
     setCustomerPhone('');
     setTenderedAmount('');
     setSplitCashAmount('');
     setSplitOnlineAmount('');
     setDiscountValue('');
+  }, []);
+
+  const handleSelectCustomer = useCallback((customer) => {
+    setSelectedCustomer(customer);
+    if (customer) {
+      setCustomerName(customer.name);
+      setCustomerPhone(customer.phone || '');
+      if (customer.defaultDiscountPct > 0) {
+        setDiscountType('PERCENT');
+        setDiscountValue(String(customer.defaultDiscountPct));
+        toast.info(`Applied ${customer.defaultDiscountPct}% customer tier discount`);
+      }
+    } else {
+      setCustomerName('Walk-in Customer');
+      setCustomerPhone('');
+    }
   }, []);
 
   const toggleExpandMed = useCallback((medId) => {
@@ -302,10 +320,27 @@ export function PosView() {
       }
     }
 
+    if (paymentMethod === 'CREDIT' || paymentMethod === 'CREDIT_LEDGER') {
+      if (!selectedCustomer) {
+        toast.error('A registered customer account is required for Credit / Udhaar settlement');
+        return;
+      }
+      if (selectedCustomer.creditLimit > 0) {
+        const currentBal = selectedCustomer.currentBalance || 0;
+        if (currentBal + finalNetPayable > selectedCustomer.creditLimit) {
+          toast.error(
+            `Credit limit exceeded. Current Balance: ₹${currentBal.toFixed(2)}, Limit: ₹${selectedCustomer.creditLimit.toFixed(2)}, Order: ₹${finalNetPayable.toFixed(2)}`
+          );
+          return;
+        }
+      }
+    }
+
     checkoutMutation.mutate({
-      customerName: customerName.trim() || 'Walk-in Customer',
-      customerPhone: customerPhone.trim() || undefined,
-      paymentMethod,
+      customerId: selectedCustomer?.id || undefined,
+      customerName: selectedCustomer ? selectedCustomer.name : (customerName.trim() || 'Walk-in Customer'),
+      customerPhone: selectedCustomer ? (selectedCustomer.phone || undefined) : (customerPhone.trim() || undefined),
+      paymentMethod: paymentMethod === 'CREDIT' ? 'CREDIT_LEDGER' : paymentMethod,
       discountAmount: calculatedDiscount,
       roundOffAmount,
       items: cart.map((i) => ({
@@ -477,6 +512,8 @@ export function PosView() {
                 customerName={customerName}
                 setCustomerName={setCustomerName}
                 customerPhone={customerPhone}
+                selectedCustomer={selectedCustomer}
+                onSelectCustomer={handleSelectCustomer}
                 onOpenCustomerModal={() => setCustomerModalOpen(true)}
                 cart={cart}
                 updateQuantity={updateQuantity}
@@ -503,6 +540,7 @@ export function PosView() {
           tempBillNumber={tempBillNumber}
           customerName={customerName}
           customerPhone={customerPhone}
+          selectedCustomer={selectedCustomer}
           cart={cart}
           updateQuantity={updateQuantity}
           removeFromCart={removeFromCart}
@@ -538,10 +576,7 @@ export function PosView() {
       <CustomerModal
         open={customerModalOpen}
         onOpenChange={setCustomerModalOpen}
-        onCustomerSet={(name, phone) => {
-          setCustomerName(name);
-          setCustomerPhone(phone);
-        }}
+        onCustomerSet={handleSelectCustomer}
       />
 
       <ShortcutsModal

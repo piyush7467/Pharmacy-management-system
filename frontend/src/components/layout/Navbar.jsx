@@ -11,12 +11,14 @@ import {
   Barcode,
   ChevronDown,
   Store,
+  User,
   Moon,
   Sun,
   Laptop
 } from 'lucide-react';
 import { ThemeToggle } from '../ui/ThemeToggle.jsx';
 import { Button } from '../ui/button.jsx';
+import { NotificationsDropdown } from './NotificationsDropdown.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { clearCredentials } from '../../features/auth/authSlice.js';
 import { setTheme } from '../../features/preferences/preferencesSlice.js';
@@ -113,23 +115,14 @@ export function Navbar({ onMenuClick }) {
           <Barcode className="w-5 h-5" />
         </button>
 
-        {/* Notifications Bell */}
-        <div className="relative">
-          <button
-            className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors relative"
-            title="Notifications"
-            aria-label="Notifications"
-          >
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-surface-card" />
-          </button>
-        </div>
+        {/* Notifications Dropdown & Real-time Alerts */}
+        <NotificationsDropdown />
 
         {/* Branch Selector Pill */}
         <Link
-          to="/profile"
+          to="/settings"
           className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surface bg-surface-page text-[13.5px] font-medium text-text-primary cursor-pointer hover:bg-surface-muted transition-colors"
-          title="Manage Pharmacy Details"
+          title="Manage Pharmacy Settings"
         >
           <Store className="w-4 h-4 text-brand-primary" />
           <span>Main Shop</span>
@@ -170,15 +163,23 @@ export function Navbar({ onMenuClick }) {
                 </p>
               </div>
 
-              {/* Profile Link */}
-              <div className="py-1 px-1 border-b border-surface">
+              {/* Navigation Links */}
+              <div className="py-1 px-1 border-b border-surface space-y-0.5">
                 <Link
-                  to="/profile"
+                  to="/settings"
                   onClick={() => setUserDropdownOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
                 >
                   <Store className="w-4 h-4 text-brand-primary" />
-                  Pharmacy Profile &amp; Settings
+                  Pharmacy Settings
+                </Link>
+                <Link
+                  to="/account"
+                  onClick={() => setUserDropdownOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-text-primary hover:bg-surface-muted transition-colors cursor-pointer"
+                >
+                  <User className="w-4 h-4 text-brand-primary" />
+                  Account &amp; Security
                 </Link>
               </div>
 

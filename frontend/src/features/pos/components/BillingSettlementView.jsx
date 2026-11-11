@@ -21,6 +21,7 @@ export function BillingSettlementView({
   tempBillNumber,
   customerName,
   customerPhone,
+  selectedCustomer,
   cart,
   updateQuantity,
   removeFromCart,
@@ -83,9 +84,17 @@ export function BillingSettlementView({
         {/* Customer Badge */}
         <div className="flex items-center gap-2 text-sm bg-surface-page px-3.5 py-1.5 rounded-xl border border-surface">
           <User className="w-4 h-4 text-brand-primary" />
-          <span className="font-bold text-text-primary">{customerName}</span>
-          {customerPhone && (
-            <span className="text-text-muted font-mono text-xs">• {customerPhone}</span>
+          <span className="font-bold text-text-primary">
+            {selectedCustomer ? selectedCustomer.name : customerName}
+          </span>
+          {selectedCustomer ? (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+              {selectedCustomer.customerCode} • {selectedCustomer.type.replace('_', ' ')}
+            </span>
+          ) : (
+            customerPhone && (
+              <span className="text-text-muted font-mono text-xs">• {customerPhone}</span>
+            )
           )}
         </div>
       </div>
@@ -320,13 +329,47 @@ export function BillingSettlementView({
               )}
 
               {paymentMethod === 'CREDIT' && (
-                <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-sm space-y-1.5 text-amber-800 dark:text-amber-300">
-                  <p className="font-bold text-base flex items-center gap-2">
-                    ⚠️ Customer Udhaar / Credit Ledger
+                <div
+                  className={`p-4 rounded-xl border space-y-2 text-sm ${
+                    selectedCustomer
+                      ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800'
+                      : 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800'
+                  }`}
+                >
+                  <p className="font-bold text-base flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-brand-primary" />
+                      <span>Customer Udhaar / Credit Ledger Settlement</span>
+                    </span>
+                    {selectedCustomer && (
+                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-card border border-surface text-brand-primary">
+                        {selectedCustomer.customerCode}
+                      </span>
+                    )}
                   </p>
-                  <p className="text-xs md:text-sm leading-relaxed">
-                    This bill of <strong>{formatCurrency(finalNetPayable)}</strong> will post to <strong>{customerName}</strong>&apos;s customer account balance ledger.
-                  </p>
+
+                  {selectedCustomer ? (
+                    <div className="space-y-1.5 text-xs md:text-sm text-text-secondary">
+                      <p>
+                        This invoice of <strong>{formatCurrency(finalNetPayable)}</strong> will be charged to{' '}
+                        <strong>{selectedCustomer.name}</strong>&apos;s account.
+                      </p>
+                      <div className="flex items-center gap-4 pt-1 font-mono text-xs flex-wrap">
+                        <span>Current Debt: <strong>{formatCurrency(selectedCustomer.currentBalance || 0)}</strong></span>
+                        {selectedCustomer.creditLimit > 0 && (
+                          <span>Credit Limit: <strong>{formatCurrency(selectedCustomer.creditLimit)}</strong></span>
+                        )}
+                        <span>New Debt: <strong>{formatCurrency((selectedCustomer.currentBalance || 0) + finalNetPayable)}</strong></span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-xs md:text-sm text-amber-800 dark:text-amber-300">
+                      <p className="font-semibold">⚠️ No registered customer profile is attached.</p>
+                      <p className="mt-0.5">
+                        Please return to Step 1 and attach or register a Customer account to settle on credit.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
