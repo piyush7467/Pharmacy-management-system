@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { apiClient } from '../../services/api/apiClient.js';
 import { InventoryHeader } from './components/InventoryHeader.jsx';
-import { InventoryMetricsCards } from './components/InventoryMetricsCards.jsx';
+
 import { InventoryFilters } from './components/InventoryFilters.jsx';
 import { BatchesTable } from './components/BatchesTable.jsx';
 import { StockAdjustmentModal } from './components/StockAdjustmentModal.jsx';
@@ -76,12 +76,9 @@ export function InventoryView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Header */}
-      <InventoryHeader />
-
-      {/* 2. Bento Metrics Grid */}
-      <InventoryMetricsCards overview={overview} />
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with inline metrics */}
+      <InventoryHeader overview={overview} />
 
       {/* 3. Search & Filter Bar */}
       <InventoryFilters

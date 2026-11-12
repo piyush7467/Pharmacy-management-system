@@ -8,7 +8,6 @@ import { DashboardKpiStrip } from './components/DashboardKpiStrip.jsx';
 import { SalesTrendChartCard } from './components/SalesTrendChartCard.jsx';
 import { PaymentDistributionCard } from './components/PaymentDistributionCard.jsx';
 import { RecentActivityHub } from './components/RecentActivityHub.jsx';
-import { QuickActionsStrip } from './components/QuickActionsStrip.jsx';
 
 export function DashboardView() {
   const user = useSelector((state) => state.auth?.user);
@@ -123,7 +122,7 @@ export function DashboardView() {
   const recentPurchases = Array.isArray(recentPurchasesData) ? recentPurchasesData : [];
 
   return (
-    <div className="space-y-7 pb-10 max-w-7xl mx-auto">
+    <div className="space-y-5 pb-10 max-w-7xl mx-auto">
       {/* 1. Top Header & Executive Controls */}
       <DashboardHeader
         user={user}
@@ -173,8 +172,6 @@ export function DashboardView() {
         recentPurchases={recentPurchases}
       />
 
-      {/* 6. Operations Shortcuts */}
-      <QuickActionsStrip />
     </div>
   );
 }

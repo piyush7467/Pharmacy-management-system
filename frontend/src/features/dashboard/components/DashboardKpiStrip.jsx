@@ -23,11 +23,11 @@ export function DashboardKpiStrip({
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl md:text-3xl font-black text-brand-primary tracking-tight font-mono">
+          <div className="text-2xl font-bold text-brand-primary tracking-tight font-mono">
             {formatCurrency(netRevenue)}
           </div>
-          <p className="text-xs text-text-muted mt-1 flex items-center gap-1 font-medium">
-            <span className="text-brand-primary font-bold">{ordersCount}</span> completed sales in period
+          <p className="text-xs text-text-muted mt-1 flex items-center gap-1">
+            <span className="font-semibold text-text-primary">{ordersCount}</span> sales in period
           </p>
         </div>
       </div>
@@ -41,10 +41,10 @@ export function DashboardKpiStrip({
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl md:text-3xl font-black text-text-primary tracking-tight font-mono">
+          <div className="text-2xl font-bold text-text-primary tracking-tight font-mono">
             {ordersCount}
           </div>
-          <p className="text-xs text-text-muted mt-1 font-medium">
+          <p className="text-xs text-text-muted mt-1">
             FEFO batch auto-allocation
           </p>
         </div>
@@ -59,11 +59,11 @@ export function DashboardKpiStrip({
           </div>
         </div>
         <div className="mt-4">
-          <div className="text-2xl md:text-3xl font-black text-text-primary tracking-tight font-mono">
+          <div className="text-2xl font-bold text-text-primary tracking-tight font-mono">
             {isCashier ? 'Protected' : formatCurrency(stockValuationCost)}
           </div>
-          <p className="text-xs text-text-muted mt-1 font-medium">
-            <span className="font-bold text-text-primary">{totalActiveUnits}</span> total units in shelf
+          <p className="text-xs text-text-muted mt-1">
+            <span className="font-semibold text-text-primary">{totalActiveUnits}</span> units in shelf
           </p>
         </div>
       </div>

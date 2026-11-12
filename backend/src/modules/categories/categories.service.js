@@ -37,6 +37,20 @@ export async function listCategories({ search, status, page = 1, limit = 50 }) {
       include: {
         _count: {
           select: { medicines: true }
+        },
+        medicines: {
+          select: {
+            id: true,
+            name: true,
+            genericName: true,
+            sku: true,
+            dosageForm: true,
+            strength: true,
+            packageUnit: true,
+            isActive: true
+          },
+          orderBy: { name: 'asc' },
+          take: 50
         }
       },
       orderBy: { name: 'asc' },
@@ -48,7 +62,8 @@ export async function listCategories({ search, status, page = 1, limit = 50 }) {
   return {
     categories: categories.map((c) => ({
       ...c,
-      medicineCount: c._count.medicines
+      medicineCount: c._count.medicines,
+      medicines: c.medicines || []
     })),
     pagination: {
       page,
@@ -65,6 +80,19 @@ export async function getCategoryById(id) {
     include: {
       _count: {
         select: { medicines: true }
+      },
+      medicines: {
+        select: {
+          id: true,
+          name: true,
+          genericName: true,
+          sku: true,
+          dosageForm: true,
+          strength: true,
+          packageUnit: true,
+          isActive: true
+        },
+        orderBy: { name: 'asc' }
       }
     }
   });
@@ -75,7 +103,8 @@ export async function getCategoryById(id) {
 
   return {
     ...category,
-    medicineCount: category._count.medicines
+    medicineCount: category._count.medicines,
+    medicines: category.medicines || []
   };
 }
 

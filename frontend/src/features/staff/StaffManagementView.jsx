@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -40,6 +40,7 @@ import {
   TableRow,
   TableCell
 } from '../../components/ui/table.jsx';
+import { TablePagination } from '../../components/ui/table-pagination.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { formatDate } from '../../lib/utils.js';
 
@@ -123,22 +124,29 @@ export function StaffManagementView() {
 
   const usersList = Array.isArray(data) ? data : (data?.users || data?.data || []);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [usersList.length, searchTerm, roleFilter]);
+
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return usersList.slice(start, start + pageSize);
+  }, [usersList, currentPage, pageSize]);
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-surface">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">Staff & Account Management</h1>
-            <Badge variant="default" className="gap-1">
-              <Shield className="w-3 h-3" /> ADMIN ONLY
-            </Badge>
-          </div>
-          <p className="text-xs text-text-muted mt-1">
-            Provision staff credentials, manage roles (Pharmacist / Cashier), and audit account lifecycles.
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">Staff Management</h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            Provision staff credentials, manage roles (Pharmacist / Cashier), and account permissions.
           </p>
         </div>
-        <Button onClick={() => setAddModalOpen(true)} variant="default">
+        <Button onClick={() => setAddModalOpen(true)} className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold gap-2 shadow-sm rounded-lg text-sm">
           <UserPlus className="w-4 h-4 mr-1.5" />
           Add Staff Member
         </Button>
@@ -200,93 +208,113 @@ export function StaffManagementView() {
               No staff members match the selected criteria.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Staff Member</TableHead>
-                  <TableHead>Assigned Role</TableHead>
-                  <TableHead>Account Status</TableHead>
-                  <TableHead>Registered On</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {usersList.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-text-primary">{user.fullName}</span>
-                        <span className="text-[11px] text-text-muted">{user.email}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {user.role === 'ADMIN' && (
-                        <Badge variant="default" className="font-mono">
-                          ADMIN
-                        </Badge>
-                      )}
-                      {user.role === 'PHARMACIST' && (
-                        <Badge variant="success" className="font-mono">
-                          PHARMACIST
-                        </Badge>
-                      )}
-                      {user.role === 'CASHIER' && (
-                        <Badge variant="accent" className="font-mono">
-                          CASHIER
-                        </Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {user.isActive ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Active
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
-                          <XCircle className="w-3.5 h-3.5" /> Suspended
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-text-muted">{formatDate(user.createdAt)}</TableCell>
-                    <TableCell className="text-right">
-                      {user.role !== 'ADMIN' ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              toggleStatusMutation.mutate({
-                                id: user.id,
-                                isActive: !user.isActive
-                              })
-                            }
-                            disabled={toggleStatusMutation.isPending}
-                          >
-                            {user.isActive ? 'Suspend' : 'Reactivate'}
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => {
-                              if (confirm(`Are you sure you want to delete ${user.fullName}?`)) {
-                                deleteMutation.mutate(user.id);
-                              }
-                            }}
-                            disabled={deleteMutation.isPending}
-                            title="Soft delete user"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-[11px] text-text-muted italic pr-2">Primary Admin</span>
-                      )}
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Staff Member</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Assigned Role</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Account Status</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Registered On</TableHead>
+                    <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id} className="border-surface/60 hover:bg-surface-page/70 transition-colors">
+                      <TableCell className="min-w-[200px] align-middle">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-sm text-text-primary">{user.fullName}</span>
+                          <span className="text-xs text-text-muted mt-0.5">{user.email}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="w-36 align-middle">
+                        {user.role === 'ADMIN' && (
+                          <span className="inline-block text-[11px] font-semibold text-purple-700 dark:text-purple-300 bg-purple-500/10 border border-purple-500/25 px-2.5 py-0.5 rounded-full font-mono">
+                            ADMIN
+                          </span>
+                        )}
+                        {user.role === 'PHARMACIST' && (
+                          <span className="inline-block text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 rounded-full font-mono">
+                            PHARMACIST
+                          </span>
+                        )}
+                        {user.role === 'CASHIER' && (
+                          <span className="inline-block text-[11px] font-semibold text-blue-700 dark:text-blue-400 bg-blue-500/10 border border-blue-500/25 px-2.5 py-0.5 rounded-full font-mono">
+                            CASHIER
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="w-36 align-middle text-center">
+                        {user.isActive ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Active
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
+                            <XCircle className="w-3.5 h-3.5" /> Suspended
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="w-36 align-middle text-text-muted text-xs font-medium">
+                        {formatDate(user.createdAt)}
+                      </TableCell>
+                      <TableCell className="w-40 align-middle text-right pr-4">
+                        {user.role !== 'ADMIN' ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 px-2.5 text-xs font-medium rounded-lg border-surface cursor-pointer text-text-secondary hover:text-text-primary"
+                              onClick={() =>
+                                toggleStatusMutation.mutate({
+                                  id: user.id,
+                                  isActive: !user.isActive
+                                })
+                              }
+                              disabled={toggleStatusMutation.isPending}
+                            >
+                              {user.isActive ? 'Suspend' : 'Reactivate'}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 text-text-muted hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer rounded-md"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete ${user.fullName}?`)) {
+                                  deleteMutation.mutate(user.id);
+                                }
+                              }}
+                              disabled={deleteMutation.isPending}
+                              title="Soft delete user"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-text-muted italic pr-2">Primary Admin</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Pagination Footer */}
+          {!isLoading && usersList.length > 0 && (
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={usersList.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 15, 25, 50]}
+            />
           )}
         </CardContent>
       </Card>

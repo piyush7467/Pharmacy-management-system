@@ -153,18 +153,13 @@ export function SupplierFormView() {
 
       {/* 2. Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface">
-        <div className="flex items-start gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary shrink-0 shadow-2xs">
-            <Building2 className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              {isEditing ? 'Edit Supplier Details' : 'Register Supplier'}
-            </h1>
-            <p className="text-sm text-text-muted">
-              Add a new distributor or supplier for medicine procurement.
-            </p>
-          </div>
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+            {isEditing ? 'Edit Supplier Details' : 'Register Supplier'}
+          </h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            Register or update wholesale distributors and medicine procurement partners.
+          </p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -172,7 +167,7 @@ export function SupplierFormView() {
             type="button"
             variant="outline"
             onClick={() => navigate('/suppliers')}
-            className="border-surface hover:bg-surface-card"
+            className="border-surface hover:bg-surface-card rounded-lg text-sm"
           >
             Cancel
           </Button>
@@ -180,7 +175,7 @@ export function SupplierFormView() {
             type="button"
             onClick={handleSubmit}
             disabled={saveMutation.isPending || loadingExisting}
-            className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold px-5 shadow-sm"
+            className="bg-brand-primary hover:bg-brand-primary/90 text-white font-semibold px-5 shadow-sm rounded-lg text-sm"
           >
             {saveMutation.isPending ? 'Saving...' : isEditing ? 'Update Supplier' : 'Register Supplier'}
           </Button>

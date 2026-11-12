@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -13,13 +13,21 @@ import { ImportMedicinesModal } from './components/ImportMedicinesModal.jsx';
 
 export function MedicinesView() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const user = useSelector((state) => state.auth?.user);
   const canManageMedicines = user?.role === 'ADMIN' || user?.role === 'PHARMACIST';
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState(searchParams.get('category') || '');
   const [lowStockFilter, setLowStockFilter] = useState(false);
+
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat !== null) {
+      setCategoryFilter(cat);
+    }
+  }, [searchParams]);
 
   // Modals state
   const [importModalOpen, setImportModalOpen] = useState(false);
@@ -86,16 +94,16 @@ export function MedicinesView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Header with Title & Action */}
-      <MedicinesHeader
-        onOpenAddModal={() => navigate('/medicines/new')}
-        onOpenImportModal={() => setImportModalOpen(true)}
-        canManageMedicines={canManageMedicines}
-      />
-
-      {/* 2. Bento Metrics Grid */}
-      <MedicinesMetricsCards medicines={medicines} />
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with Title, Metrics & Actions */}
+      <div className="flex flex-col gap-2 pb-4 border-b border-surface">
+        <MedicinesHeader
+          onOpenAddModal={() => navigate('/medicines/new')}
+          onOpenImportModal={() => setImportModalOpen(true)}
+          canManageMedicines={canManageMedicines}
+        />
+        <MedicinesMetricsCards medicines={medicines} />
+      </div>
 
       {/* 3. Search & Filter Bar */}
       <MedicinesFilters

@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '../../services/api/apiClient.js';
 import { SalesHeader } from './components/SalesHeader.jsx';
-import { SalesMetricsCards } from './components/SalesMetricsCards.jsx';
 import { SalesFilters } from './components/SalesFilters.jsx';
 import { SalesTable } from './components/SalesTable.jsx';
 import { SaleDetailsModal } from './components/SaleDetailsModal.jsx';
@@ -53,12 +52,9 @@ export function SalesView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Header with Title & POS Shortcut */}
-      <SalesHeader />
-
-      {/* 2. Bento Metrics Grid */}
-      <SalesMetricsCards
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with inline metrics */}
+      <SalesHeader
         totalCount={totalCount}
         totalRevenue={totalRevenue}
         totalTax={totalTax}

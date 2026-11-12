@@ -10,9 +10,7 @@ export function StockAlertsBanner({ expiredCount, nearExpiryCount, lowStockCount
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-text-primary shadow-xs">
       <div className="flex items-center gap-3">
-        <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0">
-          <AlertTriangle className="w-5 h-5" />
-        </div>
+        <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
         <div>
           <p className="text-sm font-bold text-text-primary">
             Inventory Alerts Requiring Immediate Attention

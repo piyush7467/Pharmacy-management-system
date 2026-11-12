@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -20,11 +20,18 @@ import {
   AlertCircle,
   Clock,
   ArrowUpRight,
-  Receipt
+  Receipt,
+  MapPin
 } from 'lucide-react';
 import { apiClient } from '../../services/api/apiClient.js';
 import { Button } from '../../components/ui/button.jsx';
 import { Badge } from '../../components/ui/badge.jsx';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent
+} from '../../components/ui/popover.jsx';
+import { TablePagination } from '../../components/ui/table-pagination.jsx';
 import { formatCurrency, formatDate } from '../../lib/utils.js';
 import { CustomerModal } from './components/CustomerModal.jsx';
 import { RecordPaymentModal } from './components/RecordPaymentModal.jsx';
@@ -95,6 +102,18 @@ export function CustomersView() {
 
   const customers = Array.isArray(data) ? data : data?.data || [];
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [customers.length, searchTerm, selectedType, onlyBalance]);
+
+  const paginatedCustomers = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return customers.slice(start, start + pageSize);
+  }, [customers, currentPage, pageSize]);
+
   // Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: (id) => apiClient.delete(`/customers/${id}`),
@@ -138,100 +157,62 @@ export function CustomersView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Unboxed Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-surface">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-text-primary">
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with Title, Actions & Inline Summary */}
+      <div className="flex flex-col gap-3 pb-4 border-b border-surface">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight text-text-primary">
               Customer Accounts
             </h1>
-            <Badge variant="outline" className="font-semibold px-2 py-0.5 text-xs">
-              {totalCount} Profiles
-            </Badge>
           </div>
-          <p className="text-sm text-text-muted mt-1">
-            Manage retail patients, loyalty members, hospital institutions, and bulk wholesale accounts.
-          </p>
+
+          <div className="flex items-center gap-2.5">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={isFetching}
+              className="h-9 px-3 gap-2 border-surface cursor-pointer text-text-secondary hover:text-text-primary rounded-lg text-sm"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </Button>
+
+            <Button
+              onClick={handleOpenAdd}
+              className="h-9 px-3.5 text-sm font-semibold rounded-lg bg-brand-primary hover:bg-brand-primary/90 text-white shadow-sm gap-2 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Customer</span>
+            </Button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => refetch()}
-            disabled={isFetching}
-            className="h-10 px-3.5 gap-2 border-surface cursor-pointer text-text-secondary hover:text-text-primary"
-          >
-            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
-
-          <Button
-            onClick={handleOpenAdd}
-            className="h-10 px-4 text-sm font-semibold rounded-xl bg-brand-primary hover:bg-brand-primary/90 text-white shadow-sm gap-2 cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Customer</span>
-          </Button>
-        </div>
-      </div>
-
-      {/* 2. Top Metric Summary Strip (Restrained, Unboxed) */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-        <div className="p-4 rounded-xl border border-surface bg-surface-card">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-muted uppercase tracking-wider">
-            <span>Total Profiles</span>
-            <Users className="w-4 h-4 text-text-muted" />
-          </div>
-          <div className="text-2xl font-bold text-text-primary mt-2">
-            {totalCount}
-          </div>
-          <p className="text-xs text-text-muted mt-0.5">Active client registry</p>
-        </div>
-
-        <div className="p-4 rounded-xl border border-surface bg-surface-card">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-muted uppercase tracking-wider">
-            <span>Loyalty / Regular</span>
-            <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
-            {regularCount}
-          </div>
-          <p className="text-xs text-text-muted mt-0.5">Chronic care patients</p>
-        </div>
-
-        <div className="p-4 rounded-xl border border-surface bg-surface-card">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-muted uppercase tracking-wider">
-            <span>Hospitals & Clinics</span>
-            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">
-            {hospitalCount}
-          </div>
-          <p className="text-xs text-text-muted mt-0.5">B2B Institutional</p>
-        </div>
-
-        <div className="p-4 rounded-xl border border-surface bg-surface-card">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-muted uppercase tracking-wider">
-            <span>Wholesale Bulk</span>
-            <Package className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-2">
-            {bulkCount}
-          </div>
-          <p className="text-xs text-text-muted mt-0.5">Commercial buyers</p>
-        </div>
-
-        <div className="col-span-2 lg:col-span-1 p-4 rounded-xl border border-surface bg-surface-card">
-          <div className="flex items-center justify-between text-xs font-semibold text-text-muted uppercase tracking-wider">
-            <span>Ledger Outstanding</span>
-            <CreditCard className="w-4 h-4 text-red-500" />
-          </div>
-          <div className={`text-2xl font-bold mt-2 ${totalCreditBalance > 0 ? 'text-red-600 dark:text-red-400' : 'text-text-primary'}`}>
-            {formatCurrency(totalCreditBalance)}
-          </div>
-          <p className="text-xs text-text-muted mt-0.5">Unsettled credit debt</p>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+          <span className="text-text-muted">
+            <span className="font-semibold text-text-primary">{totalCount}</span> profiles
+          </span>
+          {regularCount > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">{regularCount}</span> regular
+            </span>
+          )}
+          {hospitalCount > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{hospitalCount}</span> clinical/B2B
+            </span>
+          )}
+          {bulkCount > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-amber-600 dark:text-amber-400">{bulkCount}</span> wholesale
+            </span>
+          )}
+          {totalCreditBalance > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-red-600 dark:text-red-400">{formatCurrency(totalCreditBalance)}</span> outstanding ledger
+            </span>
+          )}
         </div>
       </div>
 
@@ -327,7 +308,7 @@ export function CustomersView() {
                   </td>
                 </tr>
               ) : (
-                customers.map((cust) => {
+                paginatedCustomers.map((cust) => {
                   const typeCfg = TYPE_CONFIG[cust.type] || TYPE_CONFIG.GENERAL;
                   const TypeIcon = typeCfg.icon;
                   const balance = cust.currentBalance || 0;
@@ -392,6 +373,27 @@ export function CustomersView() {
                               <Mail className="w-3 h-3 text-text-muted" />
                               <span>{cust.email}</span>
                             </p>
+                          )}
+                          {cust.address && (
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="flex items-center gap-1 text-[11px] text-brand-primary hover:underline cursor-pointer mt-0.5"
+                                  title="View full street address"
+                                >
+                                  <MapPin className="w-2.5 h-2.5" />
+                                  <span>Address</span>
+                                </button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-64 p-2.5 text-xs shadow-lg" align="start">
+                                <div className="font-semibold text-xs text-text-primary border-b border-surface pb-1 flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-brand-primary" />
+                                  <span>Customer Address</span>
+                                </div>
+                                <p className="mt-1.5 text-text-muted leading-relaxed whitespace-pre-wrap">{cust.address}</p>
+                              </PopoverContent>
+                            </Popover>
                           )}
                         </div>
                       </td>
@@ -495,6 +497,21 @@ export function CustomersView() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Footer */}
+        {!isLoading && customers.length > 0 && (
+          <TablePagination
+            currentPage={currentPage}
+            pageSize={pageSize}
+            totalItems={customers.length}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[10, 15, 25, 50]}
+          />
+        )}
       </div>
 
       {/* Customer Form Modal */}

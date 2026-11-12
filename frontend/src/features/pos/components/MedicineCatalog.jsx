@@ -205,12 +205,7 @@ export function MedicineCatalog({
               >
                 {/* Medicine Card Content */}
                 <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3.5 flex-1 min-w-0">
-                    {/* Medicine Pill Icon */}
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary border border-brand-primary/25 shadow-2xs">
-                      <Pill className="w-6 h-6" />
-                    </div>
-
+                  <div className="flex items-start flex-1 min-w-0">
                     {/* Details */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">

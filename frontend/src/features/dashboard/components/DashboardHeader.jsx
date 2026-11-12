@@ -1,7 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, RefreshCw, ShoppingCart } from 'lucide-react';
+import { RefreshCw, ShoppingCart } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
+
+function getTimeGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'morning';
+  if (h < 17) return 'afternoon';
+  return 'evening';
+}
 
 export function DashboardHeader({
   user,
@@ -16,16 +23,12 @@ export function DashboardHeader({
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surface pb-5">
       <div>
         <div className="flex items-center gap-2.5">
-          <h1 className="text-2xl md:text-3xl font-black tracking-tight text-text-primary">
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             Pharmacy Operations
           </h1>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            {user?.role || 'Staff'}
-          </span>
         </div>
-        <p className="text-sm text-text-muted mt-1">
-          Welcome back, <strong className="text-text-primary font-bold">{user?.fullName || 'Operator'}</strong>. Real-time overview of sales, batch health, and transactions.
+        <p className="text-sm text-text-muted mt-0.5">
+          Good {getTimeGreeting()}, <strong className="text-text-primary font-semibold">{user?.fullName?.split(' ')[0] || 'there'}</strong>.
         </p>
       </div>
 

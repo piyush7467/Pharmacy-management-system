@@ -3,12 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Menu,
-  Search,
   ShoppingCart,
   ShieldCheck,
   LogOut,
   Bell,
-  Barcode,
   ChevronDown,
   Store,
   User,
@@ -89,31 +87,12 @@ export function Navbar({ onMenuClick }) {
         </Link>
       </div>
 
-      {/* Middle: Universal Search Bar */}
-      <div className="flex items-center flex-1 max-w-lg mx-6">
-        <div className="relative w-full hidden sm:flex items-center">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
-          <input
-            type="search"
-            placeholder="Search medicine, customer, invoice..."
-            className="w-full pl-10 pr-16 py-2 text-[14px] rounded-xl border border-surface bg-surface-page text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary transition-all"
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[11px] font-medium text-text-muted bg-surface-muted px-1.5 py-0.5 rounded border border-surface">
-            Ctrl + K
-          </div>
-        </div>
-      </div>
+      {/* Middle: flex spacer */}
+      <div className="flex-1" />
 
       {/* Right: Quick Tools, Notifications, Branch & User Profile */}
       <div className="flex items-center gap-2.5 md:gap-3.5">
-        {/* Barcode scanner action */}
-        <button
-          className="p-2 rounded-lg text-text-muted hover:text-text-primary hover:bg-surface-muted transition-colors hidden sm:flex"
-          title="Barcode Scanner Mode"
-          aria-label="Barcode Scanner"
-        >
-          <Barcode className="w-5 h-5" />
-        </button>
+        {/* Barcode scanner action — removed */}
 
         {/* Notifications Dropdown & Real-time Alerts */}
         <NotificationsDropdown />
@@ -126,7 +105,6 @@ export function Navbar({ onMenuClick }) {
         >
           <Store className="w-4 h-4 text-brand-primary" />
           <span>Main Shop</span>
-          <ChevronDown className="w-3.5 h-3.5 text-text-muted" />
         </Link>
 
         <div className="h-5 w-px bg-surface hidden sm:block" />

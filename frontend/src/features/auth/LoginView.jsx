@@ -10,14 +10,7 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  ShieldCheck,
-  Boxes,
-  BarChart3,
   Loader2,
-  Pill,
-  FileText,
-  Heart,
-  Sparkles,
   ArrowLeft,
   CheckCircle2,
   AlertCircle
@@ -124,37 +117,11 @@ export function LoginView() {
         <ThemeToggle />
       </div>
 
-      {/* Center/Left Floating Operational Pillars (Visible on Desktop) */}
-      <div className="hidden 2xl:flex flex-col gap-3.5 absolute right-[510px] top-1/2 -translate-y-1/2 z-10">
-        <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#222A25]/90 backdrop-blur-md border border-white/60 dark:border-white/10 shadow-sm text-xs font-semibold text-[#1c5236] dark:text-emerald-400">
-          <div className="p-1.5 rounded-lg bg-[#1c5236]/10 dark:bg-emerald-500/10">
-            <Pill className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-          </div>
-          <span>Medicines</span>
-        </div>
-        <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#222A25]/90 backdrop-blur-md border border-white/60 dark:border-white/10 shadow-sm text-xs font-semibold text-[#1c5236] dark:text-emerald-400">
-          <div className="p-1.5 rounded-lg bg-[#1c5236]/10 dark:bg-emerald-500/10">
-            <FileText className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-          </div>
-          <span>Prescriptions</span>
-        </div>
-        <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#222A25]/90 backdrop-blur-md border border-white/60 dark:border-white/10 shadow-sm text-xs font-semibold text-[#1c5236] dark:text-emerald-400">
-          <div className="p-1.5 rounded-lg bg-[#1c5236]/10 dark:bg-emerald-500/10">
-            <Heart className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-          </div>
-          <span>Health Care</span>
-        </div>
-        <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/90 dark:bg-[#222A25]/90 backdrop-blur-md border border-white/60 dark:border-white/10 shadow-sm text-xs font-semibold text-[#1c5236] dark:text-emerald-400">
-          <div className="p-1.5 rounded-lg bg-[#1c5236]/10 dark:bg-emerald-500/10">
-            <Leaf className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-          </div>
-          <span>Wellness</span>
-        </div>
-      </div>
+      {/* Center/Left Floating Operational Pillars — removed */}
 
       {/* Floating Authentication Card (Matches Reference Image) */}
       <div className="relative z-10 w-full max-w-[460px] mx-4 lg:mr-12 xl:mr-16 my-8">
-        <div className="w-full rounded-[28px] bg-white dark:bg-[#222A25] p-8 md:p-10 shadow-2xl border border-white/70 dark:border-white/10 backdrop-blur-xl">
+        <div className="w-full rounded-2xl bg-white dark:bg-[#222A25] p-8 md:p-10 shadow-2xl border border-white/70 dark:border-white/10">
           {/* Brand Header with Cross & Leaf Logo */}
           <div className="flex items-center gap-3 mb-6">
             <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1c5236] text-white shadow-md">
@@ -203,7 +170,7 @@ export function LoginView() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email address"
-                    className="w-full h-11 pl-10 pr-4 text-xs rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
+                    className="w-full h-11 pl-10 pr-4 text-sm rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
                     required
                   />
                 </div>
@@ -218,7 +185,7 @@ export function LoginView() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
-                    className="w-full h-11 pl-10 pr-11 text-xs rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
+                    className="w-full h-11 pl-10 pr-11 text-sm rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
                     required
                   />
                   <button
@@ -330,7 +297,7 @@ export function LoginView() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Email address"
-                      className="w-full h-11 pl-10 pr-4 text-xs rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
+                      className="w-full h-11 pl-10 pr-4 text-sm rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
                       required
                       autoFocus
                     />
@@ -357,22 +324,6 @@ export function LoginView() {
               )}
             </>
           )}
-
-          {/* Bottom 3-Column Feature Badges (Matches Reference Image) */}
-          <div className="mt-8 pt-6 border-t border-surface/70 grid grid-cols-3 divide-x divide-surface text-center">
-            <div className="flex flex-col items-center gap-1.5 px-2">
-              <ShieldCheck className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-              <span className="text-[10px] font-semibold text-text-primary">Secure Access</span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5 px-2">
-              <Boxes className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-              <span className="text-[10px] font-semibold text-text-primary">Inventory Control</span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5 px-2">
-              <BarChart3 className="w-4 h-4 text-[#1c5236] dark:text-emerald-400" />
-              <span className="text-[10px] font-semibold text-text-primary">Sales &amp; Billing</span>
-            </div>
-          </div>
 
           {/* Privacy & Legal Disclaimer Link */}
           <div className="mt-4 text-center">

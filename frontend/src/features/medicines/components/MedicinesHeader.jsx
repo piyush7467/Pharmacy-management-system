@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pill, Plus, Download, Upload, FileSpreadsheet, ChevronDown } from 'lucide-react';
+import { Plus, Download, Upload, FileSpreadsheet, ChevronDown } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import { apiClient } from '../../../services/api/apiClient.js';
 import { toast } from 'sonner';
@@ -51,19 +51,12 @@ export function MedicinesHeader({ onOpenAddModal, onOpenImportModal, canManageMe
   return (
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface">
       <div>
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
-            <Pill className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Medicines Master Catalogue
-            </h1>
-            <p className="text-sm text-text-muted mt-0.5">
-              Manage pharmaceutical formulations, therapeutic categories, strengths, and inventory thresholds.
-            </p>
-          </div>
-        </div>
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+          Medicines Catalogue
+        </h1>
+        <p className="text-sm text-text-muted mt-0.5">
+          Manage pharmaceutical formulations, strengths, and inventory thresholds.
+        </p>
       </div>
 
       <div className="flex items-center gap-2.5">

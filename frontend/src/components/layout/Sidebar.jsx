@@ -30,7 +30,7 @@ const NAV_GROUPS = [
     title: 'Overview',
     items: [
       { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-      { to: '/pos', label: 'POS', icon: ShoppingCart, highlight: true }
+      { to: '/pos', label: 'POS', icon: ShoppingCart }
     ]
   },
   {
@@ -97,11 +97,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
       >
         {/* Sidebar Header with Collapse Button */}
         <div className="flex h-12 items-center justify-between px-3 border-b border-surface">
-          {!collapsed ? (
-            <span className="text-[11px] font-bold text-text-muted uppercase tracking-wider pl-1">
-              Navigation
-            </span>
-          ) : <div />}
+          <div />
 
           {/* Expand/Collapse Toggle */}
           <button
@@ -143,7 +139,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
                       end={item.to === '/'}
                       onClick={() => setMobileOpen(false)}
                       className={cn(
-                        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all group relative',
+                        'flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14.5px] font-medium transition-all group relative',
                         isActive
                           ? 'bg-brand-primary text-white font-semibold shadow-xs'
                           : 'text-text-primary hover:bg-surface-muted hover:text-text-primary'
@@ -168,7 +164,7 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
           })}
         </nav>
 
-        {/* Settings & Legal Navigation Items at Bottom */}
+        {/* Settings Navigation Item at Bottom */}
         <div className="p-2.5 border-t border-surface space-y-1">
           <NavLink
             to="/settings"
@@ -187,27 +183,6 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
             {collapsed && (
               <div className="absolute left-full ml-3 hidden rounded-lg bg-zinc-900 dark:bg-zinc-800 px-3 py-1.5 text-[12px] font-medium text-white shadow-xl group-hover:flex items-center gap-1.5 z-50 whitespace-nowrap">
                 Pharmacy Settings
-              </div>
-            )}
-          </NavLink>
-
-          <NavLink
-            to="/privacy"
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2 rounded-xl text-[14px] font-medium transition-all group relative',
-                isActive
-                  ? 'bg-brand-primary text-white font-semibold shadow-xs'
-                  : 'text-text-muted hover:text-text-primary hover:bg-surface-muted'
-              )
-            }
-          >
-            <Scale className="w-4 h-4 shrink-0 text-text-muted group-hover:text-text-primary" />
-            {!collapsed && <span className="truncate text-xs">Legal &amp; Privacy</span>}
-            {collapsed && (
-              <div className="absolute left-full ml-3 hidden rounded-lg bg-zinc-900 dark:bg-zinc-800 px-3 py-1.5 text-[12px] font-medium text-white shadow-xl group-hover:flex items-center gap-1.5 z-50 whitespace-nowrap">
-                Legal &amp; Privacy
               </div>
             )}
           </NavLink>

@@ -460,7 +460,7 @@ export function PosView() {
   }, [invoiceModalOpen, shortcutsModalOpen, customerModalOpen, posStep, filteredMedicines, highlightedIndex, cart, checkoutMutation.isPending]);
 
   return (
-    <div className="h-full w-full flex flex-col space-y-3 overflow-hidden select-none">
+    <div className="h-full w-full flex flex-col space-y-3 overflow-hidden">
       {/* STEP 1: Medicine Selection & Cart Staging */}
       {posStep === 'SELECTION' ? (
         <>

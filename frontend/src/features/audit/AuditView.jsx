@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ShieldAlert,
@@ -35,6 +35,7 @@ import {
   TableRow,
   TableCell
 } from '../../components/ui/table.jsx';
+import { TablePagination } from '../../components/ui/table-pagination.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { formatDate } from '../../lib/utils.js';
 
@@ -104,22 +105,30 @@ export function AuditView() {
     );
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredLogs.length, actionFilter]);
+
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredLogs.slice(start, start + pageSize);
+  }, [filteredLogs, currentPage, pageSize]);
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary flex items-center gap-2">
-            <ShieldAlert className="w-6 h-6 text-brand-primary" />
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             System Audit Trail
           </h1>
           <p className="text-sm text-text-muted mt-0.5">
-            Immutable log of high-consequence administrative changes, inventory modifications, and billing actions.
+            Immutable log of administrative changes, inventory modifications, and billing transactions.
           </p>
         </div>
-        <Badge variant="outline" className="text-brand-primary border-brand-primary/20 bg-brand-primary/5 py-1 px-3">
-          Admin Privilege Active
-        </Badge>
       </div>
 
       {/* Filter and Search Bar */}
@@ -177,49 +186,50 @@ export function AuditView() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-surface hover:bg-transparent">
-                    <TableHead className="text-xs font-semibold">Timestamp</TableHead>
-                    <TableHead className="text-xs font-semibold">Action</TableHead>
-                    <TableHead className="text-xs font-semibold">Entity Affected</TableHead>
-                    <TableHead className="text-xs font-semibold">Actor / Role</TableHead>
-                    <TableHead className="text-xs font-semibold">IP Address</TableHead>
-                    <TableHead className="text-xs font-semibold text-right pr-4">Details</TableHead>
+                  <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Timestamp</TableHead>
+                    <TableHead className="w-44 text-xs font-semibold uppercase tracking-wider text-text-muted">Action</TableHead>
+                    <TableHead className="min-w-[180px] text-xs font-semibold uppercase tracking-wider text-text-muted">Entity Affected</TableHead>
+                    <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-text-muted">Actor / Role</TableHead>
+                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">IP Address</TableHead>
+                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Details</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredLogs.map((log) => (
-                    <TableRow key={log.id} className="border-surface hover:bg-surface-bg/50">
-                      <TableCell className="text-xs text-text-muted font-mono">
+                  {paginatedLogs.map((log) => (
+                    <TableRow key={log.id} className="border-surface/60 hover:bg-surface-page/70 transition-colors">
+                      <TableCell className="w-36 text-xs text-text-muted font-mono align-middle">
                         {formatDate(log.createdAt)}
                       </TableCell>
-                      <TableCell>{getActionBadge(log.action)}</TableCell>
-                      <TableCell>
-                        <span className="font-semibold text-xs text-text-primary">{log.entityName}</span>
-                        <div className="text-[10px] text-text-muted font-mono truncate max-w-[140px]">
+                      <TableCell className="w-44 align-middle">{getActionBadge(log.action)}</TableCell>
+                      <TableCell className="min-w-[180px] align-middle">
+                        <span className="font-semibold text-xs text-text-primary block">{log.entityName}</span>
+                        <div className="text-[10px] text-text-muted font-mono truncate max-w-[160px] mt-0.5">
                           {log.entityId}
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-40 align-middle">
                         <div className="font-medium text-xs text-text-primary">
                           {log.actor?.fullName || 'System Automated'}
                         </div>
                         {log.actor?.role && (
-                          <span className="text-[10px] text-text-muted uppercase font-bold">
+                          <span className="text-[10px] text-text-muted uppercase font-mono font-semibold">
                             {log.actor.role}
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="text-xs font-mono text-text-muted">
+                      <TableCell className="w-32 text-xs font-mono text-text-muted align-middle">
                         {log.ipAddress || '127.0.0.1'}
                       </TableCell>
-                      <TableCell className="text-right pr-4">
+                      <TableCell className="w-28 text-right pr-4 align-middle">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          className="h-8 px-2.5 text-text-muted hover:text-brand-primary gap-1"
+                          className="h-7 px-2.5 text-text-muted hover:text-brand-primary hover:border-brand-primary/40 text-xs font-medium gap-1 rounded-lg cursor-pointer"
                           onClick={() => setSelectedLog(log)}
                         >
-                          <Eye className="w-3.5 h-3.5" /> Inspect Diff
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Diff</span>
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -227,6 +237,21 @@ export function AuditView() {
                 </TableBody>
               </Table>
             </div>
+          )}
+
+          {/* Pagination Footer */}
+          {!isLoading && filteredLogs.length > 0 && (
+            <TablePagination
+              currentPage={currentPage}
+              pageSize={pageSize}
+              totalItems={filteredLogs.length}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[10, 15, 25, 50]}
+            />
           )}
         </CardContent>
       </Card>

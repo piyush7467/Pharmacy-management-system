@@ -2,7 +2,6 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../services/api/apiClient.js';
 import { ReportsHeader } from './components/ReportsHeader.jsx';
-import { ReportsMetricsCards } from './components/ReportsMetricsCards.jsx';
 import { LedgerReconciliationAuditCard } from './components/LedgerReconciliationAuditCard.jsx';
 import { RevenueTrendChartCard } from './components/RevenueTrendChartCard.jsx';
 import { StockValuationCard } from './components/StockValuationCard.jsx';
@@ -44,20 +43,15 @@ export function ReportsView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Header with Refresh Trigger */}
-      <ReportsHeader onRefresh={handleRefreshAll} isLoading={isLoading} />
-
-      {/* 2. Bento Metrics Grid */}
-      <ReportsMetricsCards
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with inline metrics */}
+      <ReportsHeader
+        onRefresh={handleRefreshAll}
+        isLoading={isLoading}
         grossSales={salesSummary.grossSales || salesSummary.netRevenue || 0}
         ordersCount={salesSummary.ordersCount || 0}
         totalTax={salesSummary.totalTax || 0}
         marginPercentage={stockVal.marginPercentage || 0}
-        potentialGrossMargin={stockVal.potentialGrossMargin || 0}
-        isBalanced={reconciliation.isBalanced}
-        discrepancy={reconciliation.discrepancy || 0}
-        totalAuditRecords={reconciliation.totalAuditRecords || 0}
       />
 
       {/* 3. Mathematical Double-Entry Ledger Audit Card */}

@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { apiClient } from '../../services/api/apiClient.js';
 import { ReturnsHeader } from './components/ReturnsHeader.jsx';
-import { ReturnsMetricsCards } from './components/ReturnsMetricsCards.jsx';
 import { ReturnsTable } from './components/ReturnsTable.jsx';
 import { ProcessReturnModal } from './components/ProcessReturnModal.jsx';
 import { ReturnDetailsModal } from './components/ReturnDetailsModal.jsx';
@@ -71,12 +70,10 @@ export function ReturnsView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Header with Title & Permission Check */}
-      <ReturnsHeader onOpenProcessModal={() => setProcessModalOpen(true)} />
-
-      {/* 2. Bento Metrics Grid */}
-      <ReturnsMetricsCards
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with inline metrics */}
+      <ReturnsHeader
+        onOpenProcessModal={() => setProcessModalOpen(true)}
         totalReturnsCount={totalReturnsCount}
         totalRefundAmount={totalRefundAmount}
       />

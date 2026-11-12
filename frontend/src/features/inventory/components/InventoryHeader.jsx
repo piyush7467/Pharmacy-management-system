@@ -1,20 +1,38 @@
 import React from 'react';
-import { Boxes } from 'lucide-react';
 
-export function InventoryHeader() {
+export function InventoryHeader({ overview }) {
+  const totalUnits = overview?.totalActiveUnits || 0;
+  const nearExpiryCount = overview?.nearExpiryLotsCount || 0;
+  const quarantinedCount = overview?.quarantinedLotsCount || 0;
+  const costValuation = Number(overview?.totalActiveCostValuation) || 0;
+
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-surface">
-      <div className="flex items-center gap-2.5">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
-          <Boxes className="w-5 h-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-            Batch-Wise Inventory & Expiry Reconciliation
-          </h1>
-          <p className="text-sm text-text-muted mt-0.5">
-            Monitor granular pharmaceutical lots, expiry horizons, stock valuations, and audit write-offs.
-          </p>
+    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-4 border-b border-surface">
+      <div className="space-y-1.5">
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+          Batch Inventory
+        </h1>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+          <span className="text-text-muted">
+            <span className="font-semibold text-text-primary">{totalUnits.toLocaleString()}</span> active units
+          </span>
+          {costValuation > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-text-primary">
+                ₹{(costValuation / 1000).toFixed(1)}k
+              </span> stock value
+            </span>
+          )}
+          {nearExpiryCount > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-amber-600 dark:text-amber-400">{nearExpiryCount}</span> near expiry
+            </span>
+          )}
+          {quarantinedCount > 0 && (
+            <span className="text-text-muted">
+              <span className="font-semibold text-rose-600 dark:text-rose-400">{quarantinedCount}</span> quarantined
+            </span>
+          )}
         </div>
       </div>
     </div>

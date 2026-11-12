@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { setShopProfile, setReceiptFormat } from '../preferences/preferencesSlice.js';
 import { Button } from '../../components/ui/button.jsx';
-import { Badge } from '../../components/ui/badge.jsx';
 
 const DEFAULT_PROFILE = {
   pharmacyName: 'PharmaFlow Central Pharmacy',
@@ -114,26 +113,17 @@ export function SettingsView() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto pb-20">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* 1. Header (Linear / Stripe Inspired) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-surface">
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-text-primary">
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
             Pharmacy Settings
           </h1>
           <p className="text-sm text-text-muted mt-1">
             Manage your pharmacy information and operations.
           </p>
         </div>
-
-        {/* License Active Indicator Badge */}
-        <Badge
-          variant="outline"
-          className="bg-emerald-500/10 text-emerald-800 dark:text-emerald-400 border-emerald-500/20 px-3.5 py-1.5 font-semibold text-xs flex items-center gap-1.5 self-start sm:self-auto rounded-full shadow-2xs"
-        >
-          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-          <span>License Active</span>
-        </Badge>
       </div>
 
       {/* 2. Main Settings Grid: Left Unboxed Nav, Right Unboxed Form */}
@@ -175,7 +165,7 @@ export function SettingsView() {
                 : 'text-text-muted hover:text-text-primary hover:bg-surface-muted/60 font-medium'
             }`}
           >
-            <Clock className={`w-4 h-4 shrink-0 ${activeTab === 'contact' ? 'text-emerald-700 dark:text-emerald-400' : 'text-text-muted'}`} />
+            <Phone className={`w-4 h-4 shrink-0 ${activeTab === 'contact' ? 'text-emerald-700 dark:text-emerald-400' : 'text-text-muted'}`} />
             <span>Contact &amp; Hours</span>
           </button>
 

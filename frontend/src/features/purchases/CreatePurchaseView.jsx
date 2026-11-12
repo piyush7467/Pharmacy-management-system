@@ -345,21 +345,16 @@ export function CreatePurchaseView() {
       </div>
 
       {/* 2. Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-surface">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shrink-0 border border-emerald-500/20 shadow-xs">
-            <ShoppingCart className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
-              Create Purchase Order (PO)
-            </h1>
-            <p className="text-xs sm:text-sm text-text-muted">
-              {currentStep === 1
-                ? 'Step 1 of 2: Select distributor vendor, procurement model, and order timeline.'
-                : 'Step 2 of 2: Search catalog formulations, set batch lots, quantities, and verify pricing.'}
-            </p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-surface">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-text-primary">
+            Create Purchase Order
+          </h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            {currentStep === 1
+              ? 'Step 1 of 2: Select distributor vendor, procurement model, and order timeline.'
+              : 'Step 2 of 2: Search catalog formulations, set batch lots, quantities, and verify pricing.'}
+          </p>
         </div>
 
         {/* Status Badge top right */}

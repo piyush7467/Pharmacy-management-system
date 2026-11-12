@@ -129,15 +129,4 @@
 .bg-brand-accent { background-color: var(--accent); }
 .text-brand-accent { color: var(--accent); }
 
-/* Glassmorphism utility */
-.glass-panel {
-  background-color: color-mix(in srgb, var(--card) 85%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.glass-dropdown {
-  background-color: color-mix(in srgb, var(--popover) 92%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
+/* Glassmorphism utilities removed — not used */

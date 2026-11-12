@@ -5,7 +5,6 @@ import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 import { apiClient } from '../../services/api/apiClient.js';
 import { PurchasesHeader } from './components/PurchasesHeader.jsx';
-import { PurchasesMetricsCards } from './components/PurchasesMetricsCards.jsx';
 import { PurchasesFilters } from './components/PurchasesFilters.jsx';
 import { PurchasesTable } from './components/PurchasesTable.jsx';
 import { ReceiveGoodsModal } from './components/ReceiveGoodsModal.jsx';
@@ -118,15 +117,11 @@ export function PurchasesView() {
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. Header with Title & Action */}
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1. Header with inline metrics */}
       <PurchasesHeader
         onOpenCreateModal={() => navigate('/purchases/new')}
         canCreatePurchase={canManagePurchases}
-      />
-
-      {/* 2. Bento Metrics Grid */}
-      <PurchasesMetricsCards
         totalPurchases={totalPurchases}
         receivedPurchases={receivedPurchases}
         draftPurchases={draftPurchases}
