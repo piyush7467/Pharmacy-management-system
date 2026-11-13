@@ -43,10 +43,11 @@ app.use(
       // Allow server-to-server, curl, UptimeRobot, or health pings with no Origin header
       if (!origin) return callback(null, true);
 
-      // Allow configured origins, any vercel.app deployment, or local dev
+      // Allow configured origins, custom domain (pharmaflow.piyushshakya.me), any vercel.app deployment, or local dev
       if (
         configuredOrigins.includes(origin) ||
         origin.endsWith('.vercel.app') ||
+        origin.endsWith('piyushshakya.me') ||
         origin.includes('localhost') ||
         env.NODE_ENV !== 'production'
       ) {
