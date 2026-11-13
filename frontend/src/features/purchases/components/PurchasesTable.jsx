@@ -55,24 +55,24 @@ export function PurchasesTable({
     switch (status) {
       case 'RECEIVED':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-brand-primary bg-brand-primary/10 border border-brand-primary/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
             <CheckCircle2 className="w-3 h-3" /> Received & Stocked
           </span>
         );
       case 'DRAFT':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
             <Clock className="w-3 h-3" /> Pending Delivery
           </span>
         );
       case 'CANCELLED':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-text-muted border border-surface px-2.5 py-0.5 rounded-full line-through">
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full line-through">
             <XCircle className="w-3 h-3" /> Cancelled
           </span>
         );
       default:
-        return <Badge variant="outline" className="text-[11px]">{status}</Badge>;
+        return <Badge variant="outline" className="text-[11px] font-medium text-slate-700 bg-slate-50 border-slate-200">{status}</Badge>;
     }
   };
 
@@ -102,14 +102,14 @@ export function PurchasesTable({
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">PO Number</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">Order Date</TableHead>
-                  <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Supplier Details</TableHead>
-                  <TableHead className="min-w-[220px] text-xs font-semibold uppercase tracking-wider text-text-muted">Ordered Items</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Grand Total</TableHead>
-                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Status</TableHead>
-                  <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90 text-slate-500">
+                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">PO Number</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500">Order Date</TableHead>
+                  <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Supplier Details</TableHead>
+                  <TableHead className="min-w-[220px] text-xs font-semibold uppercase tracking-wider text-slate-500">Ordered Items</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Grand Total</TableHead>
+                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Status</TableHead>
+                  <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

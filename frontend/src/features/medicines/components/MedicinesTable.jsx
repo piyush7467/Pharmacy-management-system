@@ -87,14 +87,14 @@ export function MedicinesTable({
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">SKU / Code</TableHead>
-                    <TableHead className="min-w-[240px] text-xs font-semibold uppercase tracking-wider text-text-muted">Medicine & Formulation</TableHead>
-                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Category & Classes</TableHead>
-                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Earliest Batch</TableHead>
-                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Available Stock</TableHead>
-                    <TableHead className="w-24 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Status</TableHead>
-                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                  <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90">
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">SKU / Code</TableHead>
+                    <TableHead className="min-w-[240px] text-xs font-semibold uppercase tracking-wider text-slate-500">Medicine &amp; Formulation</TableHead>
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Category &amp; Classes</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">Earliest Batch</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Available Stock</TableHead>
+                    <TableHead className="w-24 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Status</TableHead>
+                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -276,18 +276,18 @@ export function MedicinesTable({
                           </div>
                           <div className="mt-0.5 flex justify-end">
                             {isOutOfStock ? (
-                              <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-rose-700 dark:text-rose-400 bg-rose-500/10 border border-rose-500/25 px-2 py-0.5 rounded-full">
-                                <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                                <span className="h-1.5 w-1.5 rounded-full bg-red-600" />
                                 Out of stock
                               </span>
                             ) : isLowStock ? (
-                              <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full">
-                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-600" />
                                 Low stock ({stock})
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-[10.5px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-full">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
                                 In stock
                               </span>
                             )}
@@ -297,11 +297,11 @@ export function MedicinesTable({
                         {/* 6. Status */}
                         <TableCell className="w-24 align-middle text-center">
                           {med.isActive ? (
-                            <span className="inline-block text-[11px] font-semibold text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-2 py-0.5 rounded-full">
+                            <span className="inline-block text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
                               Active
                             </span>
                           ) : (
-                            <span className="inline-block text-[11px] font-medium text-text-muted border border-surface px-2 py-0.5 rounded-full line-through">
+                            <span className="inline-block text-[11px] font-medium text-slate-400 border border-slate-200 px-2 py-0.5 rounded-full line-through">
                               Inactive
                             </span>
                           )}

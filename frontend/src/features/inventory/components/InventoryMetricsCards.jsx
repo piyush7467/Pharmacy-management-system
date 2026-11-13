@@ -44,11 +44,11 @@ export function InventoryMetricsCards({ overview }) {
         <CardContent className="p-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Near Expiry (&lt; 60 Days)</p>
-            <h3 className={`text-2xl font-black mt-1 font-mono ${nearExpiryCount > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-text-primary'}`}>
+            <h3 className={`text-2xl font-black mt-1 font-mono ${nearExpiryCount > 0 ? 'text-amber-700' : 'text-text-primary'}`}>
               {nearExpiryCount}
             </h3>
           </div>
-          <div className="p-3 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20">
+          <div className="p-3 bg-amber-50 text-amber-700 rounded-xl border border-amber-200">
             <Clock className="w-5 h-5" />
           </div>
         </CardContent>
@@ -59,11 +59,11 @@ export function InventoryMetricsCards({ overview }) {
         <CardContent className="p-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Quarantined / Expired</p>
-            <h3 className={`text-2xl font-black mt-1 font-mono ${quarantinedCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-text-primary'}`}>
+            <h3 className={`text-2xl font-black mt-1 font-mono ${quarantinedCount > 0 ? 'text-red-700' : 'text-text-primary'}`}>
               {quarantinedCount}
             </h3>
           </div>
-          <div className="p-3 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl border border-rose-500/20">
+          <div className="p-3 bg-red-50 text-red-700 rounded-xl border border-red-200">
             <ShieldAlert className="w-5 h-5" />
           </div>
         </CardContent>

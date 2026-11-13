@@ -113,14 +113,22 @@ export async function listBatches({
   };
 }
 
-export async function getStockOverview() {
+export async function getStockOverview({ nearExpiryDays = 60, lowStockThreshold = 15 } = {}) {
   const now = new Date();
-  const sixtyDaysAhead = new Date();
-  sixtyDaysAhead.setDate(sixtyDaysAhead.getDate() + 60);
 
-  const [allBatches, lowStockMedicines] = await Promise.all([
+  // Guard & sanitize nearExpiryDays: integer between 1 and 730 days
+  const safeExpiryDays = Math.max(1, Math.min(730, parseInt(nearExpiryDays, 10) || 60));
+  const nearExpiryAhead = new Date();
+  nearExpiryAhead.setDate(nearExpiryAhead.getDate() + safeExpiryDays);
+
+  // Guard & sanitize lowStockThreshold: integer between 1 and 10000 units
+  const safeLowStockThreshold = Math.max(1, Math.min(10000, parseInt(lowStockThreshold, 10) || 15));
+
+  const [allBatches, allMedicines, urgentNearExpiryBatches] = await Promise.all([
     prisma.batch.findMany({
       select: {
+        id: true,
+        batchNumber: true,
         currentQuantity: true,
         purchaseCost: true,
         salePrice: true,
@@ -140,6 +148,20 @@ export async function getStockOverview() {
           select: { currentQuantity: true }
         }
       }
+    }),
+    prisma.batch.findMany({
+      where: {
+        status: 'ACTIVE',
+        currentQuantity: { gt: 0 },
+        expiryDate: { lte: nearExpiryAhead }
+      },
+      include: {
+        medicine: {
+          select: { id: true, name: true, sku: true, dosageForm: true, strength: true }
+        }
+      },
+      orderBy: { expiryDate: 'asc' },
+      take: 20
     })
   ]);
 
@@ -152,7 +174,7 @@ export async function getStockOverview() {
 
   for (const b of allBatches) {
     const isExpired = new Date(b.expiryDate) < now;
-    const isNearExpiry = !isExpired && new Date(b.expiryDate) <= sixtyDaysAhead;
+    const isNearExpiry = !isExpired && new Date(b.expiryDate) <= nearExpiryAhead;
 
     if (b.status === 'DEPLETED') {
       depletedBatchesCount++;
@@ -171,10 +193,40 @@ export async function getStockOverview() {
     }
   }
 
-  const lowStockCount = lowStockMedicines.filter((m) => {
+  // Calculate low stock medicines list
+  const lowStockItems = [];
+  for (const m of allMedicines) {
     const available = m.batches.reduce((sum, b) => sum + b.currentQuantity, 0);
-    return available <= m.minReorderLevel;
-  }).length;
+    const threshold = m.minReorderLevel > 0 ? m.minReorderLevel : safeLowStockThreshold;
+    if (available <= threshold) {
+      lowStockItems.push({
+        id: m.id,
+        name: m.name,
+        sku: m.sku,
+        dosageForm: m.dosageForm,
+        strength: m.strength,
+        minReorderLevel: threshold,
+        availableStock: available
+      });
+    }
+  }
+
+  // Sort lowest stock first (0 left at top)
+  lowStockItems.sort((a, b) => a.availableStock - b.availableStock);
+
+  // Format near expiry items
+  const nearExpiryItems = urgentNearExpiryBatches.map((b) => {
+    const expiry = new Date(b.expiryDate);
+    const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return {
+      id: b.id,
+      batchNumber: b.batchNumber,
+      expiryDate: b.expiryDate,
+      daysToExpiry: diffDays,
+      currentQuantity: b.currentQuantity,
+      medicine: b.medicine
+    };
+  });
 
   return {
     totalActiveUnits,
@@ -183,7 +235,13 @@ export async function getStockOverview() {
     nearExpiryBatchesCount,
     expiredBatchesCount,
     depletedBatchesCount,
-    lowStockCount
+    lowStockCount: lowStockItems.length,
+    lowStockItems: lowStockItems.slice(0, 15),
+    nearExpiryItems,
+    appliedThresholds: {
+      nearExpiryDays: safeExpiryDays,
+      lowStockThreshold: safeLowStockThreshold
+    }
   };
 }
 

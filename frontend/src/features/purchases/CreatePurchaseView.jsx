@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShoppingCart,
@@ -45,6 +45,7 @@ import { SupplierSearchCombobox } from './components/SupplierSearchCombobox.jsx'
 
 export function CreatePurchaseView() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
 
   // Progressive Step State: 1 = Supplier Details, 2 = Medicines & Commercials
@@ -53,7 +54,14 @@ export function CreatePurchaseView() {
   const [draftSavedTime, setDraftSavedTime] = useState('just now');
 
   // Form State
-  const [supplierId, setSupplierId] = useState('');
+  const [supplierId, setSupplierId] = useState(searchParams.get('supplier') || '');
+
+  useEffect(() => {
+    const s = searchParams.get('supplier');
+    if (s) {
+      setSupplierId(s);
+    }
+  }, [searchParams]);
   const [procurementMode, setProcurementMode] = useState('RECEIVED'); // 'RECEIVED' (Direct Inward) | 'DRAFT' (Pending Delivery)
   const [poDate, setPoDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [expectedDelivery, setExpectedDelivery] = useState(() => {

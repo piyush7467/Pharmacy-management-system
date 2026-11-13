@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -15,7 +15,8 @@ import {
   RefreshCw,
   Building2,
   Package,
-  MapPin
+  MapPin,
+  Eye
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card.jsx';
 import { Button } from '../../components/ui/button.jsx';
@@ -156,47 +157,70 @@ export function SuppliersView() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Vendor & Representative</TableHead>
-                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Contact Details</TableHead>
-                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">GSTIN / Tax ID</TableHead>
-                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Purchase History</TableHead>
-                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Status</TableHead>
-                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                  <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90">
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Vendor &amp; Representative</TableHead>
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Contact Details</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">GSTIN / Tax ID</TableHead>
+                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Purchase History</TableHead>
+                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Status</TableHead>
+                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedSuppliers.map((sup) => (
                     <TableRow key={sup.id} className="border-surface/60 hover:bg-surface-page/70 transition-colors">
+                      {/* Vendor Name & Rep - Direct Link to Supplier Profile */}
                       <TableCell className="min-w-[200px] align-middle">
                         <div className="flex flex-col">
-                          <span className="font-semibold text-sm text-text-primary flex items-center gap-1.5">
-                            <Truck className="w-3.5 h-3.5 text-brand-primary" />
-                            {sup.name}
-                          </span>
+                          <Link
+                            to={`/suppliers/${sup.id}`}
+                            className="font-semibold text-sm text-text-primary hover:text-brand-primary flex items-center gap-1.5 transition-colors group cursor-pointer"
+                            title={`View 360° profile for ${sup.name}`}
+                          >
+                            <Truck className="w-3.5 h-3.5 text-brand-primary group-hover:scale-110 transition-transform shrink-0" />
+                            <span className="group-hover:underline">{sup.name}</span>
+                          </Link>
                           <span className="text-xs text-text-muted mt-0.5">
                             Rep: {sup.contactPerson || 'Not specified'}
                           </span>
                         </div>
                       </TableCell>
+
+                      {/* Contact Details with Direct Click-to-Call and Click-to-Email */}
                       <TableCell className="min-w-[200px] align-middle">
-                        <div className="flex flex-col gap-0.5 text-xs text-text-muted">
-                          {sup.phone && (
-                            <span className="flex items-center gap-1 text-text-primary font-mono">
-                              <Phone className="w-3 h-3 text-text-muted" /> {sup.phone}
-                            </span>
+                        <div className="flex flex-col gap-1 text-xs text-text-muted">
+                          {sup.phone ? (
+                            <a
+                              href={`tel:${sup.phone}`}
+                              className="flex items-center gap-1.5 text-text-primary hover:text-brand-primary font-mono transition-colors group cursor-pointer w-fit"
+                              title={`Click to call ${sup.phone}`}
+                            >
+                              <Phone className="w-3 h-3 text-text-muted group-hover:text-brand-primary shrink-0" />
+                              <span className="hover:underline">{sup.phone}</span>
+                            </a>
+                          ) : null}
+
+                          {sup.email ? (
+                            <a
+                              href={`mailto:${sup.email}`}
+                              className="flex items-center gap-1.5 text-text-muted hover:text-brand-primary transition-colors group cursor-pointer truncate max-w-[180px] w-fit"
+                              title={`Click to email ${sup.email}`}
+                            >
+                              <Mail className="w-3 h-3 text-text-muted group-hover:text-brand-primary shrink-0" />
+                              <span className="hover:underline truncate">{sup.email}</span>
+                            </a>
+                          ) : null}
+
+                          {!sup.phone && !sup.email && (
+                            <span className="italic text-text-muted">No contacts listed</span>
                           )}
-                          {sup.email && (
-                            <span className="flex items-center gap-1">
-                              <Mail className="w-3 h-3 text-text-muted" /> {sup.email}
-                            </span>
-                          )}
+
                           {sup.address && (
                             <Popover>
                               <PopoverTrigger asChild>
                                 <button
                                   type="button"
-                                  className="flex items-center gap-1 text-[11px] text-brand-primary hover:underline cursor-pointer mt-0.5"
+                                  className="flex items-center gap-1 text-[11px] text-brand-primary hover:underline cursor-pointer mt-0.5 w-fit"
                                   title="View supplier address"
                                 >
                                   <MapPin className="w-2.5 h-2.5" />
@@ -214,34 +238,55 @@ export function SuppliersView() {
                           )}
                         </div>
                       </TableCell>
+
+                      {/* GSTIN / Tax ID */}
                       <TableCell className="w-36 align-middle">
                         {sup.taxNumber ? (
-                          <code className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-surface-muted text-text-primary border border-surface">
+                          <code className="text-xs font-mono font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-800 border border-slate-200">
                             {sup.taxNumber}
                           </code>
                         ) : (
-                          <span className="text-text-muted text-xs">—</span>
+                          <span className="text-slate-400 text-xs">—</span>
                         )}
                       </TableCell>
+
+                      {/* Purchase History - Clickable link to Profile */}
                       <TableCell className="w-32 align-middle text-center">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-surface-muted text-text-primary border border-surface text-xs font-mono tabular-nums font-semibold">
-                          <Package className="w-3 h-3 text-brand-primary" />
-                          {sup.purchaseCount ?? 0} POs
-                        </span>
+                        <Link
+                          to={`/suppliers/${sup.id}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-xs font-mono tabular-nums font-semibold hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-300 transition-colors"
+                          title="View all purchase orders"
+                        >
+                          <Package className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>{sup.purchaseCount ?? 0} POs</span>
+                        </Link>
                       </TableCell>
+
+                      {/* Status */}
                       <TableCell className="w-28 align-middle text-center">
                         {sup.isActive ? (
-                          <span className="inline-block text-[11px] font-semibold text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-2.5 py-0.5 rounded-full">
+                          <span className="inline-block text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                             Active
                           </span>
                         ) : (
-                          <span className="inline-block text-[11px] font-medium text-text-muted border border-surface px-2.5 py-0.5 rounded-full line-through">
+                          <span className="inline-block text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full line-through">
                             Suspended
                           </span>
                         )}
                       </TableCell>
+
+                      {/* Actions */}
                       <TableCell className="w-28 align-middle text-right pr-4">
                         <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-text-muted hover:text-brand-primary hover:bg-surface-muted cursor-pointer rounded-md"
+                            onClick={() => navigate(`/suppliers/${sup.id}`)}
+                            title="View Supplier Dossier"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                          </Button>
                           <Button
                             variant="ghost"
                             size="icon"

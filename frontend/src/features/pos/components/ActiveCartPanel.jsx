@@ -113,7 +113,7 @@ export function ActiveCartPanel({
           <button
             type="button"
             onClick={clearCart}
-            className="text-xs font-bold text-red-600 hover:text-red-700 px-2.5 py-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="text-xs font-bold text-red-700 hover:text-red-800 px-2.5 py-1 rounded-lg hover:bg-red-50 transition-colors cursor-pointer flex items-center gap-1.5"
             title="Empty billing cart"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Clear Cart
@@ -128,7 +128,7 @@ export function ActiveCartPanel({
             <User className="w-4 h-4 text-brand-primary" /> Customer Account
           </label>
           {selectedCustomer ? (
-            <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+            <span className="text-[11px] font-mono text-emerald-700 font-semibold">
               ● Linked Profile
             </span>
           ) : (
@@ -308,7 +308,7 @@ export function ActiveCartPanel({
                   <button
                     type="button"
                     onClick={() => removeFromCart(item.medicineId)}
-                    className="p-1.5 rounded-lg text-text-muted hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors cursor-pointer shrink-0"
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
                     title="Remove item"
                   >
                     <Trash2 className="w-4 h-4" />

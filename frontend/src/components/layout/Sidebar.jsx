@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { toggleSidebar } from '../../features/preferences/preferencesSlice.js';
 import { cn } from '../../lib/utils.js';
+import logoImg from '../../assets/logo.png';
 
 const NAV_GROUPS = [
   {
@@ -95,9 +96,26 @@ export function Sidebar({ mobileOpen, setMobileOpen }) {
           mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         )}
       >
-        {/* Sidebar Header with Collapse Button */}
+        {/* Sidebar Header with Brand Mark & Collapse Button */}
         <div className="flex h-12 items-center justify-between px-3 border-b border-surface">
-          <div />
+          {collapsed ? (
+            <img
+              src={logoImg}
+              alt="PharmaFlow"
+              className="w-7 h-7 rounded-full object-cover shrink-0"
+            />
+          ) : (
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <img
+                src={logoImg}
+                alt="PharmaFlow"
+                className="w-7 h-7 rounded-full object-cover shrink-0"
+              />
+              <span className="text-[13px] font-bold text-text-primary tracking-tight truncate">
+                PharmaFlow
+              </span>
+            </div>
+          )}
 
           {/* Expand/Collapse Toggle */}
           <button

@@ -42,20 +42,20 @@ export function BatchesTable({
   const getExpiryBadge = (batch) => {
     if (batch.expiryStatus === 'EXPIRED') {
       return (
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-500/10 border border-rose-500/25 px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
           <XCircle className="w-3 h-3" /> Expired
         </span>
       );
     }
     if (batch.expiryStatus === 'NEAR_EXPIRY') {
       return (
-        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded-full">
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
           <Clock className="w-3 h-3" /> &lt; {batch.daysToExpiry}d left
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2 py-0.5 rounded-full">
+      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
         <CheckCircle2 className="w-3 h-3" /> {batch.daysToExpiry}d valid
       </span>
     );
@@ -65,30 +65,30 @@ export function BatchesTable({
     switch (status) {
       case 'ACTIVE':
         return (
-          <span className="inline-block text-[11px] font-semibold text-brand-primary bg-brand-primary/10 border border-brand-primary/20 px-2.5 py-0.5 rounded-full">
+          <span className="inline-block text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
             Active
           </span>
         );
       case 'DEPLETED':
         return (
-          <span className="inline-block text-[11px] font-medium text-text-muted border border-surface px-2.5 py-0.5 rounded-full">
+          <span className="inline-block text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
             Depleted (0)
           </span>
         );
       case 'QUARANTINED':
         return (
-          <span className="inline-block text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-block text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
             Quarantined
           </span>
         );
       case 'EXPIRED':
         return (
-          <span className="inline-block text-[11px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-500/10 border border-rose-500/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-block text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
             Expired
           </span>
         );
       default:
-        return <Badge variant="outline" className="text-[11px]">{status}</Badge>;
+        return <Badge variant="outline" className="text-[11px] font-medium text-slate-700 bg-slate-50 border-slate-200">{status}</Badge>;
     }
   };
 
@@ -118,15 +118,15 @@ export function BatchesTable({
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Batch Lot #</TableHead>
-                  <TableHead className="min-w-[220px] text-xs font-semibold uppercase tracking-wider text-text-muted">Medicine Name</TableHead>
-                  <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-text-muted">Expiry Horizon</TableHead>
-                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Available Stock</TableHead>
-                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Cost Price</TableHead>
-                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Sale MRP</TableHead>
-                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Lot Status</TableHead>
-                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90 text-slate-500">
+                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">Batch Lot #</TableHead>
+                  <TableHead className="min-w-[220px] text-xs font-semibold uppercase tracking-wider text-slate-500">Medicine Name</TableHead>
+                  <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-slate-500">Expiry Horizon</TableHead>
+                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Available Stock</TableHead>
+                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Cost Price</TableHead>
+                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Sale MRP</TableHead>
+                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Lot Status</TableHead>
+                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

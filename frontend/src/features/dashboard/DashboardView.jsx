@@ -3,14 +3,23 @@ import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../../services/api/apiClient.js';
 import { DashboardHeader } from './components/DashboardHeader.jsx';
-import { StockAlertsBanner } from './components/StockAlertsBanner.jsx';
 import { DashboardKpiStrip } from './components/DashboardKpiStrip.jsx';
+import { LowStockAlertCard } from './components/LowStockAlertCard.jsx';
+import { NearExpiryAlertCard } from './components/NearExpiryAlertCard.jsx';
+import { QuickActionsCard } from './components/QuickActionsCard.jsx';
 import { SalesTrendChartCard } from './components/SalesTrendChartCard.jsx';
 import { PaymentDistributionCard } from './components/PaymentDistributionCard.jsx';
 import { RecentActivityHub } from './components/RecentActivityHub.jsx';
 
 export function DashboardView() {
   const user = useSelector((state) => state.auth?.user);
+  const alertSettings = useSelector((state) => state.preferences?.alertSettings) || {
+    nearExpiryDays: 60,
+    defaultLowStock: 10,
+    enableLowStockAlert: true,
+    enableNearExpiryAlert: true
+  };
+
   const [dateRange, setDateRange] = useState('7d');
   const [activeActivityTab, setActiveActivityTab] = useState('sales');
 
@@ -45,15 +54,20 @@ export function DashboardView() {
     }
   });
 
-  // 2. Fetch Inventory Overview & Alerts
+  // 2. Fetch Inventory Overview & Alerts (with dynamic threshold query params)
   const {
     data: inventoryOverview,
     isLoading: inventoryLoading,
     refetch: refetchInventory
   } = useQuery({
-    queryKey: ['dashboard-inventory-overview'],
+    queryKey: ['dashboard-inventory-overview', alertSettings.nearExpiryDays, alertSettings.defaultLowStock],
     queryFn: async () => {
-      const res = await apiClient.get('/inventory/overview');
+      const res = await apiClient.get('/inventory/overview', {
+        params: {
+          nearExpiryDays: alertSettings.nearExpiryDays || 60,
+          lowStockThreshold: alertSettings.defaultLowStock || 10
+        }
+      });
       return res.data || res || {};
     }
   });
@@ -68,7 +82,16 @@ export function DashboardView() {
     enabled: user?.role !== 'CASHIER'
   });
 
-  // 4. Fetch Recent Sales
+  // 4. Fetch Customer Count
+  const { data: customersTotal = 0 } = useQuery({
+    queryKey: ['dashboard-customers-count'],
+    queryFn: async () => {
+      const res = await apiClient.get('/customers', { params: { limit: 1 } });
+      return res.data?.meta?.pagination?.total ?? (Array.isArray(res.data) ? res.data.length : 0);
+    }
+  });
+
+  // 5. Fetch Recent Sales
   const { data: recentSalesData } = useQuery({
     queryKey: ['dashboard-recent-sales'],
     queryFn: async () => {
@@ -77,7 +100,7 @@ export function DashboardView() {
     }
   });
 
-  // 5. Fetch Recent Purchases
+  // 6. Fetch Recent Purchases
   const { data: recentPurchasesData } = useQuery({
     queryKey: ['dashboard-recent-purchases'],
     queryFn: async () => {
@@ -96,9 +119,8 @@ export function DashboardView() {
   const ordersCount = Number(salesSummary?.ordersCount) || 0;
   const stockValuationCost = Number(inventoryOverview?.totalActiveCostValuation || stockValuation?.totalCostValuation) || 0;
   const totalActiveUnits = Number(inventoryOverview?.totalActiveUnits) || 0;
-  const nearExpiryCount = Number(inventoryOverview?.nearExpiryLotsCount || inventoryOverview?.nearExpiryBatchesCount) || 0;
-  const expiredCount = Number(inventoryOverview?.expiredLotsCount || inventoryOverview?.expiredBatchesCount) || 0;
-  const lowStockCount = Number(inventoryOverview?.lowStockMedicinesCount || inventoryOverview?.lowStockCount) || 0;
+  const nearExpiryCount = Number(inventoryOverview?.nearExpiryBatchesCount || inventoryOverview?.nearExpiryLotsCount) || 0;
+  const lowStockCount = Number(inventoryOverview?.lowStockCount || inventoryOverview?.lowStockMedicinesCount) || 0;
 
   // Chart data from real daily trend or fallback single point
   const chartData = useMemo(() => {
@@ -122,8 +144,8 @@ export function DashboardView() {
   const recentPurchases = Array.isArray(recentPurchasesData) ? recentPurchasesData : [];
 
   return (
-    <div className="space-y-5 pb-10 max-w-7xl mx-auto">
-      {/* 1. Top Header & Executive Controls */}
+    <div className="space-y-6 pb-12 max-w-7xl mx-auto">
+      {/* 1. Header & Fast Operational Controls */}
       <DashboardHeader
         user={user}
         dateRange={dateRange}
@@ -132,26 +154,34 @@ export function DashboardView() {
         isLoading={salesLoading || inventoryLoading}
       />
 
-      {/* 2. Critical Stock Warning Strip */}
-      <StockAlertsBanner
-        expiredCount={expiredCount}
-        nearExpiryCount={nearExpiryCount}
-        lowStockCount={lowStockCount}
-      />
-
-      {/* 3. Primary KPI Strip */}
+      {/* 2. Top 4 Metric KPI Cards (Reference Aligned) */}
       <DashboardKpiStrip
         netRevenue={netRevenue}
         ordersCount={ordersCount}
         stockValuationCost={stockValuationCost}
         totalActiveUnits={totalActiveUnits}
-        nearExpiryCount={nearExpiryCount}
-        expiredCount={expiredCount}
-        lowStockCount={lowStockCount}
+        customersCount={customersTotal}
         isCashier={user?.role === 'CASHIER'}
       />
 
-      {/* 4. Sales Analytics & Tender Breakdown */}
+      {/* 3. Middle 3-Column Dedicated Alert & Action Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <LowStockAlertCard
+          items={inventoryOverview?.lowStockItems || []}
+          count={lowStockCount}
+          threshold={alertSettings.defaultLowStock || 10}
+          isLoading={inventoryLoading}
+        />
+        <NearExpiryAlertCard
+          items={inventoryOverview?.nearExpiryItems || []}
+          count={nearExpiryCount}
+          horizonDays={alertSettings.nearExpiryDays || 60}
+          isLoading={inventoryLoading}
+        />
+        <QuickActionsCard />
+      </div>
+
+      {/* 4. Sales Revenue Trend & Tender Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <SalesTrendChartCard chartData={chartData} dateRange={dateRange} />
@@ -164,14 +194,13 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* 5. Recent Activity Hub (Sales vs Purchases) */}
+      {/* 5. Recent Activity Hub (Sales vs Purchases Transactions) */}
       <RecentActivityHub
         activeTab={activeActivityTab}
         setActiveTab={setActiveActivityTab}
         recentSales={recentSales}
         recentPurchases={recentPurchases}
       />
-
     </div>
   );
 }

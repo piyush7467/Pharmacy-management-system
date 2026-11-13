@@ -8,6 +8,7 @@ import { DashboardView } from '../features/dashboard/DashboardView.jsx';
 import { StaffManagementView } from '../features/staff/StaffManagementView.jsx';
 import { CategoriesView } from '../features/categories/CategoriesView.jsx';
 import { SuppliersView } from '../features/suppliers/SuppliersView.jsx';
+import { SupplierProfileView } from '../features/suppliers/SupplierProfileView.jsx';
 import { MedicinesView } from '../features/medicines/MedicinesView.jsx';
 import { PurchasesView } from '../features/purchases/PurchasesView.jsx';
 import { CreatePurchaseView } from '../features/purchases/CreatePurchaseView.jsx';
@@ -73,6 +74,7 @@ export function AppRoutes() {
         <Route path="categories" element={<CategoriesView />} />
         <Route path="suppliers" element={<SuppliersView />} />
         <Route path="suppliers/new" element={<SupplierFormView />} />
+        <Route path="suppliers/:id" element={<SupplierProfileView />} />
         <Route path="suppliers/:id/edit" element={<SupplierFormView />} />
         <Route path="purchases" element={<PurchasesView />} />
         <Route path="purchases/new" element={<CreatePurchaseView />} />

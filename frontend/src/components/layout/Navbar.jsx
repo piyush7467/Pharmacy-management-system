@@ -20,6 +20,7 @@ import { NotificationsDropdown } from './NotificationsDropdown.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import { clearCredentials } from '../../features/auth/authSlice.js';
 import { setTheme } from '../../features/preferences/preferencesSlice.js';
+import logoImg from '../../assets/logo.png';
 
 export function Navbar({ onMenuClick }) {
   const dispatch = useDispatch();
@@ -72,10 +73,12 @@ export function Navbar({ onMenuClick }) {
           <Menu className="w-5 h-5" />
         </button>
 
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-primary text-white shadow-xs">
-            <span className="text-lg font-black leading-none">+</span>
-          </div>
+        <Link to="/" className="flex items-center gap-3 group">
+          <img
+            src={logoImg}
+            alt="PharmaFlow Logo"
+            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-xs"
+          />
           <div className="flex flex-col">
             <span className="font-bold text-[16.5px] tracking-tight text-text-primary leading-tight group-hover:text-brand-primary transition-colors">
               PharmaFlow

@@ -54,6 +54,28 @@ export async function getSupplierById(id) {
     include: {
       _count: {
         select: { purchases: true }
+      },
+      purchases: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          items: {
+            include: {
+              medicine: {
+                select: {
+                  id: true,
+                  name: true,
+                  genericName: true,
+                  sku: true,
+                  dosageForm: true,
+                  strength: true
+                }
+              }
+            }
+          },
+          receivedByUser: {
+            select: { id: true, fullName: true, role: true }
+          }
+        }
       }
     }
   });
@@ -62,9 +84,46 @@ export async function getSupplierById(id) {
     throw new AppError('Supplier not found', 404, 'NOT_FOUND');
   }
 
+  const purchases = supplier.purchases || [];
+  const totalSpend = purchases.reduce((sum, p) => sum + Number(p.grandTotal || 0), 0);
+  const receivedOrders = purchases.filter((p) => p.status === 'RECEIVED').length;
+  const pendingOrders = purchases.filter((p) => p.status === 'DRAFT').length;
+
+  // Extract unique medicines supplied by this vendor
+  const suppliedMedicinesMap = new Map();
+  purchases.forEach((p) => {
+    (p.items || []).forEach((item) => {
+      if (item.medicine && !suppliedMedicinesMap.has(item.medicine.id)) {
+        suppliedMedicinesMap.set(item.medicine.id, {
+          ...item.medicine,
+          lastUnitCost: Number(item.unitCost || 0),
+          lastOrderedQty: item.orderedQuantity,
+          lastPurchaseDate: p.orderedDate || p.createdAt
+        });
+      }
+    });
+  });
+
   return {
     ...supplier,
-    purchaseCount: supplier._count.purchases
+    purchaseCount: supplier._count.purchases,
+    totalSpend,
+    receivedOrders,
+    pendingOrders,
+    suppliedMedicines: Array.from(suppliedMedicinesMap.values()),
+    purchases: purchases.map((p) => ({
+      ...p,
+      subtotal: Number(p.subtotal),
+      taxTotal: Number(p.taxTotal),
+      grandTotal: Number(p.grandTotal),
+      itemsCount: p.items?.length || 0,
+      items: (p.items || []).map((it) => ({
+        ...it,
+        unitCost: Number(it.unitCost),
+        unitSalePrice: Number(it.unitSalePrice),
+        lineTotal: Number(it.lineTotal)
+      }))
+    }))
   };
 }
 

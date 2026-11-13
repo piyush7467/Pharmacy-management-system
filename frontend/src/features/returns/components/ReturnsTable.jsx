@@ -90,14 +90,14 @@ export function ReturnsTable({
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">Return #</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">Original Invoice</TableHead>
-                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Date & Time</TableHead>
-                  <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Return Reason</TableHead>
-                  <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-text-muted">Processed By</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Refund Amount</TableHead>
-                  <TableHead className="w-24 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90 text-slate-500">
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500">Return #</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500">Original Invoice</TableHead>
+                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">Date & Time</TableHead>
+                  <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Return Reason</TableHead>
+                  <TableHead className="w-40 text-xs font-semibold uppercase tracking-wider text-slate-500">Processed By</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Refund Amount</TableHead>
+                  <TableHead className="w-24 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

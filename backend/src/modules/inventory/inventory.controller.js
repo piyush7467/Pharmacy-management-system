@@ -29,7 +29,11 @@ export async function listBatches(req, res, next) {
 
 export async function getStockOverview(req, res, next) {
   try {
-    const overview = await inventoryService.getStockOverview();
+    const { nearExpiryDays, lowStockThreshold } = req.query;
+    const overview = await inventoryService.getStockOverview({
+      nearExpiryDays: nearExpiryDays ? parseInt(nearExpiryDays, 10) : undefined,
+      lowStockThreshold: lowStockThreshold ? parseInt(lowStockThreshold, 10) : undefined
+    });
     res.status(200).json({
       success: true,
       data: overview,

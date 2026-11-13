@@ -2,27 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PharmaPulse — Pharmacy Operations & Inventory System</title>
+    <title>PharmaFlow — Pharmacy Management System</title>
     <!-- Prevent theme flicker before React hydration -->
     <script>
       (function() {
         try {
           const persisted = localStorage.getItem('persist:app-preferences');
+          let isDark = false;
           if (persisted) {
             const parsed = JSON.parse(persisted);
-            const theme = parsed.theme ? JSON.parse(parsed.theme) : 'system';
-            const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            if (isDark) {
-              document.documentElement.classList.add('dark');
-              document.documentElement.setAttribute('data-theme', 'dark');
-            } else {
-              document.documentElement.classList.remove('dark');
-              document.documentElement.setAttribute('data-theme', 'light');
-            }
+            const theme = parsed.theme ? JSON.parse(parsed.theme) : 'light';
+            isDark = (theme === 'dark');
           }
-        } catch (e) {}
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            document.documentElement.setAttribute('data-theme', 'light');
+          }
+        } catch (e) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
       })();
     </script>
   </head>

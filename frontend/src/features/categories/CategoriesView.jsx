@@ -84,12 +84,12 @@ function CategoryMedicinesCell({ category, onNavigate }) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-primary/10 text-brand-primary border border-brand-primary/25 hover:bg-brand-primary/20 hover:border-brand-primary/40 transition-all cursor-pointer font-mono text-xs font-semibold shadow-2xs group"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-all cursor-pointer font-mono text-xs font-semibold shadow-2xs group"
           title={`Click to view all ${count} medicines in this category`}
         >
-          <Pill className="w-3.5 h-3.5 text-brand-primary" />
+          <Pill className="w-3.5 h-3.5 text-emerald-700" />
           <span>{count} {count === 1 ? 'drug' : 'drugs'}</span>
-          <ChevronRight className="w-3 h-3 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-3 h-3 text-emerald-700 opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform" />
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 md:w-96 p-3 text-xs shadow-xl" align="center">
@@ -366,12 +366,12 @@ export function CategoriesView() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Category Name</TableHead>
-                    <TableHead className="min-w-[260px] text-xs font-semibold uppercase tracking-wider text-text-muted">Clinical Description</TableHead>
-                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Linked Medicines</TableHead>
-                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">Created</TableHead>
-                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                  <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90">
+                    <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Category Name</TableHead>
+                    <TableHead className="min-w-[260px] text-xs font-semibold uppercase tracking-wider text-slate-500">Clinical Description</TableHead>
+                    <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Linked Medicines</TableHead>
+                    <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500">Created</TableHead>
+                    <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -415,7 +415,7 @@ export function CategoriesView() {
                               )}
                             </div>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
                               <AlertCircle className="w-3 h-3" /> Needs Description
                             </span>
                           )}

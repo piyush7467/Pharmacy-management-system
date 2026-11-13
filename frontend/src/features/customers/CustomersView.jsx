@@ -48,27 +48,27 @@ const CUSTOMER_TYPES = [
 const TYPE_CONFIG = {
   GENERAL: {
     label: 'Walk-in',
-    badgeClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700',
+    badgeClass: 'bg-slate-100 text-slate-800 border-slate-200',
     icon: Users
   },
   REGULAR: {
     label: 'Regular Patient',
-    badgeClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+    badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200',
     icon: UserCheck
   },
   HOSPITAL_CLINIC: {
     label: 'Hospital / Clinic',
-    badgeClass: 'bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+    badgeClass: 'bg-blue-50 text-blue-800 border-blue-200',
     icon: Building2
   },
   WHOLESALE_BULK: {
     label: 'Wholesale Bulk',
-    badgeClass: 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+    badgeClass: 'bg-amber-50 text-amber-800 border-amber-200',
     icon: Package
   },
   CORPORATE_TPA: {
     label: 'Corporate TPA',
-    badgeClass: 'bg-purple-50 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+    badgeClass: 'bg-purple-50 text-purple-800 border-purple-200',
     icon: ShieldCheck
   }
 };
@@ -266,15 +266,15 @@ export function CustomersView() {
       <div className="border border-surface rounded-xl overflow-hidden bg-surface-card shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-surface-page/60 border-b border-surface text-xs font-semibold text-text-muted uppercase tracking-wider">
+            <thead className="bg-slate-50/90 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">Customer Profile</th>
-                <th className="py-3 px-4">Segment Type</th>
-                <th className="py-3 px-4">Contact Details</th>
-                <th className="py-3 px-4">Tax & License</th>
-                <th className="py-3 px-4">Terms & Discount</th>
-                <th className="py-3 px-4 text-right">Credit Balance</th>
-                <th className="py-3 px-4 text-right">Actions</th>
+                <th className="py-3 px-4 text-slate-500">Customer Profile</th>
+                <th className="py-3 px-4 text-slate-500">Segment Type</th>
+                <th className="py-3 px-4 text-slate-500">Contact Details</th>
+                <th className="py-3 px-4 text-slate-500">Tax & License</th>
+                <th className="py-3 px-4 text-slate-500">Terms & Discount</th>
+                <th className="py-3 px-4 text-right text-slate-500">Credit Balance</th>
+                <th className="py-3 px-4 text-right text-slate-500">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface">

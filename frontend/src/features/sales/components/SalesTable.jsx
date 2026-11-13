@@ -44,43 +44,43 @@ export function SalesTable({ sales = [], isLoading, onViewReceipt }) {
     switch (status) {
       case 'COMPLETED':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
             <CheckCircle2 className="w-3 h-3" /> Completed
           </span>
         );
       case 'REFUNDED_PARTIAL':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
             <RotateCcw className="w-3 h-3" /> Partial Refund
           </span>
         );
       case 'REFUNDED_FULL':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 dark:text-rose-400 bg-rose-500/10 border border-rose-500/25 px-2.5 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-red-700 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full">
             <RotateCcw className="w-3 h-3" /> Fully Refunded
           </span>
         );
       case 'CANCELLED':
         return (
-          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-text-muted border border-surface px-2.5 py-0.5 rounded-full line-through">
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full line-through">
             Cancelled
           </span>
         );
       default:
-        return <Badge variant="outline" className="text-[11px]">{status}</Badge>;
+        return <Badge variant="outline" className="text-[11px] font-medium text-slate-700 bg-slate-50 border-slate-200">{status}</Badge>;
     }
   };
 
   const getPaymentIcon = (method) => {
     switch (method) {
       case 'CASH':
-        return <Banknote className="w-3.5 h-3.5 mr-1 text-emerald-600 dark:text-emerald-400" />;
+        return <Banknote className="w-3.5 h-3.5 mr-1 text-emerald-700" />;
       case 'CARD':
-        return <CreditCard className="w-3.5 h-3.5 mr-1 text-blue-600 dark:text-blue-400" />;
+        return <CreditCard className="w-3.5 h-3.5 mr-1 text-blue-700" />;
       case 'UPI':
-        return <QrCode className="w-3.5 h-3.5 mr-1 text-purple-600 dark:text-purple-400" />;
+        return <QrCode className="w-3.5 h-3.5 mr-1 text-purple-700" />;
       case 'SPLIT':
-        return <Layers className="w-3.5 h-3.5 mr-1 text-amber-600 dark:text-amber-400" />;
+        return <Layers className="w-3.5 h-3.5 mr-1 text-amber-700" />;
       default:
         return null;
     }
@@ -112,15 +112,15 @@ export function SalesTable({ sales = [], isLoading, onViewReceipt }) {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-surface bg-surface-muted/40 hover:bg-surface-muted/40">
-                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-text-muted">Invoice Number</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">Date & Time</TableHead>
-                  <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-text-muted">Customer Details</TableHead>
-                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Items</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted">Payment</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted text-right">Grand Total</TableHead>
-                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-text-muted text-center">Status</TableHead>
-                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-text-muted text-right pr-4">Actions</TableHead>
+                <TableRow className="border-b border-slate-200 bg-slate-50/90 hover:bg-slate-50/90 text-slate-500">
+                  <TableHead className="w-36 text-xs font-semibold uppercase tracking-wider text-slate-500">Invoice Number</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500">Date & Time</TableHead>
+                  <TableHead className="min-w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500">Customer Details</TableHead>
+                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Items</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500">Payment</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">Grand Total</TableHead>
+                  <TableHead className="w-32 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">Status</TableHead>
+                  <TableHead className="w-28 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right pr-4">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

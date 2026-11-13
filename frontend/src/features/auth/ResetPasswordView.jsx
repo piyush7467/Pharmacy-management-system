@@ -19,6 +19,7 @@ import {
 import { ThemeToggle } from '../../components/ui/ThemeToggle.jsx';
 import { apiClient } from '../../services/api/apiClient.js';
 import bgPharmacy from '../../assets/bgPharmacy.png';
+import logoImg from '../../assets/logo.png';
 
 export function ResetPasswordView() {
   const [searchParams] = useSearchParams();
@@ -86,45 +87,46 @@ export function ResetPasswordView() {
 
       {/* Floating Card */}
       <div className="relative z-10 w-full max-w-[460px] mx-4 lg:mr-12 xl:mr-16 my-8">
-        <div className="w-full rounded-[28px] bg-white dark:bg-[#222A25] p-8 md:p-10 shadow-2xl border border-white/70 dark:border-white/10 backdrop-blur-xl">
-          {/* Brand Header */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1c5236] text-white shadow-md">
-              <Cross className="w-6 h-6 rotate-45" />
-              <Leaf className="w-4 h-4 text-emerald-300 absolute -bottom-0.5 -right-0.5" />
-            </div>
+        <div className="w-full rounded-2xl bg-white dark:bg-slate-900 p-8 md:p-9 shadow-2xl border border-slate-200/80 dark:border-slate-800 backdrop-blur-sm">
+          {/* Brand Header with Official Circular Logo */}
+          <div className="flex items-center gap-3.5 mb-6">
+            <img
+              src={logoImg}
+              alt="PharmaFlow Logo"
+              className="h-12 w-12 shrink-0 rounded-full object-cover shadow-xs border border-emerald-600/20"
+            />
             <div>
-              <div className="text-2xl font-extrabold tracking-tight text-[#1c5236] dark:text-emerald-400 font-sans leading-none">
+              <div className="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-sans leading-none">
                 PharmaFlow
               </div>
-              <div className="text-[11px] font-medium text-text-muted tracking-wide mt-1">
+              <div className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 tracking-wide mt-1">
                 Pharmacy Management System
               </div>
             </div>
           </div>
 
-          <div className="mb-7">
-            <h1 className="text-2xl font-bold tracking-tight text-[#1c5236] dark:text-white">
+          <div className="mb-6">
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               Create New Password
             </h1>
-            <p className="text-xs text-text-muted mt-1.5">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-300 mt-1">
               Enter and confirm your new secure password below to regain access.
             </p>
           </div>
 
           {success ? (
             <div className="space-y-4">
-              <div className="rounded-xl bg-surface-page dark:bg-[#1a211c] p-5 text-xs text-text-primary leading-relaxed border border-surface text-center space-y-2">
+              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/80 p-5 text-xs text-slate-900 dark:text-slate-100 leading-relaxed border border-slate-200 dark:border-slate-700 text-center space-y-2">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 dark:text-emerald-400 mx-auto" />
-                <p className="text-sm font-semibold">Password Successfully Reset</p>
-                <p className="text-text-muted">
+                <p className="text-sm font-bold">Password Successfully Reset</p>
+                <p className="text-slate-600 dark:text-slate-400">
                   All active sessions have been invalidated. Please sign in with your new password.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full h-11 rounded-xl bg-[#1c5236] hover:bg-[#153e29] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
+                className="w-full h-11 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
               >
                 Proceed to Sign In
                 <ArrowRight className="w-4 h-4" />
@@ -134,7 +136,7 @@ export function ResetPasswordView() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* New Password Input */}
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -142,13 +144,13 @@ export function ResetPasswordView() {
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="New password (min. 8 characters)"
-                  className="w-full h-11 pl-10 pr-11 text-xs rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
+                  className="w-full h-11 pl-10 pr-11 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-700 dark:focus:border-emerald-500 transition-all shadow-2xs font-medium"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-text-muted hover:text-text-primary transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus:outline-none cursor-pointer"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -157,7 +159,7 @@ export function ResetPasswordView() {
 
               {/* Confirm Password Input */}
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                   <Lock className="h-4 w-4" />
                 </div>
                 <input
@@ -165,16 +167,15 @@ export function ResetPasswordView() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Confirm new password"
-                  className="w-full h-11 pl-10 pr-4 text-xs rounded-xl border border-surface bg-surface-page dark:bg-[#1a211c] text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-[#1c5236] dark:focus:ring-emerald-500 transition-all shadow-xs"
+                  className="w-full h-11 pl-10 pr-11 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/90 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-600/30 focus:border-emerald-700 dark:focus:border-emerald-500 transition-all shadow-2xs font-medium"
                   required
                 />
               </div>
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 rounded-xl bg-[#1c5236] hover:bg-[#153e29] dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+                className="w-full h-11 rounded-xl bg-emerald-800 hover:bg-emerald-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
               >
                 {loading ? (
                   <>
@@ -192,7 +193,7 @@ export function ResetPasswordView() {
               <div className="text-center pt-2">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-primary transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:underline transition-colors"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />
                   Return to Sign In

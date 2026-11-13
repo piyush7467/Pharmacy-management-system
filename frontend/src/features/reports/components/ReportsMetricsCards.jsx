@@ -53,14 +53,14 @@ export function ReportsMetricsCards({
         <CardContent className="p-5 flex items-center justify-between">
           <div>
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Potential Gross Margin</p>
-            <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
+            <h3 className="text-2xl font-black text-emerald-800 mt-1 font-mono">
               {marginPercentage}%
             </h3>
             <p className="text-[11px] text-text-muted mt-0.5">
               {formatCurrency(potentialGrossMargin)} on stock
             </p>
           </div>
-          <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20">
+          <div className="p-3 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200">
             <ArrowUpRight className="w-5 h-5" />
           </div>
         </CardContent>
@@ -73,12 +73,12 @@ export function ReportsMetricsCards({
             <p className="text-xs font-bold text-text-muted uppercase tracking-wider">Ledger Reconciliation</p>
             <div className="mt-1">
               {isBalanced ? (
-                <Badge variant="default" className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold text-xs py-1">
+                <Badge variant="default" className="bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs py-1">
                   <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
                   Balanced (Δ = 0)
                 </Badge>
               ) : (
-                <Badge variant="outline" className="bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 font-bold text-xs py-1">
+                <Badge variant="outline" className="bg-red-50 text-red-700 border border-red-200 font-bold text-xs py-1">
                   <AlertTriangle className="w-3.5 h-3.5 mr-1" />
                   Discrepancy ({discrepancy})
                 </Badge>

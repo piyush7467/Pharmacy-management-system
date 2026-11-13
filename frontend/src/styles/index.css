@@ -2,34 +2,34 @@
 
 @layer base {
   :root {
-    /* PharmaFlow Medical UI Theme */
-    --background: #F7F9F8;
-    --foreground: #334155;
+    /* PharmaFlow Clean Healthcare UI Palette */
+    --background: #F8FAFC;
+    --foreground: #0F172A;
 
     --card: #FFFFFF;
-    --card-foreground: #334155;
+    --card-foreground: #0F172A;
 
     --popover: #FFFFFF;
-    --popover-foreground: #334155;
+    --popover-foreground: #0F172A;
 
-    /* Authoritative Forest Green Primary */
+    /* Authoritative Forest / Emerald Green Brand Primary */
     --primary: #166534;
     --primary-hover: #14532D;
     --primary-foreground: #FFFFFF;
 
-    /* Clean Soft Mint / Sage Surface */
-    --secondary: #DCFCE7;
-    --secondary-foreground: #166534;
+    /* Clean Neutral Slate Soft Surface */
+    --secondary: #F1F5F9;
+    --secondary-foreground: #0F172A;
 
     /* High-Legibility Slate Neutrals */
     --muted: #F1F5F9;
     --muted-foreground: #64748B;
 
-    /* Warm Gold/Amber Accent */
-    --accent: #FDE68A;
-    --accent-foreground: #78350F;
+    /* Warm Amber Accent */
+    --accent: #FEF3C7;
+    --accent-foreground: #92400E;
 
-    --destructive: #DC2626;
+    --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
 
     --border: #E2E8F0;
@@ -45,56 +45,56 @@
   }
 
   .dark {
-    --background: #171C19;
-    --foreground: #EDF2ED;
+    --background: #0F172A;
+    --foreground: #F8FAFC;
 
-    --card: #222A25;
-    --card-foreground: #EDF2ED;
+    --card: #1E293B;
+    --card-foreground: #F8FAFC;
 
-    --popover: #222A25;
-    --popover-foreground: #EDF2ED;
+    --popover: #1E293B;
+    --popover-foreground: #F8FAFC;
 
-    /* Luminous Forest / Sage in Dark Mode */
-    --primary: #4ADE80;
-    --primary-hover: #22C55E;
-    --primary-foreground: #052E16;
+    /* Clean Emerald Primary in Dark Mode */
+    --primary: #10B981;
+    --primary-hover: #059669;
+    --primary-foreground: #FFFFFF;
 
-    /* Secondary Dark Emerald Surface */
-    --secondary: #2C3B30;
-    --secondary-foreground: #86EFAC;
+    /* Secondary Clean Slate Surface */
+    --secondary: #1E293B;
+    --secondary-foreground: #F8FAFC;
 
-    --muted: #1E2721;
-    --muted-foreground: #A2AEA5;
+    --muted: #1E293B;
+    --muted-foreground: #94A3B8;
 
     /* Warm Accent */
-    --accent: #FDE68A;
-    --accent-foreground: #171C19;
+    --accent: #F59E0B;
+    --accent-foreground: #0F172A;
 
     --destructive: #EF4444;
     --destructive-foreground: #FFFFFF;
 
-    --border: #37433B;
-    --input: #37433B;
-    --ring: #4ADE80;
+    --border: #334155;
+    --input: #334155;
+    --ring: #10B981;
 
-    --status-success: #4ADE80;
-    --status-warning: #FBBF24;
-    --status-danger: #F87171;
+    --status-success: #10B981;
+    --status-warning: #F59E0B;
+    --status-danger: #EF4444;
   }
 
   * {
     border-color: var(--border);
   }
 
-  /* High-Contrast Text Selection (Never disappears when copying) */
+  /* High-Contrast Text Selection */
   ::selection {
     background-color: #15803D !important;
     color: #FFFFFF !important;
   }
 
   .dark ::selection {
-    background-color: #22C55E !important;
-    color: #022C22 !important;
+    background-color: #10B981 !important;
+    color: #0F172A !important;
   }
 
   /* Receipt white paper text selection */

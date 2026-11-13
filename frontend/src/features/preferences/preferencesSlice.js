@@ -1,9 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
-  theme: 'system', // 'light' | 'dark' | 'system'
+  theme: 'light', // 'light' | 'dark' | 'system'
   sidebarCollapsed: false,
   receiptFormat: '80mm', // '80mm' | '58mm' | 'A4'
+  alertSettings: {
+    nearExpiryDays: 60, // days threshold for near expiry (default: 60)
+    defaultLowStock: 10, // default minimum units threshold (default: 10)
+    enableLowStockAlert: true,
+    enableNearExpiryAlert: true
+  },
   shopProfile: {
     pharmacyName: '',
     legalName: '',
@@ -47,6 +53,9 @@ export const preferencesSlice = createSlice({
     },
     setShopProfile: (state, action) => {
       state.shopProfile = { ...state.shopProfile, ...action.payload };
+    },
+    setAlertSettings: (state, action) => {
+      state.alertSettings = { ...state.alertSettings, ...action.payload };
     }
   }
 });
@@ -56,7 +65,8 @@ export const {
   toggleSidebar,
   setSidebarCollapsed,
   setReceiptFormat,
-  setShopProfile
+  setShopProfile,
+  setAlertSettings
 } = preferencesSlice.actions;
 
 export default preferencesSlice.reducer;

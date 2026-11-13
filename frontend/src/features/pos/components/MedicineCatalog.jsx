@@ -213,7 +213,7 @@ export function MedicineCatalog({
                           {med.name}
                         </h3>
                         {med.strength && (
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 border border-surface px-2.5 py-0.5 rounded-md">
+                          <span className="text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
                             {med.strength}
                           </span>
                         )}
@@ -229,15 +229,15 @@ export function MedicineCatalog({
                       {/* Stock Badge & FEFO Indicator */}
                       <div className="mt-2.5 flex items-center gap-2.5 flex-wrap">
                         {isOutOfStock ? (
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
                             Out of stock
                           </span>
                         ) : isLow ? (
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
                             {med.totalAvailableStock} in stock (Low Stock)
                           </span>
                         ) : (
-                          <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-brand-primary/15 text-brand-primary border border-brand-primary/30">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                             {med.totalAvailableStock} in stock
                           </span>
                         )}
