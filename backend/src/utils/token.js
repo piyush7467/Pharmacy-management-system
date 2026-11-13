@@ -25,20 +25,23 @@ export function hashToken(token) {
 }
 
 export function setRefreshTokenCookie(res, token) {
+  const isProd = env.NODE_ENV === 'production';
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: env.COOKIE_SECURE,
-    sameSite: env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    // Cross-site cookies between Vercel frontend and Render backend require secure=true and sameSite='none'
+    secure: isProd ? true : env.COOKIE_SECURE,
+    sameSite: isProd ? 'none' : 'lax',
     path: '/api/v1/auth',
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 }
 
 export function clearRefreshTokenCookie(res) {
+  const isProd = env.NODE_ENV === 'production';
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: env.COOKIE_SECURE,
-    sameSite: env.NODE_ENV === 'production' ? 'strict' : 'lax',
+    secure: isProd ? true : env.COOKIE_SECURE,
+    sameSite: isProd ? 'none' : 'lax',
     path: '/api/v1/auth'
   });
 }

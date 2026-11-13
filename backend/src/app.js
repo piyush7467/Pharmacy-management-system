@@ -31,10 +31,30 @@ app.use(
   })
 );
 
-// CORS Configuration
+// CORS Configuration (supports localhost, custom Vercel domain, and Vercel preview deploys)
+const configuredOrigins = (env.FRONTEND_ORIGIN || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
 app.use(
   cors({
-    origin: env.FRONTEND_ORIGIN,
+    origin: (origin, callback) => {
+      // Allow server-to-server, curl, UptimeRobot, or health pings with no Origin header
+      if (!origin) return callback(null, true);
+
+      // Allow configured origins, any vercel.app deployment, or local dev
+      if (
+        configuredOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.includes('localhost') ||
+        env.NODE_ENV !== 'production'
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id', 'Idempotency-Key']
@@ -55,15 +75,15 @@ if (env.NODE_ENV !== 'test') {
 }
 
 // -------------------------------------------------------------
-// HEALTHCHECK ROUTE
+// ROOT & HEALTHCHECK ROUTES (Used by UptimeRobot, Render, and Vercel)
 // -------------------------------------------------------------
-app.get('/api/v1/health', (req, res) => {
+app.get(['/', '/health', '/api/v1/health'], (req, res) => {
   res.status(200).json({
     success: true,
     data: {
       status: 'UP',
-      uptime: process.uptime(),
-      service: 'PharmaPulse Backend API',
+      uptime: Math.floor(process.uptime()),
+      service: 'PharmaFlow Backend API',
       environment: env.NODE_ENV,
       timestamp: new Date().toISOString()
     },

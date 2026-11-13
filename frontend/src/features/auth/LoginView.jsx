@@ -42,6 +42,13 @@ export function LoginView() {
 
   const from = location.state?.from?.pathname || '/';
 
+  // Pre-warm backend when visitor lands on login page (wakes Render if cold)
+  React.useEffect(() => {
+    try {
+      apiClient.get('/health').catch(() => {});
+    } catch {}
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
